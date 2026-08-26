@@ -30,7 +30,7 @@ export default function DocsPage() {
   useEffect(() => {
     setIsVisible(true)
     const observer = new IntersectionObserver(
-      (entries) => { entries.forEach((entry) => { if (entry.isIntersecting) setVisibleCards((prev) => new Set([...prev, Number(entry.target.getAttribute('data-idx'))])) }) },
+      (entries) => { entries.forEach((entry) => { if (entry.isIntersecting) setVisibleCards((prev) => new Set([...Array.from(prev), Number(entry.target.getAttribute('data-idx'))])) }) },
       { threshold: 0.1 }
     )
     gridRef.current?.querySelectorAll('[data-idx]').forEach((el) => observer.observe(el))
