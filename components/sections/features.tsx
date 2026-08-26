@@ -113,7 +113,7 @@ export function FeaturesSection() {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             const index = Number(entry.target.getAttribute('data-index'))
-            setVisibleCards((prev) => new Set([...prev, index]))
+            setVisibleCards((prev) => new Set([...Array.from(prev), index]))
           }
         })
       },

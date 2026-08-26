@@ -177,7 +177,7 @@ function FeaturesGrid() {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             const idx = Number(entry.target.getAttribute('data-idx'))
-            setVisibleCards((prev) => new Set([...prev, idx]))
+            setVisibleCards((prev) => new Set([...Array.from(prev), idx]))
           }
         })
       },

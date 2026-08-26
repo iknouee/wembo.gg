@@ -50,7 +50,7 @@ export default function AutomationsPage() {
     // Stagger node appearances
     workflowSteps.forEach((_, i) => {
       setTimeout(() => {
-        setVisibleNodes((prev) => new Set([...prev, i]))
+        setVisibleNodes((prev) => new Set([...Array.from(prev), i]))
       }, 800 + i * 300)
     })
   }, [])
