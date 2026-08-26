@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Menu, X, ArrowRight, Sparkles } from 'lucide-react'
+import { Menu, X, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { siteConfig } from '@/config/site'
 import { cn } from '@/lib/utils'
@@ -14,173 +14,104 @@ export function Navbar() {
   const pathname = usePathname()
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20)
-    }
+    const handleScroll = () => setIsScrolled(window.scrollY > 20)
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // Close mobile menu on route change
-  useEffect(() => {
-    setIsMobileOpen(false)
-  }, [pathname])
+  useEffect(() => { setIsMobileOpen(false) }, [pathname])
 
   return (
     <>
       <header
         className={cn(
-          'fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-out',
+          'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
           isScrolled
-            ? 'bg-background/60 backdrop-blur-2xl border-b border-white/[0.04] shadow-lg shadow-black/5'
+            ? 'bg-black/80 backdrop-blur-xl border-b border-white/[0.06]'
             : 'bg-transparent'
         )}
       >
-        {/* Subtle top gradient line when scrolled */}
-        <div
-          className={cn(
-            'absolute top-0 left-0 right-0 h-px transition-opacity duration-500',
-            isScrolled ? 'opacity-100' : 'opacity-0'
-          )}
-          style={{
-            background: 'linear-gradient(90deg, transparent, hsl(var(--primary) / 0.3), transparent)',
-          }}
-        />
-
-        <nav className="container mx-auto flex h-16 items-center justify-between px-4 lg:px-8">
+        <nav className="container mx-auto flex h-14 items-center justify-between px-4 lg:px-8">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="relative h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/20 group-hover:shadow-primary/40 transition-all duration-300 group-hover:scale-105">
-              <span className="text-white font-bold text-sm">W</span>
-              <div className="absolute inset-0 rounded-lg bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <Link href="/" className="flex items-center gap-2 group">
+            <div className="h-7 w-7 rounded-md bg-yellow-500 flex items-center justify-center group-hover:bg-yellow-400 transition-colors">
+              <span className="text-black font-bold text-xs">W</span>
             </div>
-            <span className="font-bold text-lg tracking-tight">{siteConfig.name}</span>
+            <span className="font-semibold text-sm text-white/90">Wembo</span>
           </Link>
 
           {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-0.5">
-            {siteConfig.nav.main.map((item) => {
-              const isActive = pathname === item.href
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    'relative px-3.5 py-2 text-sm transition-all duration-200 rounded-lg',
-                    isActive
-                      ? 'text-foreground'
-                      : 'text-muted-foreground hover:text-foreground'
-                  )}
-                >
-                  {item.title}
-                  {isActive && (
-                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-0.5 bg-primary rounded-full" />
-                  )}
-                </Link>
-              )
-            })}
+          <div className="hidden md:flex items-center gap-1">
+            {siteConfig.nav.main.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  'px-3 py-1.5 text-[13px] rounded-md transition-colors',
+                  pathname === item.href
+                    ? 'text-white bg-white/[0.06]'
+                    : 'text-white/40 hover:text-white/80'
+                )}
+              >
+                {item.title}
+              </Link>
+            ))}
           </div>
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-2">
             <Link href="/login">
-              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+              <Button variant="ghost" size="sm" className="text-white/40 hover:text-white text-xs h-8">
                 Login
               </Button>
             </Link>
             <Link href="#">
-              <Button size="sm" className="gap-2 group/btn relative overflow-hidden">
-                <span className="relative z-10 flex items-center gap-2">
-                  Add Wembo
-                  <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover/btn:translate-x-0.5" />
-                </span>
+              <Button size="sm" className="h-8 text-xs font-semibold bg-yellow-500 text-black hover:bg-yellow-400 gap-1.5">
+                Add Wembo <ArrowRight className="h-3 w-3" />
               </Button>
             </Link>
           </div>
 
           {/* Mobile Toggle */}
           <button
-            className="md:hidden relative p-2 rounded-lg hover:bg-white/[0.05] transition-colors"
+            className="md:hidden p-2 text-white/60 hover:text-white transition-colors"
             onClick={() => setIsMobileOpen(!isMobileOpen)}
             aria-label="Toggle menu"
           >
-            <div className="relative w-5 h-5">
-              <Menu
-                className={cn(
-                  'h-5 w-5 absolute inset-0 transition-all duration-300',
-                  isMobileOpen ? 'opacity-0 rotate-90 scale-75' : 'opacity-100 rotate-0 scale-100'
-                )}
-              />
-              <X
-                className={cn(
-                  'h-5 w-5 absolute inset-0 transition-all duration-300',
-                  isMobileOpen ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 -rotate-90 scale-75'
-                )}
-              />
-            </div>
+            {isMobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </nav>
       </header>
 
-      {/* Mobile Menu - Full screen overlay */}
-      <div
-        className={cn(
-          'fixed inset-0 z-40 md:hidden transition-all duration-500',
-          isMobileOpen ? 'pointer-events-auto' : 'pointer-events-none'
-        )}
-      >
-        {/* Backdrop */}
-        <div
-          className={cn(
-            'absolute inset-0 bg-background/90 backdrop-blur-xl transition-opacity duration-500',
-            isMobileOpen ? 'opacity-100' : 'opacity-0'
-          )}
-          onClick={() => setIsMobileOpen(false)}
-        />
-
-        {/* Menu Content */}
-        <div
-          className={cn(
-            'relative h-full pt-20 px-6 flex flex-col transition-all duration-500',
-            isMobileOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
-          )}
-        >
-          <nav className="flex flex-col gap-1">
-            {siteConfig.nav.main.map((item, i) => {
-              const isActive = pathname === item.href
-              return (
+      {/* Mobile Menu */}
+      {isMobileOpen && (
+        <div className="fixed inset-0 z-40 md:hidden">
+          <div className="absolute inset-0 bg-black/95 backdrop-blur-xl" onClick={() => setIsMobileOpen(false)} />
+          <div className="relative pt-20 px-6 flex flex-col h-full">
+            <nav className="flex flex-col gap-1">
+              {siteConfig.nav.main.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={cn(
-                    'px-4 py-4 text-lg font-medium rounded-xl transition-all duration-200',
-                    isActive
-                      ? 'text-foreground bg-white/[0.05]'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-white/[0.03]'
-                  )}
-                  style={{ transitionDelay: `${i * 50}ms` }}
+                  className="px-4 py-3 text-base text-white/60 hover:text-white rounded-lg hover:bg-white/[0.03] transition-colors"
                 >
                   {item.title}
                 </Link>
-              )
-            })}
-          </nav>
-
-          <div className="mt-auto pb-8 space-y-3">
-            <Link href="/login" className="block">
-              <Button variant="outline" className="w-full h-12 text-base">
-                Login
-              </Button>
-            </Link>
-            <Link href="#" className="block">
-              <Button className="w-full h-12 text-base gap-2">
-                Add Wembo
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
+              ))}
+            </nav>
+            <div className="mt-auto pb-8 space-y-3">
+              <Link href="/login" className="block">
+                <Button variant="outline" className="w-full h-11 border-white/10 text-white/70">Login</Button>
+              </Link>
+              <Link href="#" className="block">
+                <Button className="w-full h-11 bg-yellow-500 text-black font-semibold hover:bg-yellow-400">
+                  Add Wembo <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </>
   )
 }
