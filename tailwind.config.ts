@@ -2,18 +2,9 @@ import type { Config } from 'tailwindcss'
 
 const config: Config = {
   darkMode: ['class'],
-  content: [
-    './pages/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
-    './app/**/*.{ts,tsx}',
-    './lib/**/*.{ts,tsx}',
-  ],
+  content: ['./pages/**/*.{ts,tsx}', './components/**/*.{ts,tsx}', './app/**/*.{ts,tsx}', './lib/**/*.{ts,tsx}'],
   theme: {
-    container: {
-      center: true,
-      padding: '2rem',
-      screens: { '2xl': '1400px' },
-    },
+    container: { center: true, padding: '2rem', screens: { '2xl': '1400px' } },
     extend: {
       colors: {
         border: 'hsl(var(--border))',
@@ -31,15 +22,14 @@ const config: Config = {
       },
       borderRadius: { lg: 'var(--radius)', md: 'calc(var(--radius) - 2px)', sm: 'calc(var(--radius) - 4px)' },
       animation: {
-        'fade-up': 'fade-up 0.6s ease-out forwards',
-        'fade-in': 'fade-in 0.5s ease-out forwards',
-        'glow-pulse': 'glow-pulse 3s ease-in-out infinite',
-        'float': 'float 5s ease-in-out infinite',
-        'shimmer': 'shimmer 2.5s linear infinite',
+        'fade-up': 'fade-up 0.5s ease-out forwards',
+        'fade-in': 'fade-in 0.4s ease-out forwards',
+        'float': 'float 6s ease-in-out infinite',
+        'float-reverse': 'float-reverse 7s ease-in-out infinite',
+        'pulse-glow': 'pulse-glow 3s ease-in-out infinite',
       },
     },
   },
   plugins: [require('tailwindcss-animate')],
 }
-
 export default config
