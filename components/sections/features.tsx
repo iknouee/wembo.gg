@@ -56,8 +56,8 @@ export function FeaturesSection() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 max-w-3xl mx-auto text-center">
             <StatNum value="AI" suffix="" label="Powered Assistance" vis={statsVis} delay={0} />
             <StatNum value="24" suffix="/7" label="Protection" vis={statsVis} delay={100} />
-            <StatNum value="0" suffix=" code" label="Required" vis={statsVis} delay={200} />
-            <StatNum value="1" suffix=" dashboard" label="For Everything" vis={statsVis} delay={300} />
+            <StatNum value="Zero" suffix="" label="Code Required" vis={statsVis} delay={200} />
+            <StatNum value="One" suffix="" label="Dashboard For All" vis={statsVis} delay={300} />
           </div>
         </div>
       </div>
