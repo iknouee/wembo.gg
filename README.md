@@ -12,7 +12,7 @@ Wembo is a premium Discord community management platform featuring AI-powered in
 - 🛡️ **Smart Security** — Anti-raid, phishing detection, threat scoring, automatic lockdown
 - ⚡ **Automations** — Visual workflow builder with triggers, conditions, and actions
 - 📊 **Analytics** — Real-time community metrics, growth data, and AI insights
-- 💡 **Knowledge Base** — Turn your Discord into a searchable knowledge base
+- 💡 **Knowledge Base** — Turn your Discord into a searchable knowledge based
 - 📝 **Forms & Workflows** — Applications, appeals, reports, and custom forms
 - 👥 **Member Intelligence** — Reputation, expertise tracking, and member search
 - 🔔 **Integrations** — YouTube, Twitch, GitHub, Reddit, RSS, webhooks
