@@ -2,221 +2,209 @@
 
 import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Users, MessageSquare, Shield, Bot, TrendingUp, Zap } from 'lucide-react'
+import { ArrowRight, Users, MessageSquare, Shield, Bot, TrendingUp, Zap, Check, BarChart3 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 export function HeroSection() {
   const [loaded, setLoaded] = useState(false)
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
-  const heroRef = useRef<HTMLDivElement>(null)
+  const [mouse, setMouse] = useState({ x: 0, y: 0 })
+  const ref = useRef<HTMLDivElement>(null)
 
-  useEffect(() => { setTimeout(() => setLoaded(true), 200) }, [])
+  useEffect(() => { setTimeout(() => setLoaded(true), 250) }, [])
 
   useEffect(() => {
-    const handleMouse = (e: MouseEvent) => {
-      if (!heroRef.current) return
-      const rect = heroRef.current.getBoundingClientRect()
-      const x = (e.clientX - rect.left - rect.width / 2) / rect.width
-      const y = (e.clientY - rect.top - rect.height / 2) / rect.height
-      setMousePos({ x: x * 3, y: y * 3 })
+    const handle = (e: MouseEvent) => {
+      if (!ref.current || window.innerWidth < 1024) return
+      const r = ref.current.getBoundingClientRect()
+      setMouse({ x: ((e.clientX - r.left) / r.width - 0.5) * 2, y: ((e.clientY - r.top) / r.height - 0.5) * 2 })
     }
-    window.addEventListener('mousemove', handleMouse)
-    return () => window.removeEventListener('mousemove', handleMouse)
+    window.addEventListener('mousemove', handle)
+    return () => window.removeEventListener('mousemove', handle)
   }, [])
 
   return (
-    <section ref={heroRef} className="relative min-h-screen flex items-center overflow-hidden pt-24">
-      {/* === BACKGROUND === */}
-      <div className="absolute inset-0 bg-[#070809]" />
+    <section ref={ref} className="relative min-h-[90vh] lg:min-h-screen flex items-center overflow-hidden pt-20 lg:pt-0">
+      {/* ===== BACKGROUND ===== */}
+      <div className="absolute inset-0 surface-0" />
 
-      {/* Large yellow glow behind hero text */}
-      <div className="absolute top-[20%] left-[15%] w-[600px] h-[500px] bg-[#FFD400]/[0.015] rounded-full blur-[180px] animate-glow-breathe" />
+      {/* Large yellow ambient glow — left */}
+      <div className="absolute top-[15%] left-[5%] w-[500px] h-[500px] bg-[#FFD600]/[0.012] rounded-full blur-[180px] animate-glow-breathe" />
+      {/* Large glow — behind right mockup */}
+      <div className="absolute top-[10%] right-[-5%] w-[800px] h-[700px] bg-[#FFD600]/[0.018] rounded-full blur-[200px] animate-glow-breathe" style={{ animationDelay: '2.5s' }} />
 
-      {/* Glow behind dashboard mockup */}
-      <div className="absolute top-[25%] right-[5%] w-[700px] h-[600px] bg-[#FFD400]/[0.02] rounded-full blur-[160px] animate-glow-breathe" style={{ animationDelay: '2s' }} />
+      {/* Grid */}
+      <div className="absolute inset-0 animate-grid-pulse" style={{
+        backgroundImage: 'linear-gradient(rgba(255,214,0,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,214,0,0.025) 1px, transparent 1px)',
+        backgroundSize: '72px 72px',
+      }} />
 
-      {/* Grid pattern */}
-      <div
-        className="absolute inset-0 animate-grid-fade"
-        style={{
-          backgroundImage: `
-            linear-gradient(rgba(255,212,0,0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,212,0,0.03) 1px, transparent 1px)
-          `,
-          backgroundSize: '80px 80px',
-        }}
-      />
+      {/* Dots */}
+      <div className="absolute inset-0 opacity-[0.012]" style={{
+        backgroundImage: 'radial-gradient(rgba(255,255,255,0.8) 1px, transparent 1px)',
+        backgroundSize: '28px 28px',
+      }} />
 
-      {/* Dotted pattern overlay */}
-      <div
-        className="absolute inset-0 opacity-[0.015]"
-        style={{
-          backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1px)',
-          backgroundSize: '32px 32px',
-        }}
-      />
-
-      {/* Thin decorative lines */}
-      <div className="absolute top-[30%] left-0 w-full h-px bg-gradient-to-r from-transparent via-[#FFD400]/[0.06] to-transparent" />
-      <div className="absolute top-[70%] left-0 w-full h-px bg-gradient-to-r from-transparent via-white/[0.03] to-transparent" />
+      {/* Horizontal accent lines */}
+      <div className="absolute top-[35%] left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#FFD600]/[0.05] to-transparent" />
+      <div className="absolute top-[75%] left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.03] to-transparent" />
 
       {/* Vignette */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,#070809_100%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,#050505_85%)]" />
 
-      {/* === CONTENT === */}
-      <div className="relative container mx-auto px-4 lg:px-8 py-16 lg:py-0">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          {/* LEFT — Text */}
-          <div className="max-w-[560px]">
+      {/* ===== CONTENT ===== */}
+      <div className="relative w-full max-w-content mx-auto px-4 lg:px-8 py-20 lg:py-0">
+        <div className="grid lg:grid-cols-[1fr_1.1fr] gap-12 lg:gap-16 items-center">
+          {/* === LEFT TEXT === */}
+          <div>
             {/* Badge */}
-            <div className={`mb-7 transition-all duration-700 delay-200 ${loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#FFD400]/20 bg-[#FFD400]/[0.04]">
-                <div className="h-[6px] w-[6px] rounded-full bg-[#FFD400] animate-pulse-soft" />
-                <span className="text-[11px] font-semibold text-[#FFD400]/80 uppercase tracking-wider">The Discord bot built for everything</span>
-              </div>
+            <div className={`mb-7 transition-all duration-700 delay-[200ms] ${loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+              <span className="inline-flex items-center gap-2 px-3.5 py-[6px] rounded-full border border-[#FFD600]/20 bg-[#FFD600]/[0.04]">
+                <span className="h-[6px] w-[6px] rounded-full bg-[#FFD600] animate-pulse-dot" />
+                <span className="text-[11px] font-semibold text-[#FFD600]/80 uppercase tracking-wider">AI-Powered Discord Management</span>
+              </span>
             </div>
 
             {/* Headline */}
-            <h1 className={`text-[clamp(2.5rem,5vw,4.5rem)] font-bold leading-[1.08] tracking-[-0.03em] mb-6 transition-all duration-700 delay-300 ${loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}>
-              <span className="text-white">Run your </span>
-              <span className="text-gradient-gold">entire</span>
+            <h1 className={`text-[clamp(2.5rem,5.5vw,4.75rem)] font-bold leading-[1.05] tracking-[-0.035em] mb-6 transition-all duration-700 delay-[300ms] ${loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}>
+              <span className="text-white">Your Discord community,</span>
               <br />
-              <span className="text-white">Discord server</span>
-              <br />
-              <span className="text-white">with </span>
-              <span className="text-gradient-gold">Wembo.</span>
+              <span className="text-gradient-gold">running smarter.</span>
             </h1>
 
             {/* Description */}
-            <p className={`text-[16px] text-[#a8aab0] leading-[1.7] max-w-[480px] mb-9 transition-all duration-700 delay-400 ${loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}>
-              Moderation, AI, automations, analytics and community tools — all inside one powerful Discord bot.
+            <p className={`text-[16px] text-[#b0b2b8] leading-[1.75] max-w-[480px] mb-8 transition-all duration-700 delay-[400ms] ${loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}>
+              AI, moderation, automations, analytics and community intelligence — all working together in one powerful Discord platform.
             </p>
 
-            {/* Buttons */}
-            <div className={`flex flex-wrap gap-3 mb-10 transition-all duration-700 delay-500 ${loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}>
+            {/* CTAs */}
+            <div className={`flex flex-wrap gap-3 mb-7 transition-all duration-700 delay-[500ms] ${loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}>
               <Link href="#">
-                <Button size="xl" className="gap-2 rounded-lg">
+                <Button size="xl" className="gap-2 group">
                   Add Wembo to Discord
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                 </Button>
               </Link>
-              <Link href="/dashboard">
+              <Link href="/features">
                 <Button size="lg" variant="outline" className="gap-2 group">
-                  Explore Dashboard
-                  <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                  Explore Features
+                  <ArrowRight className="h-3.5 w-3.5 opacity-50 transition-all group-hover:opacity-100 group-hover:translate-x-0.5" />
                 </Button>
               </Link>
+            </div>
+
+            {/* Checklist */}
+            <div className={`flex flex-wrap gap-x-5 gap-y-2 mb-8 transition-all duration-700 delay-[600ms] ${loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+              {['Setup in under 2 minutes', 'No coding required', 'Free to get started'].map((t) => (
+                <span key={t} className="flex items-center gap-1.5 text-[12px] text-[#9A9CA3]">
+                  <Check className="h-3.5 w-3.5 text-emerald-400" />
+                  {t}
+                </span>
+              ))}
             </div>
 
             {/* Social proof */}
-            <div className={`flex items-center gap-3 transition-all duration-700 delay-600 ${loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-              {/* Overlapping avatars */}
+            <div className={`flex items-center gap-3 transition-all duration-700 delay-[700ms] ${loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
               <div className="flex -space-x-2">
-                {[1,2,3,4,5].map((i) => (
-                  <div key={i} className="h-7 w-7 rounded-full border-2 border-[#070809] bg-gradient-to-br from-[#FFD400]/20 to-[#FFD400]/5 flex items-center justify-center">
-                    <span className="text-[8px] text-[#FFD400]/60 font-medium">{String.fromCharCode(64 + i)}</span>
+                {['A','B','C','D','E'].map((c, i) => (
+                  <div key={c} className="h-7 w-7 rounded-full border-[2px] border-[#050505] bg-gradient-to-br from-[#FFD600]/15 to-[#FFD600]/5 flex items-center justify-center">
+                    <span className="text-[8px] text-[#FFD600]/50 font-bold">{c}</span>
                   </div>
                 ))}
               </div>
-              <span className="text-[13px] text-[#8B8D93]">Trusted by <span className="text-white font-medium">2,500+</span> communities</span>
+              <span className="text-[12px] text-[#9A9CA3]">Trusted by <span className="text-white font-medium">2,500+</span> communities</span>
             </div>
           </div>
 
-          {/* RIGHT — Dashboard Mockup */}
+          {/* === RIGHT DASHBOARD MOCKUP === */}
           <div
-            className={`relative transition-all duration-1000 delay-500 ${loaded ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`}
-            style={{ transform: loaded ? `perspective(1200px) rotateY(${mousePos.x * -0.5}deg) rotateX(${mousePos.y * 0.5}deg)` : undefined }}
+            className={`relative transition-all duration-1000 delay-[500ms] ${loaded ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'}`}
+            style={{ transform: loaded ? `perspective(1400px) rotateY(${mouse.x * -1.2}deg) rotateX(${mouse.y * 0.8}deg) translateZ(0)` : undefined, transition: 'transform 0.1s ease-out' }}
           >
-            {/* Glow under mockup */}
-            <div className="absolute -inset-8 bg-[#FFD400]/[0.02] rounded-3xl blur-3xl" />
+            {/* Glow underneath */}
+            <div className="absolute -inset-6 bg-[#FFD600]/[0.015] rounded-3xl blur-3xl" />
 
-            {/* Illuminated grid under mockup */}
-            <div className="absolute -bottom-12 left-[10%] right-[10%] h-32 opacity-30"
-              style={{
-                backgroundImage: 'linear-gradient(rgba(255,212,0,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,212,0,0.04) 1px, transparent 1px)',
-                backgroundSize: '20px 20px',
-                maskImage: 'linear-gradient(to bottom, transparent, black 30%, black 70%, transparent)',
-                WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 30%, black 70%, transparent)',
-              }}
-            />
+            {/* Illuminated grid surface */}
+            <div className="absolute -bottom-8 left-[5%] right-[5%] h-20 opacity-40" style={{
+              backgroundImage: 'linear-gradient(rgba(255,214,0,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,214,0,0.03) 1px, transparent 1px)',
+              backgroundSize: '16px 16px',
+              maskImage: 'linear-gradient(to bottom, transparent, black 40%, black 60%, transparent)',
+              WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 40%, black 60%, transparent)',
+            }} />
 
-            {/* Main Discord embed card */}
-            <div className="relative rounded-xl overflow-hidden card-elevated">
-              {/* Discord-style header */}
-              <div className="flex items-center gap-3 px-5 py-3.5 border-b border-white/[0.05] bg-[#0c0d10]">
-                <div className="h-9 w-9 rounded-full bg-[#FFD400]/10 flex items-center justify-center shadow-inner">
-                  <span className="text-[11px] font-bold text-[#FFD400]">W</span>
+            {/* === MAIN CARD === */}
+            <div className="relative rounded-xl border border-white/[0.07] bg-[#0a0b0d] shadow-2xl shadow-black/50 overflow-hidden">
+              {/* Header */}
+              <div className="flex items-center gap-3 px-5 py-3 border-b border-white/[0.05] bg-[#080909]">
+                <div className="h-8 w-8 rounded-full bg-[#FFD600]/10 flex items-center justify-center">
+                  <span className="text-[10px] font-black text-[#FFD600]">W</span>
                 </div>
-                <div>
+                <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <span className="text-[13px] font-semibold text-white/90">Wembo</span>
-                    <span className="text-[9px] bg-[#5865F2] text-white px-1.5 py-[2px] rounded font-medium">BOT</span>
+                    <span className="text-[8px] bg-[#5865F2] text-white px-1.5 py-[1px] rounded font-bold uppercase">Bot</span>
                   </div>
-                  <span className="text-[10px] text-white/25">Today at 4:20 PM</span>
                 </div>
+                <span className="text-[10px] text-white/15">Today at 4:20 PM</span>
               </div>
 
-              {/* Embed body */}
-              <div className="p-5">
-                <div className="border-l-[3px] border-[#FFD400] rounded-r-lg bg-[#141519] p-5">
-                  <p className="text-[14px] font-semibold text-white/90 mb-1">Wembo Dashboard</p>
-                  <p className="text-[12px] text-white/40 mb-5">Your community is looking healthy.</p>
+              {/* Embed */}
+              <div className="p-4">
+                <div className="border-l-[3px] border-[#FFD600] rounded-r-lg bg-[#111215] p-5">
+                  <p className="text-[13px] font-semibold text-white/90 mb-0.5">Server Overview</p>
+                  <p className="text-[11px] text-white/35 mb-4">Your community is looking healthy today.</p>
 
-                  {/* Stats grid */}
-                  <div className="grid grid-cols-2 gap-3 mb-5">
-                    <StatBox icon={Users} label="Members" value="12,482" change="+8.4%" />
-                    <StatBox icon={MessageSquare} label="Messages" value="3,219" change="Today" />
-                    <StatBox icon={Shield} label="Threats Blocked" value="2" change="Security" />
-                    <StatBox icon={Bot} label="AI Queries" value="89" change="Today" />
+                  <div className="grid grid-cols-2 gap-2.5 mb-4">
+                    <MiniStat icon={Users} label="Members" value="12,482" sub="+8.4%" />
+                    <MiniStat icon={MessageSquare} label="Messages" value="3,219" sub="Today" />
+                    <MiniStat icon={Shield} label="Threats" value="2 blocked" sub="Protected" />
+                    <MiniStat icon={Bot} label="AI Queries" value="89" sub="Answered" />
                   </div>
 
-                  {/* Mini graph */}
-                  <div className="rounded-lg bg-[#0c0d10] border border-white/[0.04] p-3 mb-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-[10px] text-white/30 uppercase tracking-wider font-medium">Member Growth</span>
-                      <span className="text-[10px] text-emerald-400">+12%</span>
+                  {/* Mini chart */}
+                  <div className="rounded-md bg-[#090a0c] border border-white/[0.04] p-3 mb-3">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-[9px] text-white/25 uppercase tracking-wider font-medium">Member Growth</span>
+                      <span className="text-[9px] text-emerald-400 font-medium">+12% ↑</span>
                     </div>
-                    <div className="flex items-end gap-[3px] h-10">
-                      {[30, 35, 28, 42, 50, 45, 55, 60, 52, 65, 70, 75].map((h, i) => (
-                        <div key={i} className="flex-1 rounded-t-sm bg-gradient-to-t from-[#FFD400]/20 to-[#FFD400]/50" style={{ height: `${h}%` }} />
+                    <div className="flex items-end gap-[2px] h-9">
+                      {[25,30,28,35,40,38,45,50,48,55,60,65,62,70,75].map((h,i) => (
+                        <div key={i} className="flex-1 rounded-t-sm bg-gradient-to-t from-[#FFD600]/15 to-[#FFD600]/45" style={{height:`${h}%`}} />
                       ))}
                     </div>
                   </div>
 
-                  {/* Action buttons */}
                   <div className="flex gap-2">
-                    <div className="px-3 py-1.5 rounded text-[11px] font-medium bg-[#FFD400] text-black">View Dashboard</div>
-                    <div className="px-3 py-1.5 rounded text-[11px] font-medium bg-[#2b2d31] text-white/60">Security Log</div>
-                    <div className="px-3 py-1.5 rounded text-[11px] font-medium bg-[#2b2d31] text-white/60">Analytics</div>
+                    <span className="px-3 py-1.5 rounded text-[10px] font-semibold bg-[#FFD600] text-black">View Dashboard</span>
+                    <span className="px-3 py-1.5 rounded text-[10px] font-medium bg-white/[0.05] text-white/50 border border-white/[0.06]">Security</span>
+                    <span className="px-3 py-1.5 rounded text-[10px] font-medium bg-white/[0.05] text-white/50 border border-white/[0.06]">Analytics</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Floating security card */}
-            <div className="absolute -left-6 bottom-[15%] rounded-lg card-elevated p-3.5 animate-float w-[180px]" style={{ animationDelay: '0.5s' }}>
-              <div className="flex items-center gap-2 mb-1.5">
+            {/* === FLOATING CARDS === */}
+            <div className="absolute -left-8 top-[55%] rounded-lg border border-white/[0.08] bg-[#0a0b0d]/95 backdrop-blur-sm p-3 shadow-xl shadow-black/40 animate-float-slow w-[165px]" style={{animationDelay:'0.5s'}}>
+              <div className="flex items-center gap-2 mb-1">
                 <Shield className="h-3.5 w-3.5 text-emerald-400" />
-                <span className="text-[11px] font-semibold text-white/80">Security</span>
+                <span className="text-[11px] font-semibold text-white/80">Threat Blocked</span>
               </div>
-              <p className="text-[10px] text-white/35">2 threats blocked today</p>
-              <div className="flex items-center gap-1 mt-1.5">
-                <div className="h-[5px] w-[5px] rounded-full bg-emerald-500" />
-                <span className="text-[9px] text-emerald-400/70">Protected</span>
-              </div>
+              <p className="text-[10px] text-white/30">Suspicious account quarantined</p>
             </div>
 
-            {/* Floating AI card */}
-            <div className="absolute -right-4 top-[20%] rounded-lg card-elevated p-3.5 animate-float w-[170px]" style={{ animationDelay: '1.5s' }}>
-              <div className="flex items-center gap-2 mb-1.5">
-                <Bot className="h-3.5 w-3.5 text-[#FFD400]" />
-                <span className="text-[11px] font-semibold text-white/80">AI Assistant</span>
+            <div className="absolute -right-6 top-[15%] rounded-lg border border-white/[0.08] bg-[#0a0b0d]/95 backdrop-blur-sm p-3 shadow-xl shadow-black/40 animate-float-slow-2 w-[160px]" style={{animationDelay:'1.5s'}}>
+              <div className="flex items-center gap-2 mb-1">
+                <Zap className="h-3.5 w-3.5 text-[#FFD600]" />
+                <span className="text-[11px] font-semibold text-white/80">Automation</span>
               </div>
-              <p className="text-[10px] text-white/35">89 questions answered</p>
-              <div className="flex items-center gap-1 mt-1.5">
-                <div className="h-[5px] w-[5px] rounded-full bg-[#FFD400]" />
-                <span className="text-[9px] text-[#FFD400]/70">Active</span>
+              <p className="text-[10px] text-white/30">Welcome flow completed</p>
+            </div>
+
+            <div className="absolute -right-4 bottom-[20%] rounded-lg border border-white/[0.08] bg-[#0a0b0d]/95 backdrop-blur-sm p-3 shadow-xl shadow-black/40 animate-float-slow w-[155px]" style={{animationDelay:'3s'}}>
+              <div className="flex items-center gap-2 mb-1">
+                <TrendingUp className="h-3.5 w-3.5 text-emerald-400" />
+                <span className="text-[11px] font-semibold text-white/80">+342 members</span>
               </div>
+              <p className="text-[10px] text-white/30">This week</p>
             </div>
           </div>
         </div>
@@ -225,17 +213,15 @@ export function HeroSection() {
   )
 }
 
-function StatBox({ icon: Icon, label, value, change }: { icon: React.ElementType; label: string; value: string; change: string }) {
+function MiniStat({ icon: Icon, label, value, sub }: { icon: React.ElementType; label: string; value: string; sub: string }) {
   return (
-    <div className="rounded-lg bg-[#0c0d10] border border-white/[0.04] p-3">
-      <div className="flex items-center gap-1.5 mb-1">
+    <div className="rounded-md bg-[#090a0c] border border-white/[0.04] p-2.5">
+      <div className="flex items-center gap-1 mb-0.5">
         <Icon className="h-3 w-3 text-white/20" />
-        <span className="text-[10px] text-white/30">{label}</span>
+        <span className="text-[9px] text-white/25">{label}</span>
       </div>
-      <div className="flex items-baseline gap-1.5">
-        <span className="text-[15px] font-bold text-white">{value}</span>
-        <span className="text-[9px] text-emerald-400 font-medium">{change}</span>
-      </div>
+      <span className="text-[13px] font-bold text-white block">{value}</span>
+      <span className="text-[9px] text-emerald-400/80">{sub}</span>
     </div>
   )
 }
