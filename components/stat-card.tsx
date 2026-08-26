@@ -1,7 +1,6 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import { Card } from '@/components/ui/card'
 import { type LucideIcon } from 'lucide-react'
 
 interface StatCardProps {
@@ -24,34 +23,35 @@ export function StatCard({
   className,
 }: StatCardProps) {
   return (
-    <Card className={cn('p-6 hover:border-primary/20 transition-colors', className)}>
+    <div className={cn(
+      'rounded-xl border border-white/[0.06] bg-card/50 p-5 hover:border-primary/15 hover:bg-primary/[0.02] transition-all duration-300 group',
+      className
+    )}>
       <div className="flex items-start justify-between">
-        <div className="space-y-1">
-          <p className="text-sm text-muted-foreground">{title}</p>
+        <div className="space-y-1.5">
+          <p className="text-sm text-muted-foreground/50">{title}</p>
           <p className="text-2xl font-bold tracking-tight">{value}</p>
           {description && (
-            <p className="text-xs text-muted-foreground">{description}</p>
+            <p className="text-xs text-muted-foreground/40">{description}</p>
           )}
         </div>
         {Icon && (
-          <div className="rounded-lg bg-primary/10 p-2.5">
-            <Icon className="h-5 w-5 text-primary" />
+          <div className="rounded-lg bg-primary/[0.06] p-2.5 group-hover:bg-primary/[0.12] transition-colors">
+            <Icon className="h-4 w-4 text-primary" />
           </div>
         )}
       </div>
       {trend && (
-        <div className="mt-3 flex items-center gap-1">
-          <span
-            className={cn(
-              'text-xs font-medium',
-              trendUp ? 'text-green-500' : 'text-red-500'
-            )}
-          >
+        <div className="mt-3 flex items-center gap-1.5">
+          <span className={cn(
+            'text-xs font-medium px-1.5 py-0.5 rounded',
+            trendUp ? 'text-green-400 bg-green-500/10' : 'text-red-400 bg-red-500/10'
+          )}>
             {trend}
           </span>
-          <span className="text-xs text-muted-foreground">from last week</span>
+          <span className="text-xs text-muted-foreground/40">from last week</span>
         </div>
       )}
-    </Card>
+    </div>
   )
 }
