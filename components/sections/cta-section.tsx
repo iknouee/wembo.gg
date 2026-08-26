@@ -33,7 +33,7 @@ export function CTASection() {
           Your server deserves smarter tools.
         </h2>
         <p className="text-[16px] text-[#9A9CA3] mb-10 max-w-lg mx-auto leading-relaxed">
-          Join thousands of communities using Wembo to automate, protect and understand their Discord servers.
+          Bring AI, automation, security and community intelligence together in one powerful Discord platform.
         </p>
 
         {/* Buttons */}

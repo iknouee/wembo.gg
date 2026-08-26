@@ -291,9 +291,9 @@ export const mockIntegrations = [
 ]
 
 export const mockStatusServices = [
-  { name: 'Wembo Bot', status: 'operational' as const, uptime: '99.98%' },
-  { name: 'Dashboard', status: 'operational' as const, uptime: '99.99%' },
-  { name: 'API', status: 'operational' as const, uptime: '99.97%' },
-  { name: 'Database', status: 'operational' as const, uptime: '99.99%' },
-  { name: 'Website', status: 'operational' as const, uptime: '100%' },
+  { name: 'Wembo Bot', status: 'operational' as const, uptime: '—' },
+  { name: 'Dashboard', status: 'operational' as const, uptime: '—' },
+  { name: 'API', status: 'operational' as const, uptime: '—' },
+  { name: 'Database', status: 'operational' as const, uptime: '—' },
+  { name: 'Website', status: 'operational' as const, uptime: '—' },
 ]

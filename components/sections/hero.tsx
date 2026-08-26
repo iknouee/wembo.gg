@@ -102,16 +102,9 @@ export function HeroSection() {
               ))}
             </div>
 
-            {/* Social proof */}
-            <div className={`flex items-center gap-3 transition-all duration-700 delay-[700ms] ${loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-              <div className="flex -space-x-2">
-                {['A','B','C','D','E'].map((c, i) => (
-                  <div key={c} className="h-7 w-7 rounded-full border-[2px] border-[#050505] bg-gradient-to-br from-[#FFD600]/15 to-[#FFD600]/5 flex items-center justify-center">
-                    <span className="text-[8px] text-[#FFD600]/50 font-bold">{c}</span>
-                  </div>
-                ))}
-              </div>
-              <span className="text-[12px] text-[#9A9CA3]">Trusted by <span className="text-white font-medium">2,500+</span> communities</span>
+            {/* Product highlights */}
+            <div className={`flex items-center gap-2 transition-all duration-700 delay-[700ms] ${loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+              <span className="text-[12px] text-[#9A9CA3]">AI • Security • Automations • Analytics</span>
             </div>
           </div>
 
@@ -144,7 +137,7 @@ export function HeroSection() {
                     <span className="text-[8px] bg-[#5865F2] text-white px-1.5 py-[1px] rounded font-bold uppercase">Bot</span>
                   </div>
                 </div>
-                <span className="text-[10px] text-white/15">Today at 4:20 PM</span>
+                <span className="text-[9px] text-white/15 uppercase tracking-wider">Example</span>
               </div>
 
               {/* Embed */}

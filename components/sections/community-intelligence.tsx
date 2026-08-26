@@ -54,10 +54,7 @@ export function CommunityIntelligence() {
                 <Bot className="h-4 w-4 text-[#FFD600]/60" />
                 <span className="text-[12px] font-semibold text-white/70">Community Dashboard</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <div className="h-[6px] w-[6px] rounded-full bg-red-500 animate-pulse-dot" />
-                <span className="text-[10px] font-medium text-red-400/80 uppercase tracking-wider">Live</span>
-              </div>
+              <span className="text-[9px] text-white/15 uppercase tracking-wider">Example</span>
             </div>
 
             <div className="p-5 space-y-4">

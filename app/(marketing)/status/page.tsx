@@ -32,6 +32,7 @@ export default function StatusPage() {
           <div className={`text-center mb-12 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             <h1 className="text-4xl font-bold tracking-tight mb-4">System Status</h1>
             <p className="text-muted-foreground/60">Current status of Wembo services.</p>
+            <p className="text-[11px] text-muted-foreground/30 mt-2">Status monitoring will be connected when services are live.</p>
           </div>
 
           {/* Overall Status */}

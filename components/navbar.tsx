@@ -58,10 +58,9 @@ export function Navbar() {
 
             {/* Right */}
             <div className="hidden lg:flex items-center gap-3 shrink-0">
-              <div className="flex items-center gap-1.5 mr-2">
-                <div className="h-[6px] w-[6px] rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50 animate-pulse-dot" />
-                <span className="text-[11px] text-[#9A9CA3]/70">Operational</span>
-              </div>
+              <Link href="/status" className="flex items-center gap-1.5 mr-2 hover:opacity-80 transition-opacity">
+                <span className="text-[11px] text-[#9A9CA3]/70">System Status</span>
+              </Link>
               <Link href="/login">
                 <Button variant="ghost" size="sm" className="text-[12px]">Log In</Button>
               </Link>

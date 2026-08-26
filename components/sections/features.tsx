@@ -50,14 +50,14 @@ export function FeaturesSection() {
           </div>
         </div>
 
-        {/* Stats */}
+        {/* Capabilities */}
         <div ref={statsRef} className="mt-14 lg:mt-16">
-          <p className="text-[11px] text-[#9A9CA3]/50 uppercase tracking-widest font-semibold text-center mb-8">Trusted by 2,500+ Discord communities</p>
+          <p className="text-[11px] text-[#9A9CA3]/50 uppercase tracking-widest font-semibold text-center mb-8">Everything your community needs, working together</p>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 max-w-3xl mx-auto text-center">
-            <StatNum value="2,500" suffix="+" label="Communities" vis={statsVis} delay={0} />
-            <StatNum value="1.2M" suffix="+" label="Members Protected" vis={statsVis} delay={100} />
-            <StatNum value="24" suffix="/7" label="Protection" vis={statsVis} delay={200} />
-            <StatNum value="99.99" suffix="%" label="Uptime" vis={statsVis} delay={300} />
+            <StatNum value="AI" suffix="" label="Powered Assistance" vis={statsVis} delay={0} />
+            <StatNum value="24" suffix="/7" label="Protection" vis={statsVis} delay={100} />
+            <StatNum value="0" suffix=" code" label="Required" vis={statsVis} delay={200} />
+            <StatNum value="1" suffix=" dashboard" label="For Everything" vis={statsVis} delay={300} />
           </div>
         </div>
       </div>
