@@ -34,10 +34,9 @@ export function Footer() {
           <p className="text-[11px] text-white/20">
             © {new Date().getFullYear()} Wembo. All rights reserved.
           </p>
-          <div className="flex items-center gap-1.5">
-            <div className="h-[5px] w-[5px] rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/40" />
-            <span className="text-[11px] text-white/20">All systems operational</span>
-          </div>
+          <Link href="/status" className="flex items-center gap-1.5 hover:opacity-80 transition-opacity">
+            <span className="text-[11px] text-white/20">System Status</span>
+          </Link>
         </div>
       </div>
     </footer>

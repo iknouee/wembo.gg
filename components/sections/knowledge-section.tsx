@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { Shield, HelpCircle, BookOpen, FileText, MessageSquare, Bot, Database, Clock } from 'lucide-react'
+import { Shield, HelpCircle, BookOpen, FileText, MessageSquare, Bot, Database } from 'lucide-react'
 
 export function KnowledgeSection() {
   const [visible, setVisible] = useState(false)
@@ -63,15 +63,11 @@ export function KnowledgeSection() {
               ))}
             </div>
 
-            {/* Status indicators */}
+            {/* Example status indicators */}
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1.5">
                 <Database className="h-3.5 w-3.5 text-white/20" />
-                <span className="text-[11px] text-[#9A9CA3]">1,284 documents indexed</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <Clock className="h-3.5 w-3.5 text-white/20" />
-                <span className="text-[11px] text-[#9A9CA3]">Last synced 2 min ago</span>
+                <span className="text-[11px] text-[#9A9CA3]">Indexes your server&apos;s knowledge automatically</span>
               </div>
             </div>
           </div>
