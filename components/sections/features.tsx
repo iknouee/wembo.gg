@@ -3,68 +3,61 @@
 import { useEffect, useRef, useState } from 'react'
 import { Bot, Shield, Zap, BarChart3, Lightbulb, Users } from 'lucide-react'
 
-const featureStrip = [
+const features = [
   { icon: Bot, title: 'AI Assistant', desc: 'Instant intelligent support' },
   { icon: Shield, title: 'Smart Security', desc: 'Stop threats automatically' },
   { icon: Zap, title: 'Automations', desc: 'Put repetitive work on autopilot' },
   { icon: BarChart3, title: 'Analytics', desc: 'Understand your community' },
   { icon: Lightbulb, title: 'Knowledge', desc: 'Answers from your server' },
-  { icon: Users, title: 'Member Intelligence', desc: 'Know your audience' },
+  { icon: Users, title: 'Member Intel', desc: 'Know your audience deeply' },
 ]
 
 export function FeaturesSection() {
   const [visible, setVisible] = useState(false)
-  const [statsVisible, setStatsVisible] = useState(false)
+  const [statsVis, setStatsVis] = useState(false)
   const stripRef = useRef<HTMLDivElement>(null)
   const statsRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const obs1 = new IntersectionObserver(([e]) => { if (e.isIntersecting) setVisible(true) }, { threshold: 0.2 })
-    const obs2 = new IntersectionObserver(([e]) => { if (e.isIntersecting) setStatsVisible(true) }, { threshold: 0.3 })
-    if (stripRef.current) obs1.observe(stripRef.current)
-    if (statsRef.current) obs2.observe(statsRef.current)
-    return () => { obs1.disconnect(); obs2.disconnect() }
+    const o1 = new IntersectionObserver(([e]) => { if (e.isIntersecting) setVisible(true) }, { threshold: 0.2 })
+    const o2 = new IntersectionObserver(([e]) => { if (e.isIntersecting) setStatsVis(true) }, { threshold: 0.3 })
+    if (stripRef.current) o1.observe(stripRef.current)
+    if (statsRef.current) o2.observe(statsRef.current)
+    return () => { o1.disconnect(); o2.disconnect() }
   }, [])
 
   return (
-    <section className="relative py-20 lg:py-28">
-      <div className="absolute inset-0 bg-[#070809]" />
-      {/* Top line */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#FFD400]/[0.08] to-transparent" />
+    <section className="relative py-16 lg:py-20 section-glow">
+      <div className="absolute inset-0 surface-0" />
+      <div className="divider-glow absolute top-0 left-0 right-0" />
 
-      <div className="relative container mx-auto px-4 lg:px-8">
+      <div className="relative max-w-content mx-auto px-4 lg:px-8">
         {/* Feature Strip */}
-        <div ref={stripRef} className={`rounded-2xl border border-white/[0.06] bg-[#0c0d10] p-1 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
-            {featureStrip.map((f, i) => (
-              <div
-                key={f.title}
-                className={`group relative flex flex-col items-center text-center p-5 lg:p-6 transition-all duration-300 hover:-translate-y-[2px] ${
-                  i < featureStrip.length - 1 ? 'lg:border-r border-white/[0.04]' : ''
-                } ${i < 4 ? 'border-b md:border-b lg:border-b-0 border-white/[0.04]' : ''} ${i === 2 || i === 3 ? 'md:border-b-0' : ''}`}
-              >
-                {/* Hover background */}
-                <div className="absolute inset-0 bg-[#FFD400]/[0.02] opacity-0 group-hover:opacity-100 transition-opacity rounded-xl" />
-
+        <div ref={stripRef} className={`rounded-2xl border border-white/[0.07] bg-[#090A0C] overflow-hidden transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 divide-x divide-y lg:divide-y-0 divide-white/[0.05]">
+            {features.map((f, i) => (
+              <div key={f.title} className="group relative p-5 lg:p-6 flex flex-col items-center text-center transition-all duration-300 hover:-translate-y-[2px] cursor-pointer">
+                <div className="absolute inset-0 bg-[#FFD600]/[0.015] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <div className="relative">
-                  <div className="h-10 w-10 rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center mb-3 group-hover:border-[#FFD400]/20 group-hover:bg-[#FFD400]/[0.05] transition-all">
-                    <f.icon className="h-4 w-4 text-[#8B8D93] group-hover:text-[#FFD400] transition-colors" />
+                  <div className="h-10 w-10 rounded-lg bg-white/[0.04] border border-white/[0.07] flex items-center justify-center mb-3 group-hover:border-[#FFD600]/20 group-hover:bg-[#FFD600]/[0.06] transition-all duration-300">
+                    <f.icon className="h-[18px] w-[18px] text-[#9A9CA3] group-hover:text-[#FFD600] transition-colors duration-300" />
                   </div>
-                  <h3 className="text-[12px] font-semibold text-white/80 mb-0.5">{f.title}</h3>
-                  <p className="text-[11px] text-[#8B8D93]">{f.desc}</p>
+                  <h3 className="text-[12px] font-semibold text-white/85 mb-0.5">{f.title}</h3>
+                  <p className="text-[11px] text-[#9A9CA3]/70 leading-relaxed">{f.desc}</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Stats Section */}
-        <div ref={statsRef} className={`mt-16 lg:mt-20 transition-all duration-700 delay-200 ${statsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-10 max-w-4xl mx-auto text-center">
-            <StatItem value="2,500+" label="Communities" visible={statsVisible} delay={0} />
-            <StatItem value="1.2M+" label="Members Protected" visible={statsVisible} delay={100} />
-            <StatItem value="24/7" label="Protection" visible={statsVisible} delay={200} />
-            <StatItem value="99.99%" label="Uptime" visible={statsVisible} delay={300} />
+        {/* Stats */}
+        <div ref={statsRef} className="mt-14 lg:mt-16">
+          <p className="text-[11px] text-[#9A9CA3]/50 uppercase tracking-widest font-semibold text-center mb-8">Trusted by 2,500+ Discord communities</p>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 max-w-3xl mx-auto text-center">
+            <StatNum value="2,500" suffix="+" label="Communities" vis={statsVis} delay={0} />
+            <StatNum value="1.2M" suffix="+" label="Members Protected" vis={statsVis} delay={100} />
+            <StatNum value="24" suffix="/7" label="Protection" vis={statsVis} delay={200} />
+            <StatNum value="99.99" suffix="%" label="Uptime" vis={statsVis} delay={300} />
           </div>
         </div>
       </div>
@@ -72,22 +65,13 @@ export function FeaturesSection() {
   )
 }
 
-function StatItem({ value, label, visible, delay }: { value: string; label: string; visible: boolean; delay: number }) {
+function StatNum({ value, suffix, label, vis, delay }: { value: string; suffix: string; label: string; vis: boolean; delay: number }) {
   return (
-    <div
-      className={`transition-all duration-600`}
-      style={{ transitionDelay: `${delay}ms`, opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(12px)' }}
-    >
-      <p className="text-3xl lg:text-4xl font-bold text-white mb-1 tracking-tight">
-        {value.includes('+') || value.includes('%') ? (
-          <>
-            {value.replace(/[+%]/g, '')}<span className="text-[#FFD400]">{value.match(/[+%]/)?.[0]}</span>
-          </>
-        ) : value === '24/7' ? (
-          <>24<span className="text-[#FFD400]">/</span>7</>
-        ) : value}
+    <div className="transition-all duration-600" style={{ transitionDelay: `${delay}ms`, opacity: vis ? 1 : 0, transform: vis ? 'translateY(0)' : 'translateY(12px)' }}>
+      <p className="text-3xl lg:text-[2.5rem] font-bold text-white tracking-tight mb-1">
+        {value}<span className="text-[#FFD600]">{suffix}</span>
       </p>
-      <p className="text-[13px] text-[#8B8D93]">{label}</p>
+      <p className="text-[12px] text-[#9A9CA3]">{label}</p>
     </div>
   )
 }
