@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Users, MessageSquare, Shield, Zap, Bot, TrendingUp } from 'lucide-react'
+import { ArrowUpRight, Bot, Shield, Zap, BarChart3, Lightbulb, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 export function HeroSection() {
@@ -12,117 +12,84 @@ export function HeroSection() {
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden">
       {/* Background */}
-      <div className="absolute inset-0 bg-[hsl(222,15%,4%)]" />
+      <div className="absolute inset-0 bg-[hsl(220,16%,4%)]" />
 
-      {/* Blue glow orbs */}
-      <div className="absolute top-[-20%] left-[50%] -translate-x-1/2 w-[900px] h-[600px] rounded-full bg-blue-500/[0.06] blur-[150px]" />
-      <div className="absolute bottom-[-10%] left-[20%] w-[500px] h-[500px] rounded-full bg-blue-600/[0.03] blur-[120px]" />
-      <div className="absolute top-[30%] right-[5%] w-[300px] h-[300px] rounded-full bg-cyan-500/[0.02] blur-[100px]" />
+      {/* Decorative geometric shapes — gold outlines */}
+      <div className="absolute top-[10%] right-[5%] w-[200px] h-[200px] border border-yellow-500/[0.08] rounded-3xl rotate-12 animate-float" />
+      <div className="absolute top-[25%] right-[15%] w-[120px] h-[120px] border border-yellow-500/[0.06] rounded-2xl -rotate-6 animate-float-reverse" />
+      <div className="absolute bottom-[15%] right-[8%] w-[160px] h-[160px] border border-yellow-500/[0.07] rounded-3xl rotate-45 animate-float" />
+      <div className="absolute top-[60%] right-[25%] w-[80px] h-[80px] border border-yellow-500/[0.05] rounded-xl rotate-12 animate-float-reverse" />
+      <div className="absolute top-[15%] left-[5%] w-[100px] h-[100px] border border-yellow-500/[0.04] rounded-2xl -rotate-12 animate-float" />
+      <div className="absolute bottom-[20%] left-[8%] w-[140px] h-[140px] border border-yellow-500/[0.06] rounded-3xl rotate-6 animate-float-reverse" />
 
-      {/* Subtle grid */}
-      <div className="absolute inset-0 opacity-[0.025]" style={{ backgroundImage: 'linear-gradient(rgba(59,130,246,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(59,130,246,0.3) 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
+      {/* Gold glow in background */}
+      <div className="absolute top-[20%] right-[20%] w-[400px] h-[400px] bg-yellow-500/[0.03] rounded-full blur-[150px]" />
+      <div className="absolute bottom-[10%] left-[10%] w-[300px] h-[300px] bg-yellow-500/[0.02] rounded-full blur-[120px]" />
 
-      {/* Top border glow */}
-      <div className="absolute top-0 left-0 right-0 h-px line-glow opacity-60" />
+      <div className="relative container mx-auto px-4 lg:px-8 py-32 lg:py-0">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+          {/* Left — Text */}
+          <div>
+            <div className={`transition-all duration-500 ${loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+              <span className="inline-flex items-center gap-2 text-xs font-semibold text-primary uppercase tracking-wider mb-6">
+                <span className="h-1 w-1 rounded-full bg-primary" />
+                The ultimate Discord management platform
+              </span>
+            </div>
 
-      <div className="relative container mx-auto px-4 lg:px-8 pt-32 pb-24 lg:pt-40 lg:pb-32">
-        <div className="max-w-4xl mx-auto text-center">
-          {/* Badge */}
-          <div className={`mb-8 transition-all duration-600 ${loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-blue-500/15 bg-blue-500/[0.05] glow-border">
-              <div className="h-2 w-2 rounded-full bg-blue-400 animate-glow-pulse" />
-              <span className="text-xs font-medium text-blue-300/80">Trusted by 2,000+ Discord communities</span>
+            <h1 className={`text-4xl sm:text-5xl lg:text-[3.5rem] font-bold leading-[1.15] mb-6 text-white transition-all duration-600 delay-100 ${loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}>
+              The only bot your<br />server will ever<br />need
+            </h1>
+
+            <p className={`text-base text-white/40 max-w-md leading-relaxed mb-10 transition-all duration-600 delay-200 ${loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}>
+              Powerful AI, smart security, automations, analytics, and community tools — trusted by thousands of communities.
+            </p>
+
+            <div className={`flex flex-wrap gap-3 transition-all duration-600 delay-300 ${loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}>
+              <Link href="#">
+                <Button size="lg">Invite Wembo</Button>
+              </Link>
+              <Link href="/dashboard">
+                <Button size="lg" variant="outline" className="gap-2">
+                  Open Dashboard <ArrowUpRight className="h-3.5 w-3.5" />
+                </Button>
+              </Link>
             </div>
           </div>
 
-          {/* Headline */}
-          <h1 className={`text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] mb-8 transition-all duration-700 delay-100 ${loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
-            <span className="text-white">Your community,</span>
-            <br />
-            <span className="text-gradient-glow">running smarter.</span>
-          </h1>
-
-          {/* Sub */}
-          <p className={`text-lg text-white/40 max-w-2xl mx-auto leading-relaxed mb-12 transition-all duration-700 delay-200 ${loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
-            Powerful automation, intelligent security, AI-powered knowledge, and analytics — all from one beautiful dashboard.
-          </p>
-
-          {/* CTAs */}
-          <div className={`flex flex-wrap items-center justify-center gap-4 mb-20 transition-all duration-700 delay-300 ${loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
-            <Link href="#">
-              <Button size="xl" className="gap-2.5 group">
-                Add Wembo to Discord
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-              </Button>
-            </Link>
-            <Link href="/features">
-              <Button size="lg" variant="outline" className="border-blue-500/10 hover:border-blue-500/25 hover:glow-border">
-                Explore Features
-              </Button>
-            </Link>
-          </div>
-
-          {/* Dashboard Preview */}
-          <div className={`transition-all duration-1000 delay-400 ${loaded ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-12 scale-[0.97]'}`}>
-            <div className="relative max-w-4xl mx-auto">
-              {/* Glow behind */}
-              <div className="absolute -inset-4 bg-blue-500/[0.04] rounded-3xl blur-3xl" />
-              <div className="absolute -inset-1 rounded-2xl bg-gradient-to-b from-blue-500/[0.1] via-transparent to-transparent" />
-
-              <div className="relative rounded-2xl border border-white/[0.06] bg-[hsl(222,12%,6%)] overflow-hidden glow-blue">
-                {/* Window bar */}
-                <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.05]">
-                  <div className="flex gap-2">
-                    <div className="w-3 h-3 rounded-full bg-white/[0.06]" />
-                    <div className="w-3 h-3 rounded-full bg-white/[0.06]" />
-                    <div className="w-3 h-3 rounded-full bg-white/[0.06]" />
+          {/* Right — Discord-style Embed */}
+          <div className={`transition-all duration-800 delay-400 ${loaded ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-[0.97]'}`}>
+            <div className="relative">
+              <div className="rounded-xl border border-white/[0.08] bg-[#1e1f22] overflow-hidden shadow-2xl shadow-black/40">
+                {/* Discord embed header */}
+                <div className="px-4 py-3 flex items-center gap-2 border-b border-white/[0.06]">
+                  <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center">
+                    <span className="text-xs font-bold text-primary">W</span>
                   </div>
-                  <div className="px-3 py-1 rounded-md bg-white/[0.03] border border-white/[0.04] text-[11px] text-white/20 font-mono">
-                    wembo.com/dashboard
-                  </div>
-                  <div className="w-[52px]" />
+                  <span className="text-sm font-semibold text-white/90">Wembo</span>
+                  <span className="text-[10px] bg-[#5865f2] text-white px-1.5 py-0.5 rounded text-[9px] font-medium">BOT</span>
+                  <span className="ml-auto text-[11px] text-white/20">Today at 4:20 PM</span>
                 </div>
 
-                {/* Content */}
-                <div className="p-6 lg:p-8 space-y-5">
-                  {/* Health */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs text-white/30 uppercase tracking-wider font-medium">Community Health</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/30" />
-                      <span className="text-2xl font-bold text-white">87</span>
-                      <span className="text-xs text-white/20">/100</span>
-                    </div>
-                  </div>
+                {/* Embed content */}
+                <div className="p-4">
+                  <div className="border-l-4 border-primary rounded-r-lg bg-[#2b2d31] p-4">
+                    <p className="text-sm font-semibold text-white/90 mb-3">Wembo Dashboard</p>
+                    <p className="text-[13px] text-white/50 leading-relaxed mb-4">
+                      Your community is running smoothly. Here&apos;s your daily summary:
+                    </p>
 
-                  {/* Stats grid */}
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                    <DashStat icon={Users} label="Members" value="12,482" change="+5%" />
-                    <DashStat icon={MessageSquare} label="Messages" value="84K" change="+12%" />
-                    <DashStat icon={Shield} label="Threats Blocked" value="142" change="" />
-                    <DashStat icon={TrendingUp} label="Growth" value="+8.2%" change="" />
-                  </div>
-
-                  {/* AI Insight */}
-                  <div className="flex gap-4">
-                    <div className="flex-1 rounded-xl border border-blue-500/10 bg-blue-500/[0.03] p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Bot className="h-3.5 w-3.5 text-blue-400" />
-                        <span className="text-[10px] text-blue-400/70 font-medium uppercase tracking-wider">AI Insight</span>
-                      </div>
-                      <p className="text-xs text-white/40 leading-relaxed">
-                        &ldquo;Retention dropped 11% this week. New members aren&apos;t completing onboarding.&rdquo;
-                      </p>
+                    <div className="space-y-2 mb-4">
+                      <EmbedField label="Members" value="12,482 (+47 today)" />
+                      <EmbedField label="Messages" value="3,219 today" />
+                      <EmbedField label="Security" value="2 threats blocked" />
+                      <EmbedField label="AI Queries" value="89 answered" />
                     </div>
-                    <div className="flex-1 rounded-xl border border-white/[0.05] bg-white/[0.02] p-4">
-                      <span className="text-[10px] text-white/25 uppercase tracking-wider font-medium">Noticed</span>
-                      <div className="mt-2 space-y-1.5">
-                        <div className="flex items-center gap-2"><div className="h-1.5 w-1.5 rounded-full bg-orange-400" /><span className="text-[11px] text-white/35">14 unanswered questions</span></div>
-                        <div className="flex items-center gap-2"><div className="h-1.5 w-1.5 rounded-full bg-emerald-400" /><span className="text-[11px] text-white/35">Retention up 8%</span></div>
-                        <div className="flex items-center gap-2"><div className="h-1.5 w-1.5 rounded-full bg-red-400" /><span className="text-[11px] text-white/35">2 suspicious accounts</span></div>
-                      </div>
+
+                    <div className="flex flex-wrap gap-2 mt-4">
+                      <EmbedButton label="View Dashboard" active />
+                      <EmbedButton label="Security Log" />
+                      <EmbedButton label="Analytics" />
                     </div>
                   </div>
                 </div>
@@ -130,22 +97,47 @@ export function HeroSection() {
             </div>
           </div>
         </div>
+
+        {/* Feature icons row */}
+        <div className={`mt-20 lg:mt-28 transition-all duration-700 delay-600 ${loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-6 lg:gap-8 max-w-4xl mx-auto">
+            <FeatureIcon icon={Bot} label="AI Assistant" />
+            <FeatureIcon icon={Shield} label="Smart Security" />
+            <FeatureIcon icon={Zap} label="Automations" />
+            <FeatureIcon icon={BarChart3} label="Analytics" />
+            <FeatureIcon icon={Lightbulb} label="Knowledge" />
+            <FeatureIcon icon={Users} label="Member Intel" />
+          </div>
+        </div>
       </div>
     </section>
   )
 }
 
-function DashStat({ icon: Icon, label, value, change }: { icon: React.ElementType; label: string; value: string; change: string }) {
+function EmbedField({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-white/[0.05] bg-white/[0.02] p-3">
-      <div className="flex items-center gap-1.5 mb-1">
-        <Icon className="h-3 w-3 text-white/20" />
-        <span className="text-[10px] text-white/25">{label}</span>
+    <div className="flex items-center justify-between">
+      <span className="text-xs text-white/30">{label}</span>
+      <span className="text-xs text-white/60 font-medium">{value}</span>
+    </div>
+  )
+}
+
+function EmbedButton({ label, active }: { label: string; active?: boolean }) {
+  return (
+    <div className={`px-3 py-1.5 rounded text-xs font-medium ${active ? 'bg-primary text-black' : 'bg-[#4e5058] text-white/70'}`}>
+      {label}
+    </div>
+  )
+}
+
+function FeatureIcon({ icon: Icon, label }: { icon: React.ElementType; label: string }) {
+  return (
+    <div className="flex flex-col items-center gap-2 group">
+      <div className="h-10 w-10 rounded-xl border border-white/[0.08] bg-white/[0.03] flex items-center justify-center group-hover:border-primary/30 group-hover:bg-primary/[0.05] transition-all duration-300">
+        <Icon className="h-4 w-4 text-white/40 group-hover:text-primary transition-colors" />
       </div>
-      <div className="flex items-baseline gap-1.5">
-        <span className="text-sm font-bold text-white/80">{value}</span>
-        {change && <span className="text-[10px] text-emerald-400">{change}</span>}
-      </div>
+      <span className="text-[11px] text-white/30 group-hover:text-white/60 transition-colors text-center">{label}</span>
     </div>
   )
 }
