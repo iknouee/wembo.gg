@@ -1,71 +1,93 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import Link from 'next/link'
-import { ArrowRight, Bot, Shield, Zap, BarChart3, FileText, Users, Lightbulb, Bell, Trophy, Ticket, Heart, Search } from 'lucide-react'
+import { Bot, Shield, Zap, BarChart3, Lightbulb, Users } from 'lucide-react'
 
-const features = [
-  { icon: Bot, title: 'AI Assistant', description: 'Answers questions using your server\'s approved knowledge with source citations. Configurable personality and permissions.' },
-  { icon: Shield, title: 'Smart Security', description: 'Anti-raid, phishing detection, threat scoring, impersonation detection, and automatic lockdown protection.' },
-  { icon: Zap, title: 'Automations', description: 'Visual workflow builder with triggers, conditions, and actions. No coding required.' },
-  { icon: BarChart3, title: 'Analytics', description: 'Real-time growth metrics, engagement data, channel stats, and AI-powered community insights.' },
-  { icon: Lightbulb, title: 'Knowledge Base', description: 'Turn your Discord into a searchable wiki. AI-powered answers from approved sources.' },
-  { icon: FileText, title: 'Forms & Workflows', description: 'Staff applications, ban appeals, reports — structured and reviewable in a clean dashboard.' },
-  { icon: Users, title: 'Member Intelligence', description: 'Reputation tracking, expertise search, contribution history, and member profiles.' },
-  { icon: Bell, title: 'Integrations', description: 'YouTube, Twitch, GitHub, Reddit, RSS — notifications delivered exactly where they belong.' },
-  { icon: Ticket, title: 'Tickets', description: 'Support panels, staff assignment, transcripts, internal notes, and AI-generated summaries.' },
+const featureStrip = [
+  { icon: Bot, title: 'AI Assistant', desc: 'Instant intelligent support' },
+  { icon: Shield, title: 'Smart Security', desc: 'Stop threats automatically' },
+  { icon: Zap, title: 'Automations', desc: 'Put repetitive work on autopilot' },
+  { icon: BarChart3, title: 'Analytics', desc: 'Understand your community' },
+  { icon: Lightbulb, title: 'Knowledge', desc: 'Answers from your server' },
+  { icon: Users, title: 'Member Intelligence', desc: 'Know your audience' },
 ]
 
 export function FeaturesSection() {
-  const [visible, setVisible] = useState<Set<number>>(new Set())
-  const ref = useRef<HTMLDivElement>(null)
+  const [visible, setVisible] = useState(false)
+  const [statsVisible, setStatsVisible] = useState(false)
+  const stripRef = useRef<HTMLDivElement>(null)
+  const statsRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const obs = new IntersectionObserver((entries) => {
-      entries.forEach((e) => { if (e.isIntersecting) setVisible((p) => new Set([...Array.from(p), Number(e.target.getAttribute('data-i'))])) })
-    }, { threshold: 0.1 })
-    ref.current?.querySelectorAll('[data-i]').forEach((el) => obs.observe(el))
-    return () => obs.disconnect()
+    const obs1 = new IntersectionObserver(([e]) => { if (e.isIntersecting) setVisible(true) }, { threshold: 0.2 })
+    const obs2 = new IntersectionObserver(([e]) => { if (e.isIntersecting) setStatsVisible(true) }, { threshold: 0.3 })
+    if (stripRef.current) obs1.observe(stripRef.current)
+    if (statsRef.current) obs2.observe(statsRef.current)
+    return () => { obs1.disconnect(); obs2.disconnect() }
   }, [])
 
   return (
-    <section className="py-24 lg:py-32 relative">
-      <div className="absolute inset-0 bg-[hsl(220,14%,5%)]" />
+    <section className="relative py-20 lg:py-28">
+      <div className="absolute inset-0 bg-[#070809]" />
+      {/* Top line */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#FFD400]/[0.08] to-transparent" />
 
       <div className="relative container mx-auto px-4 lg:px-8">
-        <div className="max-w-xl mb-14">
-          <span className="text-xs font-semibold text-primary uppercase tracking-wider mb-3 block">Features</span>
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-            Everything your community needs.
-          </h2>
-          <p className="text-white/35 leading-relaxed">
-            One bot, one dashboard. Powerful tools without the complexity.
-          </p>
-        </div>
+        {/* Feature Strip */}
+        <div ref={stripRef} className={`rounded-2xl border border-white/[0.06] bg-[#0c0d10] p-1 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+            {featureStrip.map((f, i) => (
+              <div
+                key={f.title}
+                className={`group relative flex flex-col items-center text-center p-5 lg:p-6 transition-all duration-300 hover:-translate-y-[2px] ${
+                  i < featureStrip.length - 1 ? 'lg:border-r border-white/[0.04]' : ''
+                } ${i < 4 ? 'border-b md:border-b lg:border-b-0 border-white/[0.04]' : ''} ${i === 2 || i === 3 ? 'md:border-b-0' : ''}`}
+              >
+                {/* Hover background */}
+                <div className="absolute inset-0 bg-[#FFD400]/[0.02] opacity-0 group-hover:opacity-100 transition-opacity rounded-xl" />
 
-        <div ref={ref} className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {features.map((f, i) => (
-            <div
-              key={f.title}
-              data-i={i}
-              className={`group p-6 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:border-primary/20 hover:bg-primary/[0.02] transition-all duration-500 ${visible.has(i) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
-              style={{ transitionDelay: `${(i % 3) * 60}ms` }}
-            >
-              <div className="h-10 w-10 rounded-lg bg-primary/[0.08] border border-primary/[0.1] flex items-center justify-center mb-4 group-hover:bg-primary/[0.15] group-hover:border-primary/20 transition-all">
-                <f.icon className="h-4 w-4 text-primary/70 group-hover:text-primary transition-colors" />
+                <div className="relative">
+                  <div className="h-10 w-10 rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center mb-3 group-hover:border-[#FFD400]/20 group-hover:bg-[#FFD400]/[0.05] transition-all">
+                    <f.icon className="h-4 w-4 text-[#8B8D93] group-hover:text-[#FFD400] transition-colors" />
+                  </div>
+                  <h3 className="text-[12px] font-semibold text-white/80 mb-0.5">{f.title}</h3>
+                  <p className="text-[11px] text-[#8B8D93]">{f.desc}</p>
+                </div>
               </div>
-              <h3 className="text-[15px] font-semibold text-white/90 mb-2">{f.title}</h3>
-              <p className="text-[13px] text-white/35 leading-relaxed">{f.description}</p>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
-        <div className="mt-12 text-center">
-          <Link href="/features" className="inline-flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors">
-            See all features <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
+        {/* Stats Section */}
+        <div ref={statsRef} className={`mt-16 lg:mt-20 transition-all duration-700 delay-200 ${statsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-10 max-w-4xl mx-auto text-center">
+            <StatItem value="2,500+" label="Communities" visible={statsVisible} delay={0} />
+            <StatItem value="1.2M+" label="Members Protected" visible={statsVisible} delay={100} />
+            <StatItem value="24/7" label="Protection" visible={statsVisible} delay={200} />
+            <StatItem value="99.99%" label="Uptime" visible={statsVisible} delay={300} />
+          </div>
         </div>
       </div>
     </section>
+  )
+}
+
+function StatItem({ value, label, visible, delay }: { value: string; label: string; visible: boolean; delay: number }) {
+  return (
+    <div
+      className={`transition-all duration-600`}
+      style={{ transitionDelay: `${delay}ms`, opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(12px)' }}
+    >
+      <p className="text-3xl lg:text-4xl font-bold text-white mb-1 tracking-tight">
+        {value.includes('+') || value.includes('%') ? (
+          <>
+            {value.replace(/[+%]/g, '')}<span className="text-[#FFD400]">{value.match(/[+%]/)?.[0]}</span>
+          </>
+        ) : value === '24/7' ? (
+          <>24<span className="text-[#FFD400]">/</span>7</>
+        ) : value}
+      </p>
+      <p className="text-[13px] text-[#8B8D93]">{label}</p>
+    </div>
   )
 }
