@@ -1,13 +1,21 @@
+import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
 import { Sidebar, MobileSidebar } from '@/components/dashboard/sidebar'
+
+export const dynamic = 'force-dynamic'
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  // Auth is handled by middleware.ts — if we get here, the user has a valid session cookie.
-  // No client-side auth check needed (it was causing redirect loops because
-  // client-side fetch to /api/auth/me doesn't reliably send the cookie).
+  // Server-side auth check — read cookie directly
+  const cookieStore = cookies()
+  const sessionCookie = cookieStore.get('wembo_session')
+
+  if (!sessionCookie?.value) {
+    redirect('/login')
+  }
 
   return (
     <div className="min-h-screen bg-[#050505]">
