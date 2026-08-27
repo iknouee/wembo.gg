@@ -6,7 +6,7 @@ import { useAuth } from '@/components/dashboard/dashboard-shell'
 
 export default function AntiRaidPage() {
   const { guilds } = useAuth()
-  const guildId = guilds[0]?.id || null
+  const guildId = guilds.find(g => g.owner)?.id || guilds[0]?.id || null
 
   const [enabled, setEnabled] = useState(false)
   const [config, setConfig] = useState({ join_threshold: 10, time_window_seconds: 10, action: 'kick', min_account_age_hours: 24, notify_channel: true })

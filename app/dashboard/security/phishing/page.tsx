@@ -6,7 +6,7 @@ import { useAuth } from '@/components/dashboard/dashboard-shell'
 
 export default function PhishingPage() {
   const { guilds } = useAuth()
-  const guildId = guilds[0]?.id || null
+  const guildId = guilds.find(g => g.owner)?.id || guilds[0]?.id || null
 
   const [enabled, setEnabled] = useState(false)
   const [config, setConfig] = useState({ auto_delete: true, quarantine_user: false, warn_in_channel: true, scan_embeds: true, custom_blocklist: [] as string[] })

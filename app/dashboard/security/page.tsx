@@ -14,7 +14,7 @@ interface Stats {
 
 export default function SecurityOverview() {
   const { guilds } = useAuth()
-  const guildId = guilds.length > 0 ? guilds[0].id : null
+  const guildId = guilds.find(g => g.owner)?.id || guilds[0]?.id || null
 
   const [events, setEvents] = useState<SecurityEvent[]>([])
   const [stats, setStats] = useState<Stats | null>(null)
