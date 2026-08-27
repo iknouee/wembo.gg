@@ -133,7 +133,7 @@ export default async function DashboardOverview() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {guilds.map((guild) => (
-              <Link
+              <a
                 key={guild.id}
                 href={`/dashboard/${guild.id}`}
                 className="group relative flex items-center gap-4 p-5 rounded-xl bg-[#0a0b0d] border border-white/[0.04] shadow-lg shadow-black/20 hover:bg-[#0f1012] hover:border-[#FFD600]/10 hover:shadow-[#FFD600]/[0.02] transition-all duration-300"
@@ -175,7 +175,7 @@ export default async function DashboardOverview() {
                 </div>
 
                 <ArrowRight className="h-4 w-4 text-white/10 group-hover:text-[#FFD600]/60 group-hover:translate-x-0.5 transition-all" />
-              </Link>
+              </a>
             ))}
 
             <Link
