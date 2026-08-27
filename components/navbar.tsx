@@ -16,11 +16,11 @@ interface User {
   global_name: string | null
 }
 
-export function Navbar() {
+export function Navbar({ initialUser = null }: { initialUser?: User | null }) {
   const [visible, setVisible] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<User | null>(initialUser)
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const pathname = usePathname()
