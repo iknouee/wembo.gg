@@ -16,11 +16,11 @@ const recentMessages: Map<string, string[]> = new Map()
 // Cleanup old entries
 setInterval(() => {
   const now = Date.now()
-  for (const [key, timestamps] of messageHistory.entries()) {
+  messageHistory.forEach((timestamps, key) => {
     const filtered = timestamps.filter(t => now - t < SPAM_WINDOW_MS * 5)
     if (filtered.length === 0) messageHistory.delete(key)
     else messageHistory.set(key, filtered)
-  }
+  })
   recentMessages.clear()
 }, CLEANUP_INTERVAL)
 

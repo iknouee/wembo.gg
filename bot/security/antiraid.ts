@@ -12,14 +12,14 @@ const CLEANUP_INTERVAL = 30000  // clean old entries every 30s
 // Periodic cleanup
 setInterval(() => {
   const now = Date.now()
-  for (const [guildId, timestamps] of recentJoins.entries()) {
+  recentJoins.forEach((timestamps, guildId) => {
     const filtered = timestamps.filter(t => now - t < RAID_WINDOW_MS * 3)
     if (filtered.length === 0) {
       recentJoins.delete(guildId)
     } else {
       recentJoins.set(guildId, filtered)
     }
-  }
+  })
 }, CLEANUP_INTERVAL)
 
 /**
