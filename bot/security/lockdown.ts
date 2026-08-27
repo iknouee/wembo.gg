@@ -22,7 +22,8 @@ export function initLockdownMonitor(client: Client) {
 
       if (!data) return
 
-      for (const row of data) {
+      for (let i = 0; i < data.length; i++) {
+        const row = data[i]
         const previousState = lockdownState.get(row.guild_id) ?? false
         const currentState = row.lockdown_active ?? false
 
@@ -63,7 +64,7 @@ async function activateLockdown(guild: Guild) {
     ch => ch.type === ChannelType.GuildText || ch.type === ChannelType.GuildVoice
   )
 
-  for (const [, channel] of channels) {
+  channels.forEach(async (channel) => {
     try {
       if ('permissionOverwrites' in channel) {
         await channel.permissionOverwrites.edit(everyone, {
@@ -76,7 +77,7 @@ async function activateLockdown(guild: Guild) {
     } catch {
       // Skip channels we can't modify
     }
-  }
+  })
 
   await logSecurityEvent({
     guildId: guild.id,
@@ -101,7 +102,7 @@ async function deactivateLockdown(guild: Guild) {
     ch => ch.type === ChannelType.GuildText || ch.type === ChannelType.GuildVoice
   )
 
-  for (const [, channel] of channels) {
+  channels.forEach(async (channel) => {
     try {
       if ('permissionOverwrites' in channel) {
         await channel.permissionOverwrites.edit(everyone, {
@@ -114,7 +115,7 @@ async function deactivateLockdown(guild: Guild) {
     } catch {
       // Skip channels we can't modify
     }
-  }
+  })
 
   await logSecurityEvent({
     guildId: guild.id,
