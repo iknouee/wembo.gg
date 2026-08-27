@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { ScrollText, Loader2, Hash, Send, CheckCircle2, Shield, Zap, Ban, Link2, UserX, Lock, RefreshCw } from 'lucide-react'
+import { ScrollText, Loader2, Hash, Send, CheckCircle2, Zap, Ban, Link2, UserX, Lock, RefreshCw } from 'lucide-react'
 import { useAuth } from '@/components/dashboard/dashboard-shell'
 import { PageHeader, SettingCard, SaveBar, useToast } from '@/components/dashboard/ui'
 
@@ -171,15 +171,27 @@ export default function LogsPage() {
                 ))}
               </div>
 
-              {/* Refresh Channels Button */}
-              <button
-                onClick={refreshChannels}
-                disabled={refreshing}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06] text-caption font-medium text-white/40 hover:text-white/70 hover:border-white/[0.1] transition-all disabled:opacity-50"
-              >
-                <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} />
-                {refreshing ? 'Refreshing...' : 'Refresh Channels'}
-              </button>
+              {/* Action Buttons — side by side */}
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={refreshChannels}
+                  disabled={refreshing}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06] text-caption font-medium text-white/40 hover:text-white/70 hover:border-white/[0.1] transition-all disabled:opacity-50"
+                >
+                  <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+                  {refreshing ? 'Refreshing...' : 'Refresh Channels'}
+                </button>
+                {logChannelId && (
+                  <button
+                    onClick={sendTest}
+                    disabled={testSending}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06] text-caption font-medium text-white/40 hover:text-white/70 hover:border-white/[0.1] transition-all disabled:opacity-50"
+                  >
+                    {testSending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+                    {testSending ? 'Sending...' : 'Send Test Log Message'}
+                  </button>
+                )}
+              </div>
             </>
           ) : (
             <div className="space-y-3">
@@ -192,109 +204,31 @@ export default function LogsPage() {
                 placeholder="Channel ID (e.g. 1234567890123456)"
                 className="dash-input font-mono"
               />
-              {/* Refresh to try fetching channels again */}
-              <button
-                onClick={refreshChannels}
-                disabled={refreshing}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06] text-caption font-medium text-white/40 hover:text-white/70 hover:border-white/[0.1] transition-all disabled:opacity-50"
-              >
-                <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} />
-                {refreshing ? 'Refreshing...' : 'Refresh Channels'}
-              </button>
+              {/* Action Buttons — side by side */}
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={refreshChannels}
+                  disabled={refreshing}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06] text-caption font-medium text-white/40 hover:text-white/70 hover:border-white/[0.1] transition-all disabled:opacity-50"
+                >
+                  <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+                  {refreshing ? 'Refreshing...' : 'Refresh Channels'}
+                </button>
+                {logChannelId && (
+                  <button
+                    onClick={sendTest}
+                    disabled={testSending}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06] text-caption font-medium text-white/40 hover:text-white/70 hover:border-white/[0.1] transition-all disabled:opacity-50"
+                  >
+                    {testSending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+                    {testSending ? 'Sending...' : 'Send Test Log Message'}
+                  </button>
+                )}
+              </div>
             </div>
-          )}
-
-          {/* Test button */}
-          {logChannelId && (
-            <button
-              onClick={sendTest}
-              disabled={testSending}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06] text-caption font-medium text-white/40 hover:text-white/70 hover:border-white/[0.1] transition-all disabled:opacity-50"
-            >
-              {testSending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
-              Send Test Log Message
-            </button>
           )}
         </div>
       </SettingCard>
-
-      {/* Embed Previews */}
-      {logChannelId && (
-        <div className="dash-card overflow-hidden">
-          <div className="px-6 py-4 border-b border-white/[0.04]">
-            <h3 className="text-[15px] font-semibold text-white/90">Embed Previews</h3>
-            <p className="text-micro text-white/25 mt-0.5">What security alerts look like in your Discord channel</p>
-          </div>
-          <div className="p-6 space-y-4">
-
-            {/* Raid Detection */}
-            <EmbedPreview
-              color="#f87171"
-              title="🔴 Raid Detected"
-              description="Mass join attempt detected — 23 accounts joined within 10 seconds."
-              fields={[
-                { name: 'Action', value: 'All accounts kicked' },
-                { name: 'Accounts', value: '23' },
-                { name: 'Time Window', value: '10 seconds' },
-              ]}
-              timestamp="Today at 14:23"
-            />
-
-            {/* Spam Detection */}
-            <EmbedPreview
-              color="#fb923c"
-              title="🟠 Spam Detected"
-              description="User **SpamBot#4821** triggered anti-spam in #general."
-              fields={[
-                { name: 'Action', value: 'Muted (10 minutes)' },
-                { name: 'Reason', value: '8 messages in 3 seconds' },
-                { name: 'Messages Deleted', value: 'Yes' },
-              ]}
-              timestamp="Today at 12:07"
-            />
-
-            {/* Link Blocked */}
-            <EmbedPreview
-              color="#60a5fa"
-              title="🔵 Link Blocked"
-              description="Blocked link from **NewUser#9012** in #general."
-              fields={[
-                { name: 'Action', value: 'Message deleted' },
-                { name: 'Link', value: 'discord.gg/scamserver' },
-                { name: 'Rule', value: 'Invite links blocked' },
-              ]}
-              timestamp="Today at 11:42"
-            />
-
-            {/* Impersonation */}
-            <EmbedPreview
-              color="#a78bfa"
-              title="🟣 Impersonation Detected"
-              description={'User **Renamed_4903** matched protected name "panto" with 100% similarity.'}
-              fields={[
-                { name: 'Action', value: 'Name Reset' },
-                { name: 'Similarity', value: '100%' },
-                { name: 'Account Age', value: '2 days' },
-              ]}
-              timestamp="Today at 08:41"
-            />
-
-            {/* Lockdown */}
-            <EmbedPreview
-              color="#FFD600"
-              title="🔒 Server Lockdown Activated"
-              description="Emergency lockdown was activated by a server administrator."
-              fields={[
-                { name: 'Channels Affected', value: '27' },
-                { name: 'Reason', value: 'Manual activation' },
-                { name: 'Status', value: 'Active' },
-              ]}
-              timestamp="Today at 06:15"
-            />
-
-          </div>
-        </div>
-      )}
 
       {/* What Gets Logged */}
       <div className="dash-card overflow-hidden">
@@ -332,34 +266,3 @@ function LogEventRow({ icon: Icon, color, title, description }: { icon: any; col
   )
 }
 
-function EmbedPreview({ color, title, description, fields, timestamp }: {
-  color: string
-  title: string
-  description: string
-  fields: { name: string; value: string }[]
-  timestamp: string
-}) {
-  return (
-    <div className="max-w-lg rounded overflow-hidden bg-[#2b2d31]" style={{ borderLeft: `4px solid ${color}` }}>
-      <div className="p-4">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="h-5 w-5 rounded-full bg-[#FFD600] flex items-center justify-center flex-shrink-0">
-            <span className="text-[8px] font-bold text-black">W</span>
-          </div>
-          <span className="text-[12px] font-semibold text-white">Wembo Security</span>
-        </div>
-        <p className="text-[13px] font-semibold text-white mb-1">{title}</p>
-        <p className="text-[12px] text-[#dcddde] leading-relaxed">{description}</p>
-        <div className="mt-3 grid grid-cols-3 gap-2">
-          {fields.map(f => (
-            <div key={f.name}>
-              <p className="text-[10px] text-[#72767d] uppercase font-semibold">{f.name}</p>
-              <p className="text-[12px] text-[#dcddde]">{f.value}</p>
-            </div>
-          ))}
-        </div>
-        <p className="text-[10px] text-[#72767d] mt-3">{timestamp}</p>
-      </div>
-    </div>
-  )
-}
