@@ -35,8 +35,9 @@ export function Navbar({ initialUser = null }: { initialUser?: User | null }) {
 
   useEffect(() => { setMobileOpen(false); setDropdownOpen(false) }, [pathname])
 
-  // Check if logged in
+  // Check if logged in — only fetch if we don't already have a user from server
   useEffect(() => {
+    if (initialUser) return // Already have user from server, no need to fetch
     fetch(`/api/auth/me?_t=${Date.now()}`, {
       method: 'GET',
       credentials: 'include',
@@ -44,9 +45,9 @@ export function Navbar({ initialUser = null }: { initialUser?: User | null }) {
       headers: { 'Cache-Control': 'no-cache' },
     })
       .then((r) => r.json())
-      .then((data) => { if (data?.user) setUser(data.user); else setUser(null) })
-      .catch(() => setUser(null))
-  }, [pathname])
+      .then((data) => { if (data?.user) setUser(data.user) })
+      .catch(() => {})
+  }, [pathname, initialUser])
 
   // Close dropdown when clicking outside
   useEffect(() => {
