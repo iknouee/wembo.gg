@@ -64,16 +64,23 @@ async function fetchGuilds(accessToken: string): Promise<Guild[]> {
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: { server?: string }
+  searchParams: { server?: string; name?: string; icon?: string; owner?: string }
 }) {
   const { user, accessToken } = getSessionData()
   const guilds = accessToken ? await fetchGuilds(accessToken) : []
   const selectedServerId = searchParams.server
-  const selectedGuild = selectedServerId ? guilds.find(g => g.id === selectedServerId) : null
 
-  // Server view
+  // Server view — use data from URL params (passed from overview)
   if (selectedServerId) {
-    return <ServerView guild={selectedGuild} />
+    const guildFromList = guilds.find(g => g.id === selectedServerId)
+    const guild: Guild | null = guildFromList || (searchParams.name ? {
+      id: selectedServerId,
+      name: decodeURIComponent(searchParams.name),
+      icon: searchParams.icon ? decodeURIComponent(searchParams.icon) : null,
+      owner: searchParams.owner === '1',
+      permissions: '0',
+    } : null)
+    return <ServerView guild={guild} />
   }
 
   // Overview
@@ -141,7 +148,7 @@ export default async function DashboardPage({
             {guilds.map((guild) => (
               <a
                 key={guild.id}
-                href={`/dashboard?server=${guild.id}`}
+                href={`/dashboard?server=${guild.id}&name=${encodeURIComponent(guild.name)}&icon=${encodeURIComponent(guild.icon || '')}&owner=${guild.owner ? '1' : '0'}`}
                 className="group relative flex items-center gap-4 p-5 rounded-xl bg-[#0a0b0d] border border-white/[0.04] shadow-lg shadow-black/20 hover:bg-[#0f1012] hover:border-[#FFD600]/10 hover:shadow-[#FFD600]/[0.02] transition-all duration-300"
               >
                 {guild.owner && (
