@@ -16,6 +16,10 @@ export default function AntiSpamPage() {
     duplicate_limit: 3,
     action: 'delete',
     mute_duration_minutes: 10,
+    mentions_limit: 5,
+    emoji_spam_limit: 10,
+    caps_percentage: 80,
+    delete_on_mute: true,
   })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -80,15 +84,33 @@ export default function AntiSpamPage() {
           </SettingRow>
         </SettingsSection>
 
+        <SettingsSection title="Advanced Detection">
+          <SettingRow label="Mention Spam" desc="Max mentions in a single message">
+            <NumberInput value={config.mentions_limit} onChange={v => setConfig({ ...config, mentions_limit: v })} min={3} max={30} />
+          </SettingRow>
+          <SettingRow label="Emoji Spam" desc="Max emojis in a single message">
+            <NumberInput value={config.emoji_spam_limit} onChange={v => setConfig({ ...config, emoji_spam_limit: v })} min={5} max={50} />
+          </SettingRow>
+          <SettingRow label="Caps Threshold" desc="Percentage of CAPS to flag as shouting" last>
+            <div className="flex items-center gap-2">
+              <NumberInput value={config.caps_percentage} onChange={v => setConfig({ ...config, caps_percentage: v })} min={50} max={100} />
+              <span className="text-[11px] text-white/15">%</span>
+            </div>
+          </SettingRow>
+        </SettingsSection>
+
         <SettingsSection title="Response">
           <SettingRow label="Action" desc="What happens when spam is detected">
             <ActionSelect value={config.action} onChange={v => setConfig({ ...config, action: v })} options={[{ value: 'delete', label: 'Delete' }, { value: 'mute', label: 'Mute' }, { value: 'ban', label: 'Ban' }]} />
           </SettingRow>
-          <SettingRow label="Mute Duration" desc="Minutes to mute (if action is Mute)" last>
+          <SettingRow label="Mute Duration" desc="Minutes to mute (if action is Mute)">
             <div className="flex items-center gap-2">
               <NumberInput value={config.mute_duration_minutes} onChange={v => setConfig({ ...config, mute_duration_minutes: v })} min={1} max={1440} />
               <span className="text-[11px] text-white/15">min</span>
             </div>
+          </SettingRow>
+          <SettingRow label="Delete on Mute" desc="Also delete spam messages when muting" last>
+            <ToggleSwitch value={config.delete_on_mute} onChange={v => setConfig({ ...config, delete_on_mute: v })} />
           </SettingRow>
         </SettingsSection>
       </div>
@@ -154,4 +176,9 @@ function ActionSelect({ value, onChange, options }: { value: string; onChange: (
       ))}
     </div>
   )
+}
+
+
+function ToggleSwitch({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {
+  return <button onClick={() => onChange(!value)} className={`relative h-6 w-11 rounded-full transition-all duration-200 ${value ? 'bg-[#FFD600]/25 ring-1 ring-[#FFD600]/20' : 'bg-white/[0.04] ring-1 ring-white/[0.06]'}`}><span className={`absolute top-1 h-4 w-4 rounded-full transition-all duration-200 ${value ? 'left-6 bg-[#FFD600]' : 'left-1 bg-white/30'}`} /></button>
 }
