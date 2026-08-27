@@ -1,8 +1,9 @@
-import { cookies } from 'next/headers'
-import Link from 'next/link'
-import { ArrowLeft, Shield, Crown, Globe } from 'lucide-react'
+'use client'
 
-export const dynamic = 'force-dynamic'
+import { useEffect, useState } from 'react'
+import { useParams } from 'next/navigation'
+import Link from 'next/link'
+import { ArrowLeft, Shield, Crown, Globe, Loader2 } from 'lucide-react'
 
 interface GuildInfo {
   id: string
@@ -11,64 +12,47 @@ interface GuildInfo {
   owner: boolean
 }
 
-function getAccessToken(): { token: string | null; error: string | null } {
-  try {
-    const cookieStore = cookies()
-    const cookie = cookieStore.get('wembo_session')
-    if (!cookie?.value) return { token: null, error: 'no cookie' }
+export default function ServerDashboard() {
+  const params = useParams()
+  const serverId = params.serverId as string
+  const [guild, setGuild] = useState<GuildInfo | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [debug, setDebug] = useState('')
 
-    const secret = process.env.AUTH_SECRET || 'fallback-secret-change-me'
+  useEffect(() => {
+    // Fetch guilds from our API route which reads the cookie server-side
+    fetch('/api/auth/guilds')
+      .then((r) => r.json())
+      .then((data) => {
+        const guilds: GuildInfo[] = data.guilds || []
+        const found = guilds.find((g) => g.id === serverId) || null
+        setGuild(found)
+        if (!found) {
+          setDebug(`Guilds returned: ${guilds.length}. IDs: ${guilds.map(g => g.id).join(', ')}`)
+        }
+        setLoading(false)
+      })
+      .catch((err) => {
+        setDebug(`Fetch error: ${err.message}`)
+        setLoading(false)
+      })
+  }, [serverId])
 
-    // Decode: convert base64url chars to standard base64, then decode
-    const cookieValue = cookie.value.replace(/-/g, '+').replace(/_/g, '/')
-    const raw = Buffer.from(cookieValue, 'base64').toString('binary')
-
-    // Decrypt with XOR cipher
-    let decrypted = ''
-    for (let i = 0; i < raw.length; i++) {
-      decrypted += String.fromCharCode(
-        raw.charCodeAt(i) ^ secret.charCodeAt(i % secret.length)
-      )
-    }
-
-    const session = JSON.parse(decrypted)
-    return { token: session.accessToken || null, error: session.accessToken ? null : 'no accessToken in session' }
-  } catch (e: any) {
-    return { token: null, error: e?.message || 'unknown error' }
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <Loader2 className="h-6 w-6 text-[#FFD600] animate-spin" />
+      </div>
+    )
   }
-}
-
-async function fetchGuilds(accessToken: string): Promise<GuildInfo[]> {
-  try {
-    const res = await fetch('https://discord.com/api/v10/users/@me/guilds', {
-      headers: { Authorization: `Bearer ${accessToken}` },
-      cache: 'no-store',
-    })
-
-    if (!res.ok) return []
-    return res.json()
-  } catch {
-    return []
-  }
-}
-
-export default async function ServerDashboard({
-  params,
-}: {
-  params: { serverId: string }
-}) {
-  const { token: accessToken, error: tokenError } = getAccessToken()
-  const guilds = accessToken ? await fetchGuilds(accessToken) : []
-  const guild = guilds.find((g) => g.id === params.serverId) || null
 
   if (!guild) {
-    // Show debug info to help diagnose
     return (
       <div className="p-6 lg:p-8 space-y-6">
-        <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm text-[#9A9CA3] hover:text-white transition-colors">
+        <a href="/dashboard" className="inline-flex items-center gap-2 text-sm text-[#9A9CA3] hover:text-white transition-colors">
           <ArrowLeft className="h-4 w-4" />
           Back to servers
-        </Link>
+        </a>
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <div className="h-16 w-16 rounded-2xl bg-[#0d0e11] border border-white/[0.04] flex items-center justify-center mb-5">
             <Globe className="h-7 w-7 text-white/15" />
@@ -77,14 +61,9 @@ export default async function ServerDashboard({
           <p className="text-[#9A9CA3] text-sm max-w-sm">
             This server doesn&apos;t exist or you don&apos;t have permission to manage it.
           </p>
-          <div className="mt-6 p-4 rounded-lg bg-[#0a0b0d] border border-white/[0.04] text-left max-w-md w-full">
-            <p className="text-[10px] text-white/20 font-mono">Debug info:</p>
-            <p className="text-[10px] text-white/20 font-mono mt-1">Looking for: {params.serverId}</p>
-            <p className="text-[10px] text-white/20 font-mono">Has token: {accessToken ? 'yes' : 'no'}</p>
-            <p className="text-[10px] text-white/20 font-mono">Token error: {tokenError || 'none'}</p>
-            <p className="text-[10px] text-white/20 font-mono">Guilds found: {guilds.length}</p>
-            <p className="text-[10px] text-white/20 font-mono">Guild IDs: {guilds.slice(0, 5).map(g => g.id).join(', ')}</p>
-          </div>
+          {debug && (
+            <p className="text-[10px] text-white/20 font-mono mt-4">{debug}</p>
+          )}
         </div>
       </div>
     )
