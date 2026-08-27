@@ -6,8 +6,6 @@ export default function MarketingLayout({
 }: {
   children: React.ReactNode
 }) {
-  // Temporarily removed cookies() reading to test if it was
-  // clearing the wembo_session cookie on dashboard routes
   return (
     <div className="relative min-h-screen">
       <Navbar initialUser={null} />

@@ -35,17 +35,20 @@ export function Navbar({ initialUser = null }: { initialUser?: User | null }) {
 
   useEffect(() => { setMobileOpen(false); setDropdownOpen(false) }, [pathname])
 
-  // Check if logged in — only fetch if we don't already have a user from server
+  // Check if logged in — read token from cookie and fetch user from Discord
   useEffect(() => {
-    if (initialUser) return // Already have user from server, no need to fetch
-    fetch(`/api/auth/me?_t=${Date.now()}`, {
-      method: 'GET',
-      credentials: 'include',
-      cache: 'no-store',
-      headers: { 'Cache-Control': 'no-cache' },
+    if (initialUser) return
+    const match = document.cookie.match(/(?:^|; )wembo_token=([^;]*)/)
+    const token = match ? match[1] : null
+    if (!token) return
+
+    fetch('https://discord.com/api/v10/users/@me', {
+      headers: { Authorization: `Bearer ${token}` },
     })
-      .then((r) => r.json())
-      .then((data) => { if (data?.user) setUser(data.user) })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data) setUser({ id: data.id, username: data.username, avatar: data.avatar, global_name: data.global_name })
+      })
       .catch(() => {})
   }, [pathname, initialUser])
 
