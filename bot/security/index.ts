@@ -5,6 +5,7 @@ import { checkAntiSpam } from './antispam'
 import { checkPhishing } from './phishing'
 import { checkImpersonation } from './impersonation'
 import { initLockdownMonitor, isInLockdown } from './lockdown'
+import { initLogger, sendSecurityLog } from './logger'
 
 // Cache module settings to avoid spamming DB
 const moduleCache: Map<string, { data: any; expires: number }> = new Map()
@@ -24,6 +25,9 @@ export function initSecurity(client: Client) {
 
   // Start lockdown monitor (polls DB every 10s)
   initLockdownMonitor(client)
+
+  // Initialize security logger
+  initLogger(client)
 
   // ─── Member Join ─────────────────────────────────────────────────────
   client.on(Events.GuildMemberAdd, async (member) => {
@@ -191,6 +195,28 @@ export async function logSecurityEvent(params: {
     if (params.eventType === 'raid') {
       await supabase.rpc('increment_raid_count', { p_guild_id: params.guildId })
     }
+
+    // Send to log channel
+    const fields: { name: string; value: string; inline?: boolean }[] = []
+    if (params.userTag) fields.push({ name: 'User', value: params.userTag })
+    if (params.actionTaken) fields.push({ name: 'Action', value: params.actionTaken.replace(/_/g, ' ') })
+
+    const titles: Record<string, string> = {
+      raid: 'Raid Detected',
+      spam: 'Spam Detected',
+      phishing: 'Link Blocked',
+      impersonation: 'Impersonation Detected',
+      lockdown: 'Lockdown',
+      suspicious_join: 'Suspicious Activity',
+    }
+
+    await sendSecurityLog({
+      guildId: params.guildId,
+      title: titles[params.eventType] || 'Security Alert',
+      description: params.description,
+      severity: params.severity,
+      fields: fields.length > 0 ? fields : undefined,
+    })
   } catch (err) {
     console.error('Failed to log security event:', err)
   }

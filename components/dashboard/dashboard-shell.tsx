@@ -3,7 +3,7 @@
 import { useState, useEffect, createContext, useContext } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, LogOut, Menu, X, Loader2, Shield, ChevronDown, Ban, Link2, UserX, Zap } from 'lucide-react'
+import { Home, LogOut, Menu, X, Loader2, Shield, ChevronDown, Ban, Link2, UserX, Zap, ScrollText } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 // ─── Auth Context ────────────────────────────────────────────────────────────
@@ -29,6 +29,7 @@ const securitySubNav = [
   { title: 'Anti-Spam', href: '/dashboard/security/antispam', icon: Ban },
   { title: 'Link Blocker', href: '/dashboard/security/phishing', icon: Link2 },
   { title: 'Impersonation', href: '/dashboard/security/impersonation', icon: UserX },
+  { title: 'Logs', href: '/dashboard/security/logs', icon: ScrollText },
 ]
 
 // ─── Shell ───────────────────────────────────────────────────────────────────

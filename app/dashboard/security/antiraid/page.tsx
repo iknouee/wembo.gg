@@ -74,9 +74,6 @@ export default function AntiRaidPage() {
           <Row label="Action" desc="What to do with raiding accounts">
             <AS value={config.action} onChange={v => setConfig({ ...config, action: v })} options={[{ value: 'kick', label: 'Kick' }, { value: 'ban', label: 'Ban' }, { value: 'lockdown', label: 'Lockdown' }]} />
           </Row>
-          <Row label="Notify Log Channel" desc="Post an alert when a raid is detected">
-            <TG value={config.notify_channel} onChange={v => setConfig({ ...config, notify_channel: v })} />
-          </Row>
           <Row label="Auto-Lockdown" desc="Automatically lock the server at a higher threshold">
             <TG value={config.auto_lockdown_enabled} onChange={v => setConfig({ ...config, auto_lockdown_enabled: v })} />
           </Row>
