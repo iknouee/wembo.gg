@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { Shield, HelpCircle, BookOpen, FileText, MessageSquare, Bot, Database } from 'lucide-react'
+import { WemboLogo } from '@/components/wembo-logo'
 
 export function KnowledgeSection() {
   const [visible, setVisible] = useState(false)
@@ -100,8 +101,8 @@ export function KnowledgeSection() {
               {/* Typing indicator */}
               {visible && !showReply && (
                 <div className="flex gap-3 items-center">
-                  <div className="h-9 w-9 rounded-full bg-[#FFD600]/10 flex-shrink-0 flex items-center justify-center">
-                    <Bot className="h-4 w-4 text-[#FFD600]" />
+                  <div className="h-9 w-9 rounded-full bg-[#FFD600] flex-shrink-0 flex items-center justify-center">
+                    <WemboLogo size={22} bare markColor="#1a1a1a" />
                   </div>
                   <div className="flex gap-1">
                     <div className="h-2 w-2 rounded-full bg-[#FFD600]/40 animate-bounce" />
@@ -114,8 +115,8 @@ export function KnowledgeSection() {
               {/* Bot reply */}
               {showReply && (
                 <div className="flex gap-3 animate-fade-up">
-                  <div className="h-9 w-9 rounded-full bg-[#FFD600]/10 flex-shrink-0 flex items-center justify-center">
-                    <Bot className="h-4 w-4 text-[#FFD600]" />
+                  <div className="h-9 w-9 rounded-full bg-[#FFD600] flex-shrink-0 flex items-center justify-center">
+                    <WemboLogo size={22} bare markColor="#1a1a1a" />
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">

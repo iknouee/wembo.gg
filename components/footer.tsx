@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { siteConfig } from '@/config/site'
+import { WemboLogo } from '@/components/wembo-logo'
 
 export function Footer() {
   return (
@@ -9,9 +10,7 @@ export function Footer() {
           {/* Logo + Tagline — col-span-2 */}
           <div className="col-span-2">
             <Link href="/" className="flex items-center gap-2.5 mb-4">
-              <div className="h-7 w-7 rounded-md bg-[#FFD600] flex items-center justify-center shadow-sm shadow-[#FFD600]/15">
-                <span className="text-black font-bold text-[11px]">W</span>
-              </div>
+              <WemboLogo size={28} />
               <span className="font-bold text-[13px] text-white/50 tracking-[0.02em]">WEMBO</span>
             </Link>
             <p className="text-[12px] text-white/20 max-w-[260px] leading-relaxed">

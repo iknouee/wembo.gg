@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
 import { ArrowRight, Users, MessageSquare, Shield, Bot, TrendingUp, Zap, Check, BarChart3 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { WemboLogo } from '@/components/wembo-logo'
 
 export function HeroSection() {
   const [loaded, setLoaded] = useState(false)
@@ -128,8 +129,8 @@ export function HeroSection() {
             <div className="relative rounded-xl border border-white/[0.07] bg-[#0a0b0d] shadow-2xl shadow-black/50 overflow-hidden">
               {/* Header */}
               <div className="flex items-center gap-3 px-5 py-3 border-b border-white/[0.05] bg-[#080909]">
-                <div className="h-8 w-8 rounded-full bg-[#FFD600]/10 flex items-center justify-center">
-                  <span className="text-[10px] font-black text-[#FFD600]">W</span>
+                <div className="h-8 w-8 rounded-full bg-[#FFD600] flex items-center justify-center">
+                  <WemboLogo size={20} bare markColor="#1a1a1a" />
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2">

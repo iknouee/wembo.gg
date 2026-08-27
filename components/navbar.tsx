@@ -7,6 +7,7 @@ import { Menu, X, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { siteConfig } from '@/config/site'
 import { cn } from '@/lib/utils'
+import { WemboLogo } from '@/components/wembo-logo'
 
 export function Navbar() {
   const [visible, setVisible] = useState(false)
@@ -35,9 +36,7 @@ export function Navbar() {
           <nav className={cn('flex items-center justify-between px-5 transition-all duration-300', scrolled ? 'h-12' : 'h-14')}>
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
-              <div className="h-7 w-7 rounded-md bg-[#FFD600] flex items-center justify-center shadow-md shadow-[#FFD600]/20 group-hover:shadow-[#FFD600]/30 transition-shadow">
-                <span className="text-black font-black text-[11px]">W</span>
-              </div>
+              <WemboLogo size={28} className="group-hover:shadow-[#FFD600]/30 transition-shadow" />
               <span className="font-bold text-[14px] text-white tracking-[0.04em]">WEMBO</span>
             </Link>
 
