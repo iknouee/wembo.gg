@@ -111,9 +111,9 @@ async function checkNukeAction(
 
   // Clean old entries periodically
   if (Math.random() < 0.1) {
-    for (const [k, v] of actionTracker.entries()) {
+    actionTracker.forEach((v, k) => {
       if (now - v.firstAction > timeWindow * 2) actionTracker.delete(k)
-    }
+    })
   }
 }
 
