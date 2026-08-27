@@ -3,22 +3,18 @@ import { NextRequest, NextResponse } from 'next/server'
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
-  const cookie = request.cookies.get('wembo_session')
-
-  if (!cookie?.value) {
-    return NextResponse.json({ guilds: [] }, { status: 401 })
-  }
-
   try {
+    const cookie = request.cookies.get('wembo_session')
+
+    if (!cookie?.value) {
+      return NextResponse.json({ guilds: [] }, { status: 401 })
+    }
+
     const secret = process.env.AUTH_SECRET || 'fallback-secret-change-me'
 
-    // Try base64url first, fall back to standard base64
-    let raw: string
-    try {
-      raw = Buffer.from(cookie.value, 'base64url').toString('binary')
-    } catch {
-      raw = Buffer.from(cookie.value, 'base64').toString('binary')
-    }
+    // Decode — handle both base64url and standard base64
+    const cookieValue = cookie.value.replace(/-/g, '+').replace(/_/g, '/')
+    const raw = atob(cookieValue)
 
     // Decrypt with XOR cipher
     let decrypted = ''
