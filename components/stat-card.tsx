@@ -24,36 +24,32 @@ export function StatCard({
 }: StatCardProps) {
   return (
     <div className={cn(
-      'relative rounded-xl border border-border/60 bg-card p-4 transition-colors hover:border-border',
+      'rounded-xl border border-white/[0.06] bg-card/50 p-5 hover:border-primary/15 hover:bg-primary/[0.02] transition-all duration-300 group',
       className
     )}>
-      <div className="flex items-center justify-between mb-3">
-        <p className="text-[12px] font-medium text-muted-foreground uppercase tracking-wide">{title}</p>
+      <div className="flex items-start justify-between">
+        <div className="space-y-1.5">
+          <p className="text-sm text-muted-foreground/50">{title}</p>
+          <p className="text-2xl font-bold tracking-tight">{value}</p>
+          {description && (
+            <p className="text-xs text-muted-foreground/40">{description}</p>
+          )}
+        </div>
         {Icon && (
-          <div className="h-8 w-8 rounded-lg bg-primary/8 flex items-center justify-center">
+          <div className="rounded-lg bg-primary/[0.06] p-2.5 group-hover:bg-primary/[0.12] transition-colors">
             <Icon className="h-4 w-4 text-primary" />
           </div>
         )}
       </div>
-      <p className="text-2xl font-semibold tracking-tight">{value}</p>
-      {(trend || description) && (
-        <div className="mt-1.5 flex items-center gap-1.5">
-          {trend && (
-            <span className={cn(
-              'text-[11px] font-medium px-1.5 py-0.5 rounded-full',
-              trendUp 
-                ? 'text-emerald-500 bg-emerald-500/10' 
-                : 'text-red-500 bg-red-500/10'
-            )}>
-              {trend}
-            </span>
-          )}
-          {description && (
-            <span className="text-[11px] text-muted-foreground">{description}</span>
-          )}
-          {trend && !description && (
-            <span className="text-[11px] text-muted-foreground">vs last week</span>
-          )}
+      {trend && (
+        <div className="mt-3 flex items-center gap-1.5">
+          <span className={cn(
+            'text-xs font-medium px-1.5 py-0.5 rounded',
+            trendUp ? 'text-green-400 bg-green-500/10' : 'text-red-400 bg-red-500/10'
+          )}>
+            {trend}
+          </span>
+          <span className="text-xs text-muted-foreground/40">from last week</span>
         </div>
       )}
     </div>

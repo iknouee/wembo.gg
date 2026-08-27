@@ -1,22 +1,9 @@
-import { Sidebar, MobileSidebar } from '@/components/dashboard/sidebar'
-import { AuthProvider } from '@/components/dashboard/auth-provider'
+import { DashboardShell } from '@/components/dashboard/dashboard-shell'
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  return (
-    <AuthProvider>
-      <div className="min-h-screen bg-background">
-        <Sidebar />
-        <MobileSidebar />
-        <main className="lg:pl-[260px]">
-          <div className="pt-14 lg:pt-0 min-h-screen">
-            {children}
-          </div>
-        </main>
-      </div>
-    </AuthProvider>
-  )
+  return <DashboardShell>{children}</DashboardShell>
 }
