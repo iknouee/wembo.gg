@@ -1,17 +1,26 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Shield } from 'lucide-react'
+import { Shield, AlertCircle } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'Login',
   description: 'Sign in to your Wembo dashboard with Discord.',
 }
 
-export default function LoginPage() {
-  // In production, this would redirect to Discord OAuth2
-  const discordOAuthUrl = `https://discord.com/api/oauth2/authorize?client_id=${process.env.DISCORD_CLIENT_ID || 'YOUR_CLIENT_ID'}&redirect_uri=${encodeURIComponent(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000')}/api/auth/callback&response_type=code&scope=identify+guilds`
+export default function LoginPage({
+  searchParams,
+}: {
+  searchParams: { error?: string; redirect?: string }
+}) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+  const redirectUri = encodeURIComponent(`${appUrl}/api/auth/callback`)
+  const clientId = process.env.DISCORD_CLIENT_ID || 'YOUR_CLIENT_ID'
+  const scopes = encodeURIComponent('identify guilds email')
+
+  const discordOAuthUrl = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scopes}`
+
+  const error = searchParams.error
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4">
@@ -27,6 +36,20 @@ export default function LoginPage() {
               Sign in to access your Wembo dashboard
             </p>
           </div>
+
+          {/* Error message */}
+          {error && (
+            <div className="mb-6 flex items-start gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+              <AlertCircle className="h-4 w-4 text-red-400 mt-0.5 flex-shrink-0" />
+              <p className="text-xs text-red-400 leading-relaxed">
+                {error === 'access_denied'
+                  ? 'You denied access. Please try again to sign in.'
+                  : error === 'no_code'
+                  ? 'No authorization code received. Please try again.'
+                  : `Login failed: ${decodeURIComponent(error)}`}
+              </p>
+            </div>
+          )}
 
           {/* Discord Login Button */}
           <Link href={discordOAuthUrl}>

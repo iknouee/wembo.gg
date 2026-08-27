@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { dashboardNav } from '@/config/dashboard'
 import { ServerSelector } from '@/components/dashboard/server-selector'
+import { UserProfile } from '@/components/dashboard/user-profile'
 import { Menu, X } from 'lucide-react'
 
 export function Sidebar() {
@@ -50,9 +51,14 @@ export function Sidebar() {
         </ul>
       </nav>
 
-      {/* Server Selector at bottom */}
+      {/* Server Selector */}
       <div className="border-t border-border p-3">
         <ServerSelector />
+      </div>
+
+      {/* User Profile at bottom */}
+      <div className="border-t border-border p-3">
+        <UserProfile />
       </div>
     </aside>
   )
@@ -132,6 +138,9 @@ export function MobileSidebar() {
             </nav>
             <div className="border-t border-border p-3">
               <ServerSelector />
+            </div>
+            <div className="border-t border-border p-3">
+              <UserProfile />
             </div>
           </div>
         </>
