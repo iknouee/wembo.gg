@@ -9,7 +9,8 @@ export default function LoginPage() {
   const [isVisible, setIsVisible] = useState(false)
   useEffect(() => { setIsVisible(true) }, [])
 
-  const discordOAuthUrl = `https://discord.com/api/oauth2/authorize?client_id=${process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID || 'YOUR_CLIENT_ID'}&redirect_uri=${encodeURIComponent(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000')}/api/auth/callback&response_type=code&scope=identify+guilds`
+  // Use server-side auth route — no client ID exposed
+  const discordOAuthUrl = '/api/auth/login'
 
   return (
     <div className="relative min-h-[85vh] flex items-center justify-center px-4">
