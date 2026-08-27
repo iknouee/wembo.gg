@@ -74,10 +74,22 @@ export default function LogsPage() {
   const sendTest = async () => {
     if (!guildId || !logChannelId) return
     setTestSending(true)
-    // This would hit an endpoint to send a test message
-    await new Promise(r => setTimeout(r, 1000))
+    try {
+      const res = await fetch('/api/security/test-log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ channel_id: logChannelId, guild_id: guildId }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        toast('Test message sent to channel', 'success')
+      } else {
+        toast(data.error || 'Failed to send test message', 'error')
+      }
+    } catch {
+      toast('Failed to send test message', 'error')
+    }
     setTestSending(false)
-    toast('Test message sent to channel', 'success')
   }
 
   if (loading) {
@@ -174,37 +186,80 @@ export default function LogsPage() {
         </div>
       </SettingCard>
 
-      {/* Embed Preview */}
+      {/* Embed Previews */}
       {logChannelId && (
         <div className="dash-card overflow-hidden">
           <div className="px-6 py-4 border-b border-white/[0.04]">
-            <h3 className="text-[15px] font-semibold text-white/90">Embed Preview</h3>
-            <p className="text-micro text-white/25 mt-0.5">What security alerts look like in Discord</p>
+            <h3 className="text-[15px] font-semibold text-white/90">Embed Previews</h3>
+            <p className="text-micro text-white/25 mt-0.5">What security alerts look like in your Discord channel</p>
           </div>
-          <div className="p-6">
-            <div className="max-w-md rounded-lg overflow-hidden border-l-4 border-red-500 bg-[#2b2d31]">
-              <div className="p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="h-5 w-5 rounded-full bg-[#FFD600] flex items-center justify-center">
-                    <span className="text-[8px] font-bold text-black">W</span>
-                  </div>
-                  <span className="text-[12px] font-semibold text-white">Wembo Security</span>
-                </div>
-                <p className="text-[13px] font-semibold text-white mb-1">🔴 Impersonation Detected</p>
-                <p className="text-[12px] text-[#dcddde]">User <span className="bg-white/5 px-1 rounded">Renamed_4903</span> matched protected name &quot;panto&quot; with 100% similarity.</p>
-                <div className="mt-3 grid grid-cols-2 gap-2">
-                  <div>
-                    <p className="text-[10px] text-[#72767d] uppercase">Action</p>
-                    <p className="text-[12px] text-[#dcddde]">Name Reset</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-[#72767d] uppercase">Account Age</p>
-                    <p className="text-[12px] text-[#dcddde]">2 days</p>
-                  </div>
-                </div>
-                <p className="text-[10px] text-[#72767d] mt-3">Today at 08:41</p>
-              </div>
-            </div>
+          <div className="p-6 space-y-4">
+
+            {/* Raid Detection */}
+            <EmbedPreview
+              color="#f87171"
+              title="🔴 Raid Detected"
+              description="Mass join attempt detected — 23 accounts joined within 10 seconds."
+              fields={[
+                { name: 'Action', value: 'All accounts kicked' },
+                { name: 'Accounts', value: '23' },
+                { name: 'Time Window', value: '10 seconds' },
+              ]}
+              timestamp="Today at 14:23"
+            />
+
+            {/* Spam Detection */}
+            <EmbedPreview
+              color="#fb923c"
+              title="🟠 Spam Detected"
+              description="User **SpamBot#4821** triggered anti-spam in #general."
+              fields={[
+                { name: 'Action', value: 'Muted (10 minutes)' },
+                { name: 'Reason', value: '8 messages in 3 seconds' },
+                { name: 'Messages Deleted', value: 'Yes' },
+              ]}
+              timestamp="Today at 12:07"
+            />
+
+            {/* Link Blocked */}
+            <EmbedPreview
+              color="#60a5fa"
+              title="🔵 Link Blocked"
+              description="Blocked link from **NewUser#9012** in #general."
+              fields={[
+                { name: 'Action', value: 'Message deleted' },
+                { name: 'Link', value: 'discord.gg/scamserver' },
+                { name: 'Rule', value: 'Invite links blocked' },
+              ]}
+              timestamp="Today at 11:42"
+            />
+
+            {/* Impersonation */}
+            <EmbedPreview
+              color="#a78bfa"
+              title="🟣 Impersonation Detected"
+              description={'User **Renamed_4903** matched protected name "panto" with 100% similarity.'}
+              fields={[
+                { name: 'Action', value: 'Name Reset' },
+                { name: 'Similarity', value: '100%' },
+                { name: 'Account Age', value: '2 days' },
+              ]}
+              timestamp="Today at 08:41"
+            />
+
+            {/* Lockdown */}
+            <EmbedPreview
+              color="#FFD600"
+              title="🔒 Server Lockdown Activated"
+              description="Emergency lockdown was activated by a server administrator."
+              fields={[
+                { name: 'Channels Affected', value: '27' },
+                { name: 'Reason', value: 'Manual activation' },
+                { name: 'Status', value: 'Active' },
+              ]}
+              timestamp="Today at 06:15"
+            />
+
           </div>
         </div>
       )}
@@ -241,6 +296,38 @@ function LogEventRow({ icon: Icon, color, title, description }: { icon: any; col
         <p className="text-micro text-white/20">{description}</p>
       </div>
       <span className="ml-auto status-active"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />Enabled</span>
+    </div>
+  )
+}
+
+function EmbedPreview({ color, title, description, fields, timestamp }: {
+  color: string
+  title: string
+  description: string
+  fields: { name: string; value: string }[]
+  timestamp: string
+}) {
+  return (
+    <div className="max-w-lg rounded overflow-hidden bg-[#2b2d31]" style={{ borderLeft: `4px solid ${color}` }}>
+      <div className="p-4">
+        <div className="flex items-center gap-2 mb-2">
+          <div className="h-5 w-5 rounded-full bg-[#FFD600] flex items-center justify-center flex-shrink-0">
+            <span className="text-[8px] font-bold text-black">W</span>
+          </div>
+          <span className="text-[12px] font-semibold text-white">Wembo Security</span>
+        </div>
+        <p className="text-[13px] font-semibold text-white mb-1">{title}</p>
+        <p className="text-[12px] text-[#dcddde] leading-relaxed">{description}</p>
+        <div className="mt-3 grid grid-cols-3 gap-2">
+          {fields.map(f => (
+            <div key={f.name}>
+              <p className="text-[10px] text-[#72767d] uppercase font-semibold">{f.name}</p>
+              <p className="text-[12px] text-[#dcddde]">{f.value}</p>
+            </div>
+          ))}
+        </div>
+        <p className="text-[10px] text-[#72767d] mt-3">{timestamp}</p>
+      </div>
     </div>
   )
 }
