@@ -1,4 +1,4 @@
-import { Message, GuildMember } from 'discord.js'
+import { Message } from 'discord.js'
 import { logSecurityEvent, isModuleEnabled, getModuleConfig } from './index'
 
 // Track message history per user per guild
@@ -53,9 +53,26 @@ export async function checkAntiSpam(message: Message) {
   const recentCount = history.filter(t => now - t < WINDOW_MS).length
 
   if (recentCount >= MSG_LIMIT) {
-    const actionTaken = await takeAction(message, ACTION, MUTE_MINS)
+    // Always delete the spam message
+    try { await message.delete() } catch {}
 
+    // Take additional action on first trigger
     if (recentCount === MSG_LIMIT) {
+      let actionTaken = 'message_deleted'
+
+      try {
+        if (ACTION === 'mute' && message.member) {
+          await message.member.timeout(MUTE_MINS * 60 * 1000, 'Anti-spam: message spam detected')
+          actionTaken = 'muted'
+        } else if (ACTION === 'ban' && message.member?.bannable) {
+          await message.member.ban({ reason: 'Anti-spam: severe spam detected' })
+          actionTaken = 'banned'
+        }
+      } catch (e) {
+        console.error('Anti-spam action failed:', e)
+        actionTaken = 'message_deleted'
+      }
+
       await logSecurityEvent({
         guildId,
         eventType: 'spam',
@@ -78,7 +95,21 @@ export async function checkAntiSpam(message: Message) {
 
   const lastN = messages.slice(-DUP_LIMIT)
   if (lastN.length >= DUP_LIMIT && lastN.every(m => m === lastN[0]) && lastN[0].length > 5) {
-    const actionTaken = await takeAction(message, ACTION, MUTE_MINS)
+    // Always delete
+    try { await message.delete() } catch {}
+
+    let actionTaken = 'message_deleted'
+    try {
+      if (ACTION === 'mute' && message.member) {
+        await message.member.timeout(MUTE_MINS * 60 * 1000, 'Anti-spam: duplicate spam')
+        actionTaken = 'muted'
+      } else if (ACTION === 'ban' && message.member?.bannable) {
+        await message.member.ban({ reason: 'Anti-spam: duplicate spam' })
+        actionTaken = 'banned'
+      }
+    } catch {
+      actionTaken = 'message_deleted'
+    }
 
     await logSecurityEvent({
       guildId,
@@ -91,22 +122,4 @@ export async function checkAntiSpam(message: Message) {
       metadata: { duplicateCount: DUP_LIMIT, content: message.content.slice(0, 200) },
     })
   }
-}
-
-async function takeAction(message: Message, action: string, muteMins: number): Promise<string> {
-  try {
-    if (action === 'delete') {
-      await message.delete()
-      return 'message_deleted'
-    } else if (action === 'mute' && message.member) {
-      await message.delete()
-      await message.member.timeout(muteMins * 60 * 1000, 'Anti-spam: message spam detected')
-      return 'muted'
-    } else if (action === 'ban' && message.member?.bannable) {
-      await message.delete()
-      await message.member.ban({ reason: 'Anti-spam: severe spam detected' })
-      return 'banned'
-    }
-  } catch {}
-  return 'detected_no_perms'
 }

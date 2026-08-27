@@ -6,7 +6,7 @@ import { checkPhishing } from './phishing'
 
 // Cache module settings for 30 seconds to avoid spamming DB
 const moduleCache: Map<string, { data: any; expires: number }> = new Map()
-const CACHE_TTL = 30000
+const CACHE_TTL = 10000
 
 /**
  * Initialize all security monitoring on the bot client.
