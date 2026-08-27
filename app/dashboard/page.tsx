@@ -53,7 +53,7 @@ export default function DashboardOverview() {
       ) : guilds.length === 0 ? (
         /* No servers */
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <div className="h-16 w-16 rounded-2xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center mb-5">
+          <div className="h-16 w-16 rounded-2xl bg-[#0d0e11] flex items-center justify-center mb-5">
             <Server className="h-7 w-7 text-white/20" />
           </div>
           <h2 className="text-lg font-semibold text-white mb-2">No servers found</h2>
@@ -74,7 +74,7 @@ export default function DashboardOverview() {
             <Link
               key={guild.id}
               href={`/dashboard/${guild.id}`}
-              className="group flex items-center gap-4 p-5 rounded-xl border border-white/[0.06] bg-[#0a0b0d] hover:border-[#FFD600]/15 hover:bg-[#FFD600]/[0.02] transition-all duration-300"
+              className="group flex items-center gap-4 p-5 rounded-xl bg-[#0a0b0d] hover:bg-[#0f1012] transition-all duration-300"
             >
               {/* Server icon */}
               {guild.icon ? (
@@ -100,7 +100,7 @@ export default function DashboardOverview() {
           {/* Add server card */}
           <Link
             href="#"
-            className="flex items-center justify-center gap-3 p-5 rounded-xl border border-dashed border-white/[0.08] hover:border-[#FFD600]/20 hover:bg-[#FFD600]/[0.02] transition-all duration-300"
+            className="flex items-center justify-center gap-3 p-5 rounded-xl border border-dashed border-white/[0.04] hover:border-[#FFD600]/15 hover:bg-[#0a0b0d] transition-all duration-300"
           >
             <Plus className="h-5 w-5 text-white/20" />
             <span className="text-sm text-white/30">Add Wembo to a server</span>

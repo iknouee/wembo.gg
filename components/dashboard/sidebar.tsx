@@ -11,9 +11,9 @@ export function Sidebar() {
   const pathname = usePathname()
 
   return (
-    <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 border-r border-white/[0.06] bg-[#090A0C]">
+    <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 border-r border-white/[0.03] bg-[#090A0C]">
       {/* Logo */}
-      <div className="h-16 flex items-center justify-between px-5 border-b border-white/[0.06]">
+      <div className="h-16 flex items-center justify-between px-5 border-b border-white/[0.03]">
         <Link href="/dashboard" className="flex items-center gap-2">
           <div className="h-7 w-7 rounded-lg bg-[#FFD600] flex items-center justify-center">
             <span className="text-black font-bold text-[11px]">W</span>
@@ -53,7 +53,7 @@ export function Sidebar() {
       </nav>
 
       {/* Bottom — Logout */}
-      <div className="border-t border-white/[0.06] p-3">
+      <div className="border-t border-white/[0.03] p-3">
         <Link
           href="/api/auth/logout"
           className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-white/30 hover:text-white/60 hover:bg-white/[0.04] transition-all"
@@ -73,7 +73,7 @@ export function MobileSidebar() {
   return (
     <>
       {/* Mobile header */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 h-14 border-b border-white/[0.06] bg-[#090A0C] flex items-center px-4 gap-3">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 h-14 border-b border-white/[0.03] bg-[#090A0C] flex items-center px-4 gap-3">
         <button
           onClick={() => setOpen(true)}
           className="p-2 rounded-lg hover:bg-white/[0.04] transition-colors"
@@ -99,8 +99,8 @@ export function MobileSidebar() {
             className="lg:hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm"
             onClick={() => setOpen(false)}
           />
-          <div className="lg:hidden fixed inset-y-0 left-0 z-50 w-72 bg-[#090A0C] border-r border-white/[0.06] flex flex-col">
-            <div className="h-14 flex items-center justify-between px-4 border-b border-white/[0.06]">
+          <div className="lg:hidden fixed inset-y-0 left-0 z-50 w-72 bg-[#090A0C] border-r border-white/[0.03] flex flex-col">
+            <div className="h-14 flex items-center justify-between px-4 border-b border-white/[0.03]">
               <Link href="/dashboard" className="flex items-center gap-2" onClick={() => setOpen(false)}>
                 <div className="h-7 w-7 rounded-lg bg-[#FFD600] flex items-center justify-center">
                   <span className="text-black font-bold text-[11px]">W</span>
@@ -133,7 +133,7 @@ export function MobileSidebar() {
                 })}
               </ul>
             </nav>
-            <div className="border-t border-white/[0.06] p-3">
+            <div className="border-t border-white/[0.03] p-3">
               <Link href="/" className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-white/30 hover:text-white/60 hover:bg-white/[0.04]" onClick={() => setOpen(false)}>
                 <Home className="h-4 w-4" /> Back to Home
               </Link>
