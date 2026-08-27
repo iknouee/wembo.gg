@@ -37,11 +37,11 @@ export function Navbar() {
 
   // Check if logged in
   useEffect(() => {
-    fetch('/api/auth/me')
-      .then((r) => r.json())
+    fetch('/api/auth/me', { cache: 'no-store' })
+      .then((r) => { if (r.ok) return r.json(); throw new Error() })
       .then((data) => { if (data.user) setUser(data.user) })
       .catch(() => {})
-  }, [])
+  }, [pathname])
 
   // Close dropdown when clicking outside
   useEffect(() => {
