@@ -3,33 +3,66 @@ import { getSupabase } from '../lib/supabase'
 import { checkAntiRaid } from './antiraid'
 import { checkAntiSpam } from './antispam'
 import { checkPhishing } from './phishing'
+import { checkImpersonation } from './impersonation'
+import { initLockdownMonitor, isInLockdown } from './lockdown'
 
-// Cache module settings for 30 seconds to avoid spamming DB
+// Cache module settings to avoid spamming DB
 const moduleCache: Map<string, { data: any; expires: number }> = new Map()
 const CACHE_TTL = 10000
 
 /**
- * Initialize all security monitoring on the bot client.
+ * Initialize all security monitoring.
  */
 export function initSecurity(client: Client) {
   console.log('🛡️  Security module initialized')
 
-  // Initialize security settings for all guilds the bot is already in
+  // Set up defaults for all existing guilds
   client.guilds.cache.forEach(async (guild) => {
-    try {
-      await setupGuildDefaults(guild.id)
-    } catch {}
+    try { await setupGuildDefaults(guild.id) } catch {}
   })
   console.log(`📋 Checked security defaults for ${client.guilds.cache.size} guilds`)
 
+  // Start lockdown monitor (polls DB every 10s)
+  initLockdownMonitor(client)
+
+  // ─── Member Join ─────────────────────────────────────────────────────
   client.on(Events.GuildMemberAdd, async (member) => {
     try {
+      // Block joins during lockdown
+      if (isInLockdown(member.guild.id)) {
+        if (member.kickable) {
+          await member.kick('Server is in lockdown')
+          await logSecurityEvent({
+            guildId: member.guild.id,
+            eventType: 'lockdown',
+            severity: 'medium',
+            description: `Blocked join during lockdown: ${member.user.tag}`,
+            userId: member.user.id,
+            userTag: member.user.tag,
+            actionTaken: 'kicked',
+          })
+        }
+        return
+      }
+
       await checkAntiRaid(member)
+      await checkImpersonation(member)
     } catch (err) {
-      console.error('Anti-raid error:', err)
+      console.error('Member join error:', err)
     }
   })
 
+  // ─── Member Update (nickname changes) ────────────────────────────────
+  client.on(Events.GuildMemberUpdate, async (oldMember, newMember) => {
+    if (oldMember.nickname === newMember.nickname) return
+    try {
+      await checkImpersonation(newMember)
+    } catch (err) {
+      console.error('Member update error:', err)
+    }
+  })
+
+  // ─── Messages ────────────────────────────────────────────────────────
   client.on(Events.MessageCreate, async (message) => {
     if (message.author.bot) return
     if (!message.guild) return
@@ -42,6 +75,7 @@ export function initSecurity(client: Client) {
     }
   })
 
+  // ─── Guild Join ──────────────────────────────────────────────────────
   client.on(Events.GuildCreate, async (guild) => {
     try {
       await setupGuildDefaults(guild.id)
@@ -53,8 +87,7 @@ export function initSecurity(client: Client) {
 }
 
 /**
- * Create default module settings for a new guild.
- * Only inserts if no settings exist yet — never overwrites existing config.
+ * Create default module settings for a new guild (never overwrites).
  */
 async function setupGuildDefaults(guildId: string) {
   const supabase = getSupabase()
@@ -67,16 +100,13 @@ async function setupGuildDefaults(guildId: string) {
   }
 
   for (const [moduleId, settings] of Object.entries(defaults)) {
-    // Only insert if no row exists — ignoreDuplicates prevents overwriting
     await supabase
       .from('security_modules')
       .insert({ guild_id: guildId, module_id: moduleId, enabled: settings.enabled, config: settings.config })
       .select()
       .maybeSingle()
-    // If row already exists, insert silently fails due to unique constraint — that's fine
   }
 
-  // Same for server_settings and security_stats — only insert if missing
   const { data: existing } = await supabase.from('server_settings').select('id').eq('guild_id', guildId).maybeSingle()
   if (!existing) {
     await supabase.from('server_settings').insert({ guild_id: guildId, lockdown_active: false })
@@ -89,7 +119,7 @@ async function setupGuildDefaults(guildId: string) {
 }
 
 /**
- * Check if a module is enabled for a guild (cached).
+ * Check if a module is enabled (cached).
  */
 export async function isModuleEnabled(guildId: string, moduleId: string): Promise<boolean> {
   const config = await getModuleConfig(guildId, moduleId)
@@ -97,8 +127,7 @@ export async function isModuleEnabled(guildId: string, moduleId: string): Promis
 }
 
 /**
- * Get module config from database (with 30s cache).
- * Returns null if module is disabled.
+ * Get module config from DB (with 10s cache). Returns null if disabled.
  */
 export async function getModuleConfig(guildId: string, moduleId: string): Promise<Record<string, any> | null> {
   const cacheKey = `${guildId}:${moduleId}`
@@ -157,7 +186,6 @@ export async function logSecurityEvent(params: {
       metadata: params.metadata || {},
     })
 
-    // Increment stats
     await supabase.rpc('increment_threat_count', { p_guild_id: params.guildId })
 
     if (params.eventType === 'raid') {

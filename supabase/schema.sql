@@ -101,3 +101,14 @@ BEGIN
     updated_at = NOW();
 END;
 $$ LANGUAGE plpgsql;
+
+
+-- Function to increment flagged accounts
+CREATE OR REPLACE FUNCTION increment_flagged_accounts(p_guild_id TEXT)
+RETURNS void AS $$
+BEGIN
+  UPDATE security_stats
+  SET accounts_flagged = accounts_flagged + 1, updated_at = NOW()
+  WHERE guild_id = p_guild_id;
+END;
+$$ LANGUAGE plpgsql;
