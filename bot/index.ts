@@ -1,11 +1,14 @@
 import { Client, GatewayIntentBits, Events, ActivityType } from 'discord.js'
 import { config } from './config'
 import { handleCommand } from './commands'
+import { initSecurity } from './security'
 
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.GuildMembers,        // Required for anti-raid (member join events)
+    GatewayIntentBits.MessageContent,      // Required for spam/phishing scanning
   ],
 })
 
@@ -15,9 +18,12 @@ client.once(Events.ClientReady, (readyClient) => {
 
   // Set presence
   readyClient.user.setPresence({
-    activities: [{ name: 'wembo.xyz', type: ActivityType.Watching }],
+    activities: [{ name: 'wembo.xyz | Protecting servers', type: ActivityType.Watching }],
     status: 'online',
   })
+
+  // Initialize security monitoring
+  initSecurity(client)
 })
 
 client.on(Events.InteractionCreate, async (interaction) => {
