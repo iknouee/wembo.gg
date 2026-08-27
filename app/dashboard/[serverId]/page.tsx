@@ -11,16 +11,19 @@ interface GuildInfo {
   owner: boolean
 }
 
-function getAccessToken(): string | null {
+function getAccessToken(): { token: string | null; error: string | null } {
   try {
     const cookieStore = cookies()
     const cookie = cookieStore.get('wembo_session')
-    if (!cookie?.value) return null
+    if (!cookie?.value) return { token: null, error: 'no cookie' }
 
     const secret = process.env.AUTH_SECRET || 'fallback-secret-change-me'
-    const cookieValue = cookie.value.replace(/-/g, '+').replace(/_/g, '/')
-    const raw = atob(cookieValue)
 
+    // Decode: convert base64url chars to standard base64, then decode
+    const cookieValue = cookie.value.replace(/-/g, '+').replace(/_/g, '/')
+    const raw = Buffer.from(cookieValue, 'base64').toString('binary')
+
+    // Decrypt with XOR cipher
     let decrypted = ''
     for (let i = 0; i < raw.length; i++) {
       decrypted += String.fromCharCode(
@@ -29,9 +32,9 @@ function getAccessToken(): string | null {
     }
 
     const session = JSON.parse(decrypted)
-    return session.accessToken || null
-  } catch {
-    return null
+    return { token: session.accessToken || null, error: session.accessToken ? null : 'no accessToken in session' }
+  } catch (e: any) {
+    return { token: null, error: e?.message || 'unknown error' }
   }
 }
 
@@ -54,7 +57,7 @@ export default async function ServerDashboard({
 }: {
   params: { serverId: string }
 }) {
-  const accessToken = getAccessToken()
+  const { token: accessToken, error: tokenError } = getAccessToken()
   const guilds = accessToken ? await fetchGuilds(accessToken) : []
   const guild = guilds.find((g) => g.id === params.serverId) || null
 
@@ -78,6 +81,7 @@ export default async function ServerDashboard({
             <p className="text-[10px] text-white/20 font-mono">Debug info:</p>
             <p className="text-[10px] text-white/20 font-mono mt-1">Looking for: {params.serverId}</p>
             <p className="text-[10px] text-white/20 font-mono">Has token: {accessToken ? 'yes' : 'no'}</p>
+            <p className="text-[10px] text-white/20 font-mono">Token error: {tokenError || 'none'}</p>
             <p className="text-[10px] text-white/20 font-mono">Guilds found: {guilds.length}</p>
             <p className="text-[10px] text-white/20 font-mono">Guild IDs: {guilds.slice(0, 5).map(g => g.id).join(', ')}</p>
           </div>
