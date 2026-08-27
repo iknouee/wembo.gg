@@ -1,4 +1,4 @@
-import { Client, Events, AuditLogEvent, Guild, GuildMember } from 'discord.js'
+import { Client, Events, AuditLogEvent, Guild, ChannelType } from 'discord.js'
 import { getModuleConfig, logSecurityEvent } from './index'
 
 // Track actions per user per guild
@@ -13,7 +13,7 @@ export function initAntiNuke(client: Client) {
 
   // Channel deletions
   client.on(Events.ChannelDelete, async (channel) => {
-    if (!channel.guild) return
+    if (channel.isDMBased()) return
     await checkNukeAction(client, channel.guild, 'channel_delete', 'max_channel_deletes', 'monitor_channel_deletes')
   })
 
@@ -29,13 +29,13 @@ export function initAntiNuke(client: Client) {
 
   // Mass kicks (detected via member remove + audit log)
   client.on(Events.GuildMemberRemove, async (member) => {
-    if (!member.guild) return
+    const guild = member.guild
     // Check audit log to see if this was a kick (not a leave)
     try {
-      const auditLogs = await member.guild.fetchAuditLogs({ type: AuditLogEvent.MemberKick, limit: 1 })
+      const auditLogs = await guild.fetchAuditLogs({ type: AuditLogEvent.MemberKick, limit: 1 })
       const kickLog = auditLogs.entries.first()
       if (kickLog && kickLog.target?.id === member.id && (Date.now() - kickLog.createdTimestamp) < 5000) {
-        await checkNukeAction(client, member.guild, 'kick', 'max_kicks', 'monitor_mass_kicks')
+        await checkNukeAction(client, guild, 'kick', 'max_kicks', 'monitor_mass_kicks')
       }
     } catch {}
   })
@@ -54,7 +54,7 @@ export function initAntiNuke(client: Client) {
 
   // Webhook creation spam
   client.on(Events.WebhooksUpdate, async (channel) => {
-    if (!channel.guild) return
+    if (channel.isDMBased() || !channel.guild) return
     await checkNukeAction(client, channel.guild, 'webhook', 'max_channel_deletes', 'monitor_webhook_creation')
   })
 }
