@@ -34,7 +34,7 @@ export function Sidebar() {
               (item.href !== '/dashboard' && pathname.startsWith(item.href))
             return (
               <li key={item.href}>
-                <a
+                <Link
                   href={item.href}
                   className={cn(
                     'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-200',
@@ -45,7 +45,7 @@ export function Sidebar() {
                 >
                   <item.icon className="h-4 w-4" />
                   {item.title}
-                </a>
+                </Link>
               </li>
             )
           })}
@@ -117,7 +117,7 @@ export function MobileSidebar() {
                   const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))
                   return (
                     <li key={item.href}>
-                      <a
+                      <Link
                         href={item.href}
                         onClick={() => setOpen(false)}
                         className={cn(
@@ -127,7 +127,7 @@ export function MobileSidebar() {
                       >
                         <item.icon className="h-4 w-4" />
                         {item.title}
-                      </a>
+                      </Link>
                     </li>
                   )
                 })}

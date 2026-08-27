@@ -1,95 +1,73 @@
-import { cookies } from 'next/headers'
-import { Server, Plus, ArrowRight, ArrowLeft, Shield, Zap, TrendingUp, Clock, Crown, Globe } from 'lucide-react'
+'use client'
 
-export const dynamic = 'force-dynamic'
+import { useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
+import Link from 'next/link'
+import { Server, Plus, ArrowRight, ArrowLeft, Shield, Zap, TrendingUp, Clock, Crown, Globe, Loader2 } from 'lucide-react'
+import { useDashboard } from '@/components/dashboard/dashboard-provider'
 
 interface Guild {
   id: string
   name: string
   icon: string | null
   owner: boolean
-  permissions: string
 }
 
-interface SessionUser {
-  id: string
-  username: string
-  avatar: string | null
-  global_name: string | null
-}
+export default function DashboardPage() {
+  const searchParams = useSearchParams()
+  const { accessToken, user } = useDashboard()
+  const selectedServerId = searchParams.get('server')
 
-function getSessionData(): { user: SessionUser | null; accessToken: string | null } {
-  try {
-    const cookieStore = cookies()
-    const cookie = cookieStore.get('wembo_session')
-    if (!cookie?.value) return { user: null, accessToken: null }
+  const [guilds, setGuilds] = useState<Guild[]>([])
+  const [loading, setLoading] = useState(true)
 
-    const secret = process.env.AUTH_SECRET || 'fallback-secret-change-me'
-    const cookieValue = cookie.value.replace(/-/g, '+').replace(/_/g, '/')
-    const raw = atob(cookieValue)
-
-    let decrypted = ''
-    for (let i = 0; i < raw.length; i++) {
-      decrypted += String.fromCharCode(
-        raw.charCodeAt(i) ^ secret.charCodeAt(i % secret.length)
-      )
+  useEffect(() => {
+    if (!accessToken) {
+      setLoading(false)
+      return
     }
 
-    const session = JSON.parse(decrypted)
-    // Support both old format (accessToken, user) and new compact format (at, u)
-    const accessToken = session.at || session.accessToken || null
-    const userData = session.u || session.user || null
-    const user: SessionUser | null = userData ? {
-      id: userData.id,
-      username: userData.username,
-      avatar: userData.avatar,
-      global_name: userData.gn || userData.global_name || null,
-    } : null
-    return { user, accessToken }
-  } catch {
-    return { user: null, accessToken: null }
-  }
-}
-
-async function fetchGuilds(accessToken: string): Promise<Guild[]> {
-  try {
-    const res = await fetch('https://discord.com/api/v10/users/@me/guilds', {
+    // Fetch guilds directly from Discord using the access token from context
+    fetch('https://discord.com/api/v10/users/@me/guilds', {
       headers: { Authorization: `Bearer ${accessToken}` },
-      cache: 'no-store',
     })
+      .then(r => r.ok ? r.json() : [])
+      .then((allGuilds) => {
+        // Filter to guilds where user has MANAGE_GUILD permission
+        const manageable = allGuilds.filter((g: any) => {
+          const perms = BigInt(g.permissions)
+          return g.owner || (perms & BigInt(0x20)) !== BigInt(0)
+        })
+        setGuilds(manageable)
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
+  }, [accessToken])
 
-    if (!res.ok) return []
-
-    const guilds = await res.json()
-    return guilds.filter((g: any) => {
-      const perms = BigInt(g.permissions)
-      return g.owner || (perms & BigInt(0x20)) !== BigInt(0)
-    })
-  } catch {
-    return []
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-6 w-6 text-[#FFD600] animate-spin" />
+      </div>
+    )
   }
-}
 
-export default async function DashboardPage({
-  searchParams,
-}: {
-  searchParams: { server?: string; name?: string; icon?: string; owner?: string }
-}) {
-  const { user, accessToken } = getSessionData()
-  const guilds = accessToken ? await fetchGuilds(accessToken) : []
-  const selectedServerId = searchParams.server
-
-  // Server view — use data from URL params (passed from overview)
+  // Server view
   if (selectedServerId) {
-    const guildFromList = guilds.find(g => g.id === selectedServerId)
-    const guild: Guild | null = guildFromList || (searchParams.name ? {
+    const guild = guilds.find(g => g.id === selectedServerId)
+    // Also try to get from URL params
+    const name = searchParams.get('name')
+    const icon = searchParams.get('icon')
+    const owner = searchParams.get('owner')
+
+    const resolvedGuild: Guild | null = guild || (name ? {
       id: selectedServerId,
-      name: decodeURIComponent(searchParams.name),
-      icon: searchParams.icon ? decodeURIComponent(searchParams.icon) : null,
-      owner: searchParams.owner === '1',
-      permissions: '0',
+      name: decodeURIComponent(name),
+      icon: icon ? decodeURIComponent(icon) : null,
+      owner: owner === '1',
     } : null)
-    return <ServerView guild={guild} />
+
+    return <ServerView guild={resolvedGuild} />
   }
 
   // Overview
@@ -155,7 +133,7 @@ export default async function DashboardPage({
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {guilds.map((guild) => (
-              <a
+              <Link
                 key={guild.id}
                 href={`/dashboard?server=${guild.id}&name=${encodeURIComponent(guild.name)}&icon=${encodeURIComponent(guild.icon || '')}&owner=${guild.owner ? '1' : '0'}`}
                 className="group relative flex items-center gap-4 p-5 rounded-xl bg-[#0a0b0d] border border-white/[0.04] shadow-lg shadow-black/20 hover:bg-[#0f1012] hover:border-[#FFD600]/10 hover:shadow-[#FFD600]/[0.02] transition-all duration-300"
@@ -197,7 +175,7 @@ export default async function DashboardPage({
                 </div>
 
                 <ArrowRight className="h-4 w-4 text-white/10 group-hover:text-[#FFD600]/60 group-hover:translate-x-0.5 transition-all" />
-              </a>
+              </Link>
             ))}
 
             <a
@@ -243,10 +221,10 @@ function ServerView({ guild }: { guild: Guild | null }) {
   if (!guild) {
     return (
       <div className="p-6 lg:p-8 space-y-6">
-        <a href="/dashboard" className="inline-flex items-center gap-2 text-sm text-[#9A9CA3] hover:text-white transition-colors">
+        <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm text-[#9A9CA3] hover:text-white transition-colors">
           <ArrowLeft className="h-4 w-4" />
           Back to servers
-        </a>
+        </Link>
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <div className="h-16 w-16 rounded-2xl bg-[#0d0e11] border border-white/[0.04] flex items-center justify-center mb-5">
             <Globe className="h-7 w-7 text-white/15" />
@@ -266,10 +244,10 @@ function ServerView({ guild }: { guild: Guild | null }) {
 
   return (
     <div className="p-6 lg:p-8 space-y-8">
-      <a href="/dashboard" className="inline-flex items-center gap-2 text-sm text-[#9A9CA3] hover:text-white transition-colors">
+      <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm text-[#9A9CA3] hover:text-white transition-colors">
         <ArrowLeft className="h-4 w-4" />
         Back to servers
-      </a>
+      </Link>
 
       <div className="flex items-center gap-5 p-6 rounded-xl bg-[#0a0b0d] border border-white/[0.04]">
         {iconUrl ? (

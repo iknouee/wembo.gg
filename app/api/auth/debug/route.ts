@@ -36,9 +36,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       status: 'ok',
       cookieLength: cookie.value.length,
-      hasUser: !!session?.user,
-      username: session?.user?.username || null,
-      userId: session?.user?.id || null,
+      cookieBytes: Buffer.byteLength(cookie.value, 'utf8'),
+      hasUser: !!(session?.u || session?.user),
+      username: session?.u?.username || session?.user?.username || null,
+      hasToken: !!(session?.at || session?.accessToken),
       secretUsed: secret.substring(0, 4) + '...',
     })
   } catch (e: any) {
