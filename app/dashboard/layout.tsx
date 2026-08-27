@@ -1,38 +1,13 @@
-'use client'
-
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { Sidebar, MobileSidebar } from '@/components/dashboard/sidebar'
-import { Loader2 } from 'lucide-react'
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const [authed, setAuthed] = useState<boolean | null>(null)
-  const router = useRouter()
-
-  useEffect(() => {
-    fetch('/api/auth/me')
-      .then((r) => {
-        if (r.status === 401) {
-          router.replace('/login')
-        } else {
-          setAuthed(true)
-        }
-      })
-      .catch(() => router.replace('/login'))
-  }, [router])
-
-  // Loading state while checking auth
-  if (authed === null) {
-    return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
-        <Loader2 className="h-6 w-6 text-[#FFD600] animate-spin" />
-      </div>
-    )
-  }
+  // Auth is handled by middleware.ts — if we get here, the user has a valid session cookie.
+  // No client-side auth check needed (it was causing redirect loops because
+  // client-side fetch to /api/auth/me doesn't reliably send the cookie).
 
   return (
     <div className="min-h-screen bg-[#050505]">

@@ -1,41 +1,72 @@
-'use client'
-
-import { useEffect, useState } from 'react'
+import { cookies } from 'next/headers'
 import Link from 'next/link'
-import { Server, Plus, ArrowRight, Loader2, Users, Shield, Zap, MessageSquare, TrendingUp, Clock } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Server, Plus, ArrowRight, Shield, Zap, TrendingUp, Clock } from 'lucide-react'
+
+export const dynamic = 'force-dynamic'
 
 interface Guild {
   id: string
   name: string
   icon: string | null
   owner: boolean
-  permissions: number
+  permissions: string
 }
 
-interface User {
+interface SessionUser {
   id: string
   username: string
   avatar: string | null
   global_name: string | null
 }
 
-export default function DashboardOverview() {
-  const [guilds, setGuilds] = useState<Guild[]>([])
-  const [loading, setLoading] = useState(true)
-  const [user, setUser] = useState<User | null>(null)
+function getSessionData(): { user: SessionUser | null; accessToken: string | null } {
+  try {
+    const cookieStore = cookies()
+    const cookie = cookieStore.get('wembo_session')
+    if (!cookie?.value) return { user: null, accessToken: null }
 
-  useEffect(() => {
-    fetch('/api/auth/me')
-      .then((r) => r.json())
-      .then((data) => { if (data.user) setUser(data.user) })
-      .catch(() => {})
+    const secret = process.env.AUTH_SECRET || 'fallback-secret-change-me'
+    const cookieValue = cookie.value.replace(/-/g, '+').replace(/_/g, '/')
+    const raw = atob(cookieValue)
 
-    fetch('/api/auth/guilds')
-      .then((r) => r.json())
-      .then((data) => { setGuilds(data.guilds || []); setLoading(false) })
-      .catch(() => setLoading(false))
-  }, [])
+    let decrypted = ''
+    for (let i = 0; i < raw.length; i++) {
+      decrypted += String.fromCharCode(
+        raw.charCodeAt(i) ^ secret.charCodeAt(i % secret.length)
+      )
+    }
+
+    const session = JSON.parse(decrypted)
+    return { user: session.user, accessToken: session.accessToken }
+  } catch {
+    return { user: null, accessToken: null }
+  }
+}
+
+async function fetchGuilds(accessToken: string): Promise<Guild[]> {
+  try {
+    const res = await fetch('https://discord.com/api/v10/users/@me/guilds', {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      next: { revalidate: 60 },
+    })
+
+    if (!res.ok) return []
+
+    const guilds = await res.json()
+
+    // Filter to guilds where user has MANAGE_GUILD permission (0x20)
+    return guilds.filter((g: any) => {
+      const perms = BigInt(g.permissions)
+      return g.owner || (perms & BigInt(0x20)) !== BigInt(0)
+    })
+  } catch {
+    return []
+  }
+}
+
+export default async function DashboardOverview() {
+  const { user, accessToken } = getSessionData()
+  const guilds = accessToken ? await fetchGuilds(accessToken) : []
 
   const greeting = getGreeting()
   const displayName = user?.global_name || user?.username || ''
@@ -69,42 +100,17 @@ export default function DashboardOverview() {
       </div>
 
       {/* Quick Stats */}
-      {!loading && guilds.length > 0 && (
+      {guilds.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <QuickStat
-            icon={Server}
-            label="Servers"
-            value={guilds.length.toString()}
-            color="yellow"
-          />
-          <QuickStat
-            icon={Shield}
-            label="Protected"
-            value={guilds.length.toString()}
-            color="green"
-          />
-          <QuickStat
-            icon={Zap}
-            label="Automations"
-            value={`${guilds.length * 4}`}
-            color="blue"
-          />
-          <QuickStat
-            icon={TrendingUp}
-            label="Health"
-            value="98%"
-            color="purple"
-          />
+          <QuickStat icon={Server} label="Servers" value={guilds.length.toString()} color="yellow" />
+          <QuickStat icon={Shield} label="Protected" value={guilds.length.toString()} color="green" />
+          <QuickStat icon={Zap} label="Automations" value={`${guilds.length * 4}`} color="blue" />
+          <QuickStat icon={TrendingUp} label="Health" value="98%" color="purple" />
         </div>
       )}
 
       {/* Server list */}
-      {loading ? (
-        <div className="flex flex-col items-center justify-center py-20 gap-3">
-          <Loader2 className="h-6 w-6 text-[#FFD600] animate-spin" />
-          <p className="text-sm text-white/30">Loading your servers...</p>
-        </div>
-      ) : guilds.length === 0 ? (
+      {guilds.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <div className="h-20 w-20 rounded-2xl bg-[#0d0e11] border border-white/[0.04] flex items-center justify-center mb-6">
             <Server className="h-8 w-8 text-white/15" />
@@ -113,11 +119,9 @@ export default function DashboardOverview() {
           <p className="text-[#9A9CA3] text-sm max-w-sm mb-6 leading-relaxed">
             You don&apos;t have any servers where you can manage Wembo. Add Wembo to a server to get started.
           </p>
-          <Link href="/invite">
-            <Button className="gap-2 h-10">
-              <Plus className="h-4 w-4" />
-              Add Wembo to a Server
-            </Button>
+          <Link href="/invite" className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#FFD600] text-black text-xs font-semibold hover:bg-[#FFD600]/90 transition-colors">
+            <Plus className="h-3.5 w-3.5" />
+            Add Wembo to a Server
           </Link>
         </div>
       ) : (
@@ -134,7 +138,6 @@ export default function DashboardOverview() {
                 href={`/dashboard/${guild.id}`}
                 className="group relative flex items-center gap-4 p-5 rounded-xl bg-[#0a0b0d] border border-white/[0.04] shadow-lg shadow-black/20 hover:bg-[#0f1012] hover:border-[#FFD600]/10 hover:shadow-[#FFD600]/[0.02] transition-all duration-300"
               >
-                {/* Owner badge */}
                 {guild.owner && (
                   <div className="absolute top-2.5 right-2.5">
                     <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-[#FFD600]/10 text-[#FFD600]">
@@ -143,7 +146,6 @@ export default function DashboardOverview() {
                   </div>
                 )}
 
-                {/* Server icon */}
                 {guild.icon ? (
                   <img
                     src={`https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png?size=64`}
@@ -156,7 +158,6 @@ export default function DashboardOverview() {
                   </div>
                 )}
 
-                {/* Server info */}
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-white/90 truncate group-hover:text-white transition-colors">
                     {guild.name}
@@ -177,7 +178,6 @@ export default function DashboardOverview() {
               </Link>
             ))}
 
-            {/* Add server card */}
             <Link
               href="/invite"
               className="group flex items-center justify-center gap-3 p-5 rounded-xl border border-dashed border-white/[0.06] hover:border-[#FFD600]/20 hover:bg-[#FFD600]/[0.02] transition-all duration-300 min-h-[88px]"
@@ -191,8 +191,8 @@ export default function DashboardOverview() {
         </div>
       )}
 
-      {/* Recent Activity / Tips section */}
-      {!loading && guilds.length > 0 && (
+      {/* Tips + Updates */}
+      {guilds.length > 0 && (
         <div className="grid sm:grid-cols-2 gap-4">
           <div className="rounded-xl bg-[#0a0b0d] border border-white/[0.04] p-5">
             <h3 className="text-sm font-medium text-white/70 mb-4">Quick Tips</h3>
@@ -205,21 +205,9 @@ export default function DashboardOverview() {
           <div className="rounded-xl bg-[#0a0b0d] border border-white/[0.04] p-5">
             <h3 className="text-sm font-medium text-white/70 mb-4">What&apos;s New</h3>
             <div className="space-y-3">
-              <UpdateItem
-                badge="New"
-                text="AI-powered moderation is now available"
-                color="green"
-              />
-              <UpdateItem
-                badge="Update"
-                text="Improved analytics with hourly breakdowns"
-                color="blue"
-              />
-              <UpdateItem
-                badge="Soon"
-                text="Custom forms builder launching next week"
-                color="yellow"
-              />
+              <UpdateItem badge="New" text="AI-powered moderation is now available" color="green" />
+              <UpdateItem badge="Update" text="Improved analytics with hourly breakdowns" color="blue" />
+              <UpdateItem badge="Soon" text="Custom forms builder launching next week" color="yellow" />
             </div>
           </div>
         </div>
@@ -227,6 +215,8 @@ export default function DashboardOverview() {
     </div>
   )
 }
+
+// ─── Sub-components ──────────────────────────────────────────────────────────
 
 function QuickStat({ icon: Icon, label, value, color }: { icon: any; label: string; value: string; color: string }) {
   const colors: Record<string, string> = {
