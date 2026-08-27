@@ -36,7 +36,16 @@ function getSessionData(): { user: SessionUser | null; accessToken: string | nul
     }
 
     const session = JSON.parse(decrypted)
-    return { user: session.user, accessToken: session.accessToken }
+    // Support both old format (accessToken, user) and new compact format (at, u)
+    const accessToken = session.at || session.accessToken || null
+    const userData = session.u || session.user || null
+    const user: SessionUser | null = userData ? {
+      id: userData.id,
+      username: userData.username,
+      avatar: userData.avatar,
+      global_name: userData.gn || userData.global_name || null,
+    } : null
+    return { user, accessToken }
   } catch {
     return { user: null, accessToken: null }
   }

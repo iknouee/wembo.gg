@@ -22,7 +22,15 @@ function getUser() {
     }
 
     const session = JSON.parse(decrypted)
-    return session?.user || null
+    // Support both old format and new compact format
+    const userData = session?.u || session?.user
+    if (!userData) return null
+    return {
+      id: userData.id,
+      username: userData.username,
+      avatar: userData.avatar,
+      global_name: userData.gn || userData.global_name || null,
+    }
   } catch {
     return null
   }

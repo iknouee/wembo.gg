@@ -11,12 +11,9 @@ export async function GET(request: NextRequest) {
     }
 
     const secret = process.env.AUTH_SECRET || 'fallback-secret-change-me'
-
-    // Decode — handle both base64url and standard base64
     const cookieValue = cookie.value.replace(/-/g, '+').replace(/_/g, '/')
     const raw = atob(cookieValue)
 
-    // Decrypt with XOR cipher
     let decrypted = ''
     for (let i = 0; i < raw.length; i++) {
       decrypted += String.fromCharCode(
@@ -25,10 +22,15 @@ export async function GET(request: NextRequest) {
     }
 
     const session = JSON.parse(decrypted)
+    const accessToken = session.at || session.accessToken
 
-    // Fetch guilds from Discord using the stored access token
+    if (!accessToken) {
+      return NextResponse.json({ guilds: [] }, { status: 401 })
+    }
+
+    // Fetch guilds from Discord
     const res = await fetch('https://discord.com/api/v10/users/@me/guilds', {
-      headers: { Authorization: `Bearer ${session.accessToken}` },
+      headers: { Authorization: `Bearer ${accessToken}` },
     })
 
     if (!res.ok) {

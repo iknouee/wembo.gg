@@ -45,15 +45,19 @@ export async function GET(request: NextRequest) {
 
     const user = await userRes.json()
 
-    // Build session data
+    // Build MINIMAL session — only store what we need to keep cookie under 4KB
     const session = JSON.stringify({
-      accessToken: tokens.access_token,
-      refreshToken: tokens.refresh_token,
-      expiresAt: Date.now() + tokens.expires_in * 1000,
-      user,
+      at: tokens.access_token,
+      rt: tokens.refresh_token,
+      u: {
+        id: user.id,
+        username: user.username,
+        avatar: user.avatar,
+        gn: user.global_name,
+      },
     })
 
-    // Encrypt session using XOR cipher (same as lib/auth.ts)
+    // Encrypt session using XOR cipher
     const secret = process.env.AUTH_SECRET || 'fallback-secret-change-me'
     let encrypted = ''
     for (let i = 0; i < session.length; i++) {
@@ -63,9 +67,7 @@ export async function GET(request: NextRequest) {
     }
     const cookieValue = Buffer.from(encrypted, 'binary').toString('base64url')
 
-    // Use a proper 302 redirect with the cookie set on the response.
-    // This is the critical fix: browsers reliably persist cookies on redirect
-    // responses, but NOT on 200 OK HTML responses that navigate via meta refresh.
+    // Use a proper 302 redirect with the cookie
     const response = NextResponse.redirect(new URL('/dashboard', request.url))
 
     response.cookies.set('wembo_session', cookieValue, {
