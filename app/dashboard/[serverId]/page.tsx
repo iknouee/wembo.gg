@@ -35,19 +35,17 @@ function getAccessToken(): string | null {
   }
 }
 
-async function fetchGuild(accessToken: string, serverId: string): Promise<GuildInfo | null> {
+async function fetchGuilds(accessToken: string): Promise<GuildInfo[]> {
   try {
     const res = await fetch('https://discord.com/api/v10/users/@me/guilds', {
       headers: { Authorization: `Bearer ${accessToken}` },
-      next: { revalidate: 60 },
+      cache: 'no-store',
     })
 
-    if (!res.ok) return null
-
-    const guilds = await res.json()
-    return guilds.find((g: any) => g.id === serverId) || null
+    if (!res.ok) return []
+    return res.json()
   } catch {
-    return null
+    return []
   }
 }
 
@@ -57,9 +55,11 @@ export default async function ServerDashboard({
   params: { serverId: string }
 }) {
   const accessToken = getAccessToken()
-  const guild = accessToken ? await fetchGuild(accessToken, params.serverId) : null
+  const guilds = accessToken ? await fetchGuilds(accessToken) : []
+  const guild = guilds.find((g) => g.id === params.serverId) || null
 
   if (!guild) {
+    // Show debug info to help diagnose
     return (
       <div className="p-6 lg:p-8 space-y-6">
         <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm text-[#9A9CA3] hover:text-white transition-colors">
@@ -74,6 +74,13 @@ export default async function ServerDashboard({
           <p className="text-[#9A9CA3] text-sm max-w-sm">
             This server doesn&apos;t exist or you don&apos;t have permission to manage it.
           </p>
+          <div className="mt-6 p-4 rounded-lg bg-[#0a0b0d] border border-white/[0.04] text-left max-w-md w-full">
+            <p className="text-[10px] text-white/20 font-mono">Debug info:</p>
+            <p className="text-[10px] text-white/20 font-mono mt-1">Looking for: {params.serverId}</p>
+            <p className="text-[10px] text-white/20 font-mono">Has token: {accessToken ? 'yes' : 'no'}</p>
+            <p className="text-[10px] text-white/20 font-mono">Guilds found: {guilds.length}</p>
+            <p className="text-[10px] text-white/20 font-mono">Guild IDs: {guilds.slice(0, 5).map(g => g.id).join(', ')}</p>
+          </div>
         </div>
       </div>
     )
@@ -86,10 +93,10 @@ export default async function ServerDashboard({
   return (
     <div className="p-6 lg:p-8 space-y-8">
       {/* Back link */}
-      <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm text-[#9A9CA3] hover:text-white transition-colors">
+      <a href="/dashboard" className="inline-flex items-center gap-2 text-sm text-[#9A9CA3] hover:text-white transition-colors">
         <ArrowLeft className="h-4 w-4" />
         Back to servers
-      </Link>
+      </a>
 
       {/* Server Header */}
       <div className="flex items-center gap-5 p-6 rounded-xl bg-[#0a0b0d] border border-white/[0.04]">
