@@ -1,4 +1,6 @@
-import { Metadata } from 'next'
+'use client'
+
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import {
   Bot,
@@ -16,12 +18,6 @@ import {
   ArrowRight,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-
-export const metadata: Metadata = {
-  title: 'Features',
-  description: 'Everything your Discord community needs — AI, security, automations, analytics, and more.',
-}
 
 const featureCategories = [
   {
@@ -195,65 +191,98 @@ const featureCategories = [
 ]
 
 export default function FeaturesPage() {
+  const [visibleCards, setVisibleCards] = useState<Set<number>>(new Set())
+  const [isVisible, setIsVisible] = useState(false)
+  const gridRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    setIsVisible(true)
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const idx = Number(entry.target.getAttribute('data-idx'))
+            setVisibleCards((prev) => new Set([...Array.from(prev), idx]))
+          }
+        })
+      },
+      { threshold: 0.1 }
+    )
+    gridRef.current?.querySelectorAll('[data-idx]').forEach((el) => observer.observe(el))
+    return () => observer.disconnect()
+  }, [])
+
   return (
-    <div className="py-24 lg:py-32">
-      <div className="container mx-auto px-4 lg:px-8">
-        {/* Header */}
-        <div className="text-center max-w-3xl mx-auto mb-20">
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight mb-6">
-            Everything your community needs.{' '}
-            <span className="text-gradient">Nothing it doesn&apos;t.</span>
-          </h1>
-          <p className="text-lg text-muted-foreground">
-            Wembo combines powerful server tools with intelligence and automation so your
-            staff can spend less time managing Discord and more time building the community.
-          </p>
-        </div>
+    <div className="relative min-h-screen bg-[#050505]">
+      {/* Background glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-[#FFD600]/[0.02] rounded-full blur-[120px]" />
 
-        {/* Feature Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {featureCategories.map((category) => (
-            <Card
-              key={category.title}
-              className="p-6 hover:border-primary/30 transition-all duration-300 group flex flex-col"
-            >
-              <div className="flex items-center gap-3 mb-4">
-                <div className="rounded-lg bg-primary/10 w-10 h-10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                  <category.icon className="h-5 w-5 text-primary" />
+      <div className="relative py-24 lg:py-32">
+        <div className="container mx-auto px-4 lg:px-8">
+          {/* Header */}
+          <div className={`text-center max-w-3xl mx-auto mb-20 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+            <span className="inline-block text-[11px] font-semibold text-[#FFD600] uppercase tracking-wider mb-6">
+              Features
+            </span>
+            <h1 className="text-[clamp(2rem,4vw,2.75rem)] font-bold text-white tracking-tight mb-6">
+              Everything your community needs.{' '}
+              <span className="bg-gradient-to-r from-[#FFD600] to-[#FFA800] bg-clip-text text-transparent">Nothing it doesn&apos;t.</span>
+            </h1>
+            <p className="text-lg text-[#9A9CA3] leading-relaxed">
+              Wembo combines powerful server tools with intelligence and automation so your
+              staff can spend less time managing Discord and more time building the community.
+            </p>
+          </div>
+
+          {/* Feature Grid */}
+          <div ref={gridRef} className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {featureCategories.map((category, i) => (
+              <div
+                key={category.title}
+                data-idx={i}
+                className={`group p-6 rounded-xl bg-[#090A0C] hover:bg-[#0f1012] transition-all duration-500 flex flex-col ${
+                  visibleCards.has(i) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+                }`}
+                style={{ transitionDelay: `${(i % 3) * 80}ms` }}
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="rounded-lg bg-[#141519] w-10 h-10 flex items-center justify-center group-hover:bg-[#1a1b20] transition-colors">
+                    <category.icon className="h-5 w-5 text-[#9A9CA3] group-hover:text-[#FFD600] transition-colors" />
+                  </div>
+                  <h3 className="font-semibold text-lg text-[#F7F7F8]">{category.title}</h3>
                 </div>
-                <h3 className="font-semibold text-lg">{category.title}</h3>
+                <p className="text-sm text-[#9A9CA3] mb-4 leading-relaxed">
+                  {category.description}
+                </p>
+                <ul className="space-y-2 mt-auto">
+                  {category.features.map((feature) => (
+                    <li key={feature} className="flex items-center gap-2 text-sm text-[#9A9CA3]/70">
+                      <div className="h-1.5 w-1.5 rounded-full bg-[#FFD600]/40" />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+                {(category.href === '/ai' || category.href === '/security' || category.href === '/automations') && (
+                  <Link
+                    href={category.href}
+                    className="flex items-center gap-1 text-sm text-[#FFD600] mt-4 hover:gap-2 transition-all"
+                  >
+                    Learn more <ArrowRight className="h-3 w-3" />
+                  </Link>
+                )}
               </div>
-              <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-                {category.description}
-              </p>
-              <ul className="space-y-2 mt-auto">
-                {category.features.map((feature) => (
-                  <li key={feature} className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <div className="h-1.5 w-1.5 rounded-full bg-primary/50" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-              {(category.href === '/ai' || category.href === '/security' || category.href === '/automations') && (
-                <Link
-                  href={category.href}
-                  className="flex items-center gap-1 text-sm text-primary mt-4 hover:gap-2 transition-all"
-                >
-                  Learn more <ArrowRight className="h-3 w-3" />
-                </Link>
-              )}
-            </Card>
-          ))}
-        </div>
+            ))}
+          </div>
 
-        {/* CTA */}
-        <div className="text-center mt-20">
-          <Link href="/invite">
-            <Button size="lg" className="gap-2">
-              Add Wembo to Discord
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
+          {/* CTA */}
+          <div className="text-center mt-24">
+            <Link href="/invite">
+              <Button size="lg" className="gap-2.5 group">
+                Add Wembo to Discord
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
     </div>
