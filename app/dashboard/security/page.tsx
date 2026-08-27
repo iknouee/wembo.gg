@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Shield, Lock, Loader2, Zap, Ban, Link2, UserX, AlertTriangle } from 'lucide-react'
+import { Shield, Lock, Loader2, Zap, Ban, Link2, UserX, AlertTriangle, Bomb, Bot } from 'lucide-react'
 import { useAuth } from '@/components/dashboard/dashboard-shell'
 import { PageHeader, StatCard, ModuleCard, SecurityScore, ConfirmModal, EmptyState } from '@/components/dashboard/ui'
 
@@ -198,6 +198,24 @@ export default function SecurityOverview() {
             active={true}
             stat={`${stats?.accounts_flagged ?? 0}`}
             statLabel="attempts detected"
+          />
+          <ModuleCard
+            href="/dashboard/security/antinuke"
+            icon={Bomb}
+            iconColor="bg-orange-500/[0.06] text-orange-400"
+            name="Anti-Nuke"
+            description="Protect against mass deletions, bans, and permission changes."
+            active={true}
+            statLabel="Monitoring server actions"
+          />
+          <ModuleCard
+            href="/dashboard/security/botguard"
+            icon={Bot}
+            iconColor="bg-emerald-500/[0.06] text-emerald-400"
+            name="Bot Guard"
+            description="Detect unauthorized bots and manage bot access."
+            active={true}
+            statLabel="All bots verified"
           />
         </div>
       </div>

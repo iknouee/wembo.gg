@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   Home, LogOut, Menu, X, Loader2, Shield, ChevronDown, Ban, Link2, UserX, Zap, ScrollText,
-  Bell, HelpCircle, Search, Settings, Users, ChevronRight
+  Bell, HelpCircle, Search, Settings, Users, ChevronRight, Bomb, Bot
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ToastProvider } from '@/components/dashboard/ui/toast'
@@ -35,8 +35,10 @@ const securitySubNav = [
   { title: 'Overview', href: '/dashboard/security', icon: Shield },
   { title: 'Anti-Raid', href: '/dashboard/security/antiraid', icon: Zap },
   { title: 'Anti-Spam', href: '/dashboard/security/antispam', icon: Ban },
+  { title: 'Anti-Nuke', href: '/dashboard/security/antinuke', icon: Bomb },
   { title: 'Link Blocker', href: '/dashboard/security/phishing', icon: Link2 },
   { title: 'Impersonation', href: '/dashboard/security/impersonation', icon: UserX },
+  { title: 'Bot Guard', href: '/dashboard/security/botguard', icon: Bot },
   { title: 'Security Logs', href: '/dashboard/security/logs', icon: ScrollText },
 ]
 
@@ -47,8 +49,10 @@ function getPageTitle(pathname: string): string {
   if (pathname === '/dashboard/security') return 'Security'
   if (pathname === '/dashboard/security/antiraid') return 'Security / Anti-Raid'
   if (pathname === '/dashboard/security/antispam') return 'Security / Anti-Spam'
+  if (pathname === '/dashboard/security/antinuke') return 'Security / Anti-Nuke'
   if (pathname === '/dashboard/security/phishing') return 'Security / Link Blocker'
   if (pathname === '/dashboard/security/impersonation') return 'Security / Impersonation'
+  if (pathname === '/dashboard/security/botguard') return 'Security / Bot Guard'
   if (pathname === '/dashboard/security/logs') return 'Security / Logs'
   return 'Dashboard'
 }
