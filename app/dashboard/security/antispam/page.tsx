@@ -25,7 +25,14 @@ export default function AntiSpamPage() {
   const save = async () => {
     if (!guildId) return
     setSaving(true)
-    await fetch('/api/security/modules', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ guild_id: guildId, module_id: 'antispam', enabled, config }) }).catch(() => {})
+    try {
+      const res = await fetch('/api/security/modules', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ guild_id: guildId, module_id: 'antispam', enabled, config }) })
+      const data = await res.json()
+      console.log('Save result:', data)
+      if (!data.success) alert('Save failed: ' + (data.error || 'unknown error'))
+    } catch (e: any) {
+      alert('Save failed: ' + e.message)
+    }
     setSaving(false)
   }
 
