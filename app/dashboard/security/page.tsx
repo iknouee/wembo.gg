@@ -85,7 +85,7 @@ export default function DashboardSecurityPage() {
         </CardHeader>
         <CardContent className="space-y-3">
           {mockSecurityEvents.map((event) => (
-            <div key={event.id} className="flex items-start justify-between p-4 rounded-lg border border-border/50">
+            <div key={event.id} className="flex items-start justify-between p-4 rounded-lg /50">
               <div className="flex items-start gap-3">
                 <div className={`mt-0.5 h-2.5 w-2.5 rounded-full ${
                   event.severity === 'high' ? 'bg-red-500' :

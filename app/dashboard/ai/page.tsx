@@ -99,19 +99,19 @@ export default function DashboardAIPage() {
         </CardHeader>
         <CardContent>
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="p-4 rounded-lg border border-border">
+            <div className="p-4 rounded-lg ">
               <h4 className="text-sm font-medium mb-2">Tone</h4>
               <p className="text-sm text-muted-foreground">Friendly & Professional</p>
             </div>
-            <div className="p-4 rounded-lg border border-border">
+            <div className="p-4 rounded-lg ">
               <h4 className="text-sm font-medium mb-2">Response Length</h4>
               <p className="text-sm text-muted-foreground">Concise (1-3 sentences)</p>
             </div>
-            <div className="p-4 rounded-lg border border-border">
+            <div className="p-4 rounded-lg ">
               <h4 className="text-sm font-medium mb-2">Language</h4>
               <p className="text-sm text-muted-foreground">English</p>
             </div>
-            <div className="p-4 rounded-lg border border-border">
+            <div className="p-4 rounded-lg ">
               <h4 className="text-sm font-medium mb-2">Citations</h4>
               <p className="text-sm text-muted-foreground">Always show source</p>
             </div>
@@ -136,7 +136,7 @@ function AIInteraction({
   time: string
 }) {
   return (
-    <div className="p-4 rounded-lg border border-border/50">
+    <div className="p-4 rounded-lg /50">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center text-xs font-medium">

@@ -23,7 +23,7 @@ export default function DashboardMembersPage() {
           <input
             type="text"
             placeholder="Search members..."
-            className="w-full h-10 rounded-lg border border-border bg-card pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+            className="w-full h-10 rounded-lg  bg-card pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
             readOnly
           />
         </div>
@@ -62,7 +62,7 @@ export default function DashboardMembersPage() {
             {mockMembers.map((member) => (
               <div
                 key={member.id}
-                className="flex items-center justify-between p-4 rounded-lg border border-border/50 hover:border-primary/20 transition-colors"
+                className="flex items-center justify-between p-4 rounded-lg /50  transition-colors"
               >
                 <div className="flex items-center gap-4">
                   <div className="relative">

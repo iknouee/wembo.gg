@@ -54,14 +54,14 @@ export default function DashboardSettingsPage() {
           <CardTitle className="text-base text-red-500">Danger Zone</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center justify-between p-4 rounded-lg border border-red-500/20 bg-red-500/5">
+          <div className="flex items-center justify-between p-4 rounded-lg  bg-red-500/5">
             <div>
               <p className="text-sm font-medium">Reset all settings</p>
               <p className="text-xs text-muted-foreground">This will reset all Wembo settings to defaults.</p>
             </div>
             <Button variant="destructive" size="sm">Reset</Button>
           </div>
-          <div className="flex items-center justify-between p-4 rounded-lg border border-red-500/20 bg-red-500/5">
+          <div className="flex items-center justify-between p-4 rounded-lg  bg-red-500/5">
             <div>
               <p className="text-sm font-medium">Remove Wembo</p>
               <p className="text-xs text-muted-foreground">Remove Wembo from this server and delete all data.</p>
@@ -76,9 +76,9 @@ export default function DashboardSettingsPage() {
 
 function SettingRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
+    <div className="flex items-center justify-between py-2 border-b /50 last:border-0">
       <span className="text-sm text-muted-foreground">{label}</span>
-      <div className="h-9 px-3 rounded-lg border border-border bg-muted/30 flex items-center text-sm">
+      <div className="h-9 px-3 rounded-lg  bg-muted/30 flex items-center text-sm">
         {value}
       </div>
     </div>
@@ -97,7 +97,7 @@ function ModuleToggle({
   icon: React.ElementType
 }) {
   return (
-    <div className="flex items-center justify-between p-4 rounded-lg border border-border/50">
+    <div className="flex items-center justify-between p-4 rounded-lg /50">
       <div className="flex items-center gap-3">
         <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
           <Icon className="h-4 w-4 text-primary" />

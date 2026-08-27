@@ -107,7 +107,7 @@ function LeaderboardRow({
     3: 'text-amber-600',
   }
   return (
-    <div className="flex items-center justify-between p-3 rounded-lg border border-border/50 hover:border-primary/20 transition-colors">
+    <div className="flex items-center justify-between p-3 rounded-lg /50  transition-colors">
       <div className="flex items-center gap-4">
         <span className={`text-lg font-bold w-6 text-center ${rankColors[rank] || 'text-muted-foreground'}`}>
           {rank}
@@ -143,7 +143,7 @@ function AchievementCard({
   holders: number
 }) {
   return (
-    <div className="p-4 rounded-lg border border-border/50 hover:border-primary/20 transition-colors">
+    <div className="p-4 rounded-lg /50  transition-colors">
       <div className="flex items-center gap-2 mb-2">
         <Award className="h-4 w-4 text-primary" />
         <h4 className="text-sm font-medium">{title}</h4>

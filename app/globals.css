@@ -28,7 +28,7 @@
 }
 
 @layer base {
-  * { @apply border-white/[0.07]; }
+  * { @apply border-transparent; }
   body {
     @apply antialiased;
     background-color: #050505;

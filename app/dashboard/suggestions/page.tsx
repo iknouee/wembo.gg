@@ -65,7 +65,7 @@ export default function DashboardSuggestionsPage() {
             {mockSuggestions.map((suggestion) => (
               <div
                 key={suggestion.id}
-                className="flex items-center justify-between p-4 rounded-lg border border-border/50 hover:border-primary/20 transition-colors"
+                className="flex items-center justify-between p-4 rounded-lg /50  transition-colors"
               >
                 <div className="flex items-center gap-4">
                   {/* Votes */}

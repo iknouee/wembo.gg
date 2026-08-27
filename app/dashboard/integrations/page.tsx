@@ -27,7 +27,7 @@ export default function DashboardIntegrationsPage() {
       {/* Available Integrations */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {availableIntegrations.map((integration) => (
-          <Card key={integration.name} className="p-6 hover:border-primary/30 transition-colors">
+          <Card key={integration.name} className="p-6  transition-colors">
             <div className="flex items-start justify-between mb-4">
               <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
                 <integration.icon className="h-5 w-5 text-primary" />
