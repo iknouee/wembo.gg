@@ -231,6 +231,8 @@ export default function SecurityOverview() {
               { value: 'spam', label: 'Spam' },
               { value: 'phishing', label: 'Links' },
               { value: 'impersonation', label: 'Impersonation' },
+              { value: 'nuke', label: 'Nuke' },
+              { value: 'unauthorized_bot', label: 'Bots' },
             ].map(f => (
               <button
                 key={f.value}

@@ -6,6 +6,8 @@ import { checkPhishing } from './phishing'
 import { checkImpersonation } from './impersonation'
 import { initLockdownMonitor, isInLockdown } from './lockdown'
 import { initLogger, sendSecurityLog } from './logger'
+import { initAntiNuke } from './antinuke'
+import { initBotGuard } from './botguard'
 
 // Cache module settings to avoid spamming DB
 const moduleCache: Map<string, { data: any; expires: number }> = new Map()
@@ -28,6 +30,12 @@ export function initSecurity(client: Client) {
 
   // Initialize security logger
   initLogger(client)
+
+  // Initialize Anti-Nuke monitoring
+  initAntiNuke(client)
+
+  // Initialize Bot Guard monitoring
+  initBotGuard(client)
 
   // ─── Member Join ─────────────────────────────────────────────────────
   client.on(Events.GuildMemberAdd, async (member) => {
@@ -101,6 +109,8 @@ async function setupGuildDefaults(guildId: string) {
     antispam: { enabled: true, config: { message_limit: 5, time_window_seconds: 3, duplicate_limit: 3, action: 'delete', mute_duration_minutes: 10, exempt_roles: [] } },
     phishing: { enabled: true, config: { auto_delete: true, quarantine_user: false, warn_in_channel: true, custom_blocklist: [], scan_embeds: true } },
     impersonation: { enabled: false, config: { protected_roles: [], similarity_threshold: 80, action: 'flag', check_avatars: true, check_nicknames: true } },
+    antinuke: { enabled: true, config: { max_channel_deletes: 3, max_role_deletes: 3, max_bans: 5, max_kicks: 5, time_window_seconds: 60, action: 'strip_roles', monitor_permission_changes: true, monitor_webhook_creation: true, monitor_channel_deletes: true, monitor_role_deletes: true, monitor_mass_bans: true, monitor_mass_kicks: true, whitelist_owner: true } },
+    botguard: { enabled: false, config: { action: 'kick', notify_on_add: true, quarantine_unverified: true, auto_kick_unverified: false, require_verification: true, log_bot_actions: true, whitelisted_bots: [] } },
   }
 
   for (const [moduleId, settings] of Object.entries(defaults)) {
@@ -208,6 +218,9 @@ export async function logSecurityEvent(params: {
       impersonation: 'Impersonation Detected',
       lockdown: 'Lockdown',
       suspicious_join: 'Suspicious Activity',
+      nuke: 'Nuke Attempt Detected',
+      unauthorized_bot: 'Unauthorized Bot',
+      bot_added: 'Bot Added',
     }
 
     await sendSecurityLog({
