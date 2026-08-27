@@ -31,9 +31,130 @@
   * { @apply border-transparent; }
   body {
     @apply antialiased;
-    background-color: #050505;
+    background-color: #070708;
     color: #F7F7F8;
     font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer components {
+  /* ─── Dashboard Surfaces ─────────────────────────────────────────────── */
+  .dash-page { background-color: #070708; }
+  .dash-sidebar { background-color: #090A0C; }
+  .dash-card {
+    background-color: #0D0E10;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+  }
+  .dash-card-elevated {
+    background-color: #111214;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+  }
+  .dash-card:hover, .dash-card-elevated:hover {
+    border-color: rgba(255,255,255,0.11);
+  }
+
+  /* ─── Dashboard Input ────────────────────────────────────────────────── */
+  .dash-input {
+    @apply w-full rounded-lg px-3.5 py-2.5 text-[13px] text-white/90 placeholder:text-white/25 transition-all duration-200;
+    background-color: #0A0B0D;
+    border: 1px solid rgba(255,255,255,0.06);
+    outline: none;
+  }
+  .dash-input:focus {
+    border-color: rgba(255,214,0,0.3);
+    box-shadow: 0 0 0 3px rgba(255,214,0,0.06);
+  }
+
+  /* ─── Module Status Badges ──────────────────────────────────────────── */
+  .status-active {
+    @apply inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full;
+    background: rgba(34,197,94,0.08);
+    color: #4ade80;
+    border: 1px solid rgba(34,197,94,0.15);
+  }
+  .status-inactive {
+    @apply inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full;
+    background: rgba(255,255,255,0.03);
+    color: rgba(255,255,255,0.3);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .status-danger {
+    @apply inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full;
+    background: rgba(239,68,68,0.08);
+    color: #f87171;
+    border: 1px solid rgba(239,68,68,0.15);
+  }
+
+  /* ─── Save Bar ──────────────────────────────────────────────────────── */
+  .save-bar {
+    @apply fixed bottom-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-3.5;
+    background: rgba(9,10,12,0.95);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(255,255,255,0.06);
+    animation: slide-up 0.3s cubic-bezier(0.16,1,0.3,1);
+  }
+
+  /* ─── Toast ─────────────────────────────────────────────────────────── */
+  .toast {
+    @apply fixed bottom-6 right-6 z-[100] flex items-center gap-3 px-5 py-3 rounded-xl text-[13px] font-medium shadow-2xl;
+    background: #111214;
+    border: 1px solid rgba(255,255,255,0.08);
+    animation: slide-up 0.3s cubic-bezier(0.16,1,0.3,1);
+  }
+  .toast-success { border-color: rgba(34,197,94,0.2); color: #4ade80; }
+  .toast-error { border-color: rgba(239,68,68,0.2); color: #f87171; }
+
+  /* ─── Segmented Control ─────────────────────────────────────────────── */
+  .segmented-control {
+    @apply inline-flex rounded-lg p-0.5;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .segmented-control button {
+    @apply px-3.5 py-1.5 text-[12px] font-medium rounded-md transition-all duration-200;
+    color: rgba(255,255,255,0.4);
+  }
+  .segmented-control button:hover {
+    color: rgba(255,255,255,0.7);
+  }
+  .segmented-control button[data-active="true"] {
+    background: rgba(255,214,0,0.1);
+    color: #FFD600;
+    box-shadow: 0 0 8px rgba(255,214,0,0.08);
+  }
+
+  /* ─── Number Stepper ────────────────────────────────────────────────── */
+  .stepper {
+    @apply inline-flex items-center rounded-lg;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .stepper button {
+    @apply h-9 w-9 flex items-center justify-center text-white/40 hover:text-white/80 hover:bg-white/[0.04] transition-colors;
+  }
+  .stepper span {
+    @apply px-3 text-[14px] font-semibold text-white tabular-nums min-w-[40px] text-center;
+  }
+
+  /* ─── Toggle Switch ─────────────────────────────────────────────────── */
+  .toggle-switch {
+    @apply relative inline-flex h-[22px] w-[40px] items-center rounded-full cursor-pointer transition-colors duration-200;
+    background: rgba(255,255,255,0.08);
+  }
+  .toggle-switch[data-checked="true"] {
+    background: #FFD600;
+  }
+  .toggle-switch .toggle-thumb {
+    @apply absolute h-[16px] w-[16px] rounded-full bg-white shadow-sm transition-transform duration-200;
+    transform: translateX(3px);
+  }
+  .toggle-switch[data-checked="true"] .toggle-thumb {
+    transform: translateX(21px);
+    background: #0a0a0a;
   }
 }
 
@@ -44,7 +165,7 @@
     background-image: linear-gradient(135deg, #FFE54C 0%, #FFD600 50%, #F5A623 100%);
   }
 
-  /* Surfaces */
+  /* Legacy Surfaces (kept for marketing pages) */
   .surface-0 { background-color: #050505; }
   .surface-1 { background-color: #090A0C; }
   .surface-2 { background-color: #0D0E11; }
@@ -55,6 +176,7 @@
   .glow-md { box-shadow: 0 0 20px rgba(255, 214, 0, 0.12), 0 0 60px rgba(255, 214, 0, 0.04); }
   .glow-lg { box-shadow: 0 0 40px rgba(255, 214, 0, 0.15), 0 0 100px rgba(255, 214, 0, 0.06); }
   .glow-btn { box-shadow: 0 0 20px rgba(255, 214, 0, 0.2), 0 4px 12px rgba(255, 214, 0, 0.1); }
+  .glow-yellow-subtle { box-shadow: 0 0 30px rgba(255,214,0,0.04); }
 
   /* Card styles */
   .card-glass {
@@ -100,6 +222,11 @@
     background: radial-gradient(ellipse, rgba(255,214,0,0.015) 0%, transparent 70%);
     pointer-events: none;
   }
+
+  /* Content constraint */
+  .dash-content {
+    @apply max-w-[1200px] mx-auto;
+  }
 }
 
 /* Keyframes */
@@ -126,6 +253,16 @@
 @keyframes fade-in {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(100%); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes float-slow {
@@ -158,9 +295,13 @@
   50% { opacity: 0.05; }
 }
 
+@keyframes progress-fill {
+  from { width: 0; }
+}
+
 /* Scrollbar */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #050505; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(255,214,0,0.12); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255,214,0,0.25); }
 

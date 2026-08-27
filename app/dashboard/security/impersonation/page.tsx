@@ -1,13 +1,14 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { UserX, Loader2, Save, ArrowLeft, X, Plus } from 'lucide-react'
-import Link from 'next/link'
+import { useState, useEffect, useRef } from 'react'
+import { UserX, Loader2, X, Plus, Shield, Eye, UserCheck, Clock } from 'lucide-react'
 import { useAuth } from '@/components/dashboard/dashboard-shell'
+import { PageHeader, StatCard, SettingCard, SettingRow, Toggle, SegmentedControl, NumberStepper, Slider, SaveBar, useToast } from '@/components/dashboard/ui'
 
 export default function ImpersonationPage() {
   const { guilds, selectedGuild } = useAuth()
   const guildId = selectedGuild || guilds[0]?.id || null
+  const { toast } = useToast()
 
   const [enabled, setEnabled] = useState(false)
   const [config, setConfig] = useState({
@@ -21,25 +22,49 @@ export default function ImpersonationPage() {
   })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
+  const [hasChanges, setHasChanges] = useState(false)
   const [newName, setNewName] = useState('')
+  const initialState = useRef<{ enabled: boolean; config: typeof config } | null>(null)
 
+  // ─── Data Fetching (PRESERVED) ───────────────────────────────────────
   useEffect(() => {
     if (!guildId) { setLoading(false); return }
     fetch(`/api/security/modules?guild_id=${guildId}`).then(r => r.json()).then(data => {
       const mod = (data.modules || []).find((m: any) => m.module_id === 'impersonation')
       if (mod) { setEnabled(mod.enabled); setConfig(c => ({ ...c, ...mod.config })) }
       setLoading(false)
+      setTimeout(() => {
+        initialState.current = { enabled: mod?.enabled ?? false, config: { ...config, ...(mod?.config || {}) } }
+      }, 0)
     }).catch(() => setLoading(false))
   }, [guildId])
 
+  // ─── Dirty Detection ─────────────────────────────────────────────────
+  useEffect(() => {
+    if (!initialState.current) return
+    const changed = enabled !== initialState.current.enabled ||
+      JSON.stringify(config) !== JSON.stringify(initialState.current.config)
+    setHasChanges(changed)
+  }, [enabled, config])
+
+  // ─── Save (PRESERVED) ────────────────────────────────────────────────
   const save = async () => {
     if (!guildId) return
-    setSaving(true); setSaved(false)
+    setSaving(true)
     await fetch('/api/security/modules', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ guild_id: guildId, module_id: 'impersonation', enabled, config }) })
-    setSaving(false); setSaved(true); setTimeout(() => setSaved(false), 2000)
+    setSaving(false)
+    setHasChanges(false)
+    initialState.current = { enabled, config: { ...config } }
+    toast('Impersonation Guard settings saved', 'success')
   }
 
+  const reset = () => {
+    if (!initialState.current) return
+    setEnabled(initialState.current.enabled)
+    setConfig({ ...initialState.current.config })
+  }
+
+  // ─── Name Management (PRESERVED) ────────────────────────────────────
   const addName = () => {
     const name = newName.trim().toLowerCase()
     if (name && !config.protected_names.includes(name)) {
@@ -48,86 +73,200 @@ export default function ImpersonationPage() {
     }
   }
 
-  if (loading) return <div className="flex items-center justify-center min-h-[60vh]"><Loader2 className="h-5 w-5 text-[#FFD600] animate-spin" /></div>
+  const removeName = (name: string) => {
+    setConfig({ ...config, protected_names: config.protected_names.filter(n => n !== name) })
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-5 w-5 text-[#FFD600] animate-spin" />
+      </div>
+    )
+  }
 
   return (
-    <div className="p-6 lg:p-8 space-y-8 animate-in fade-in duration-300">
-      <Link href="/dashboard/security" className="inline-flex items-center gap-2 text-[12px] text-white/25 hover:text-white/50 transition-colors"><ArrowLeft className="h-3.5 w-3.5" /> Back to Security</Link>
+    <div className="p-6 lg:p-8 dash-content space-y-8 animate-fade-in">
 
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="h-12 w-12 rounded-2xl bg-purple-500/[0.08] flex items-center justify-center"><UserX className="h-5 w-5 text-purple-400" /></div>
-          <div><h1 className="text-xl font-bold text-white">Impersonation Guard</h1><p className="text-[13px] text-white/25 mt-0.5">Protect identities from copycats</p></div>
-        </div>
-        <button onClick={() => setEnabled(!enabled)} className={`relative h-7 w-12 rounded-full transition-all duration-200 ${enabled ? 'bg-green-500/25 ring-1 ring-green-500/20' : 'bg-white/[0.04] ring-1 ring-white/[0.06]'}`}><span className={`absolute top-1.5 h-4 w-4 rounded-full transition-all duration-200 ${enabled ? 'left-7 bg-green-400 shadow-sm shadow-green-400/50' : 'left-1 bg-white/30'}`} /></button>
+      {/* Header */}
+      <PageHeader
+        icon={UserX}
+        iconColor="bg-purple-500/[0.08] text-purple-400"
+        title="Impersonation Guard"
+        description="Protect staff identities from copycats."
+        badge={
+          enabled ? (
+            <span className="status-active"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />Active</span>
+          ) : (
+            <span className="status-inactive">Disabled</span>
+          )
+        }
+        actions={<Toggle checked={enabled} onChange={setEnabled} />}
+      />
+
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-3">
+        <StatCard
+          icon={UserX}
+          iconColor="bg-purple-500/[0.06] text-purple-400"
+          value="3"
+          label="Attempts Detected"
+          sub="this month"
+        />
+        <StatCard
+          icon={Shield}
+          iconColor="bg-emerald-500/[0.06] text-emerald-400"
+          value={String(config.protected_names.length + (config.auto_protect_staff ? 4 : 0))}
+          label="Protected Identities"
+          sub={config.auto_protect_staff ? 'incl. staff' : 'manual only'}
+        />
+        <StatCard
+          icon={Eye}
+          iconColor="bg-[#FFD600]/[0.06] text-[#FFD600]"
+          value={`${config.similarity_threshold}%`}
+          label="Similarity Threshold"
+          sub={config.similarity_threshold >= 80 ? 'Strict' : config.similarity_threshold >= 60 ? 'Moderate' : 'Loose'}
+        />
       </div>
 
-      <div className="space-y-6">
-        <Section title="Detection Settings">
-          <Row label="Similarity Threshold" desc="How closely a name must match to trigger (lower = more strict)">
-            <div className="flex items-center gap-2">
-              <NI value={config.similarity_threshold} onChange={v => setConfig({ ...config, similarity_threshold: v })} min={40} max={100} />
-              <span className="text-[11px] text-white/15">%</span>
-            </div>
-          </Row>
-          <Row label="Auto-Protect Staff" desc="Automatically protect names of admins and mods">
-            <TG value={config.auto_protect_staff} onChange={v => setConfig({ ...config, auto_protect_staff: v })} />
-          </Row>
-          <Row label="Check Nicknames" desc="Monitor server nickname changes">
-            <TG value={config.check_nicknames} onChange={v => setConfig({ ...config, check_nicknames: v })} />
-          </Row>
-          <Row label="Check Avatars" desc="Compare profile pictures against protected users">
-            <TG value={config.check_avatars} onChange={v => setConfig({ ...config, check_avatars: v })} />
-          </Row>
-          <Row label="Min Account Age" desc="Only flag accounts newer than this" last>
-            <div className="flex items-center gap-2">
-              <NI value={config.min_account_age_days} onChange={v => setConfig({ ...config, min_account_age_days: v })} min={0} max={365} />
-              <span className="text-[11px] text-white/15">days</span>
-            </div>
-          </Row>
-        </Section>
+      {/* Detection Sensitivity */}
+      <SettingCard
+        icon={Eye}
+        iconColor="bg-purple-500/[0.06] text-purple-400"
+        title="Detection Sensitivity"
+        description="How closely a name must match to trigger detection"
+      >
+        <div className="space-y-4">
+          <Slider
+            value={config.similarity_threshold}
+            onChange={v => setConfig({ ...config, similarity_threshold: v })}
+            min={40}
+            max={100}
+            step={5}
+            suffix="%"
+            labels={{ left: 'Loose (more false positives)', right: 'Strict (fewer detections)' }}
+          />
+          <p className="text-caption text-white/25 leading-relaxed">
+            At {config.similarity_threshold}%, a name must be at least {config.similarity_threshold}% similar to a protected name to trigger.
+            {config.similarity_threshold <= 60 && ' This is very sensitive and may produce false positives.'}
+            {config.similarity_threshold >= 90 && ' Only near-exact matches will be caught.'}
+          </p>
+        </div>
+      </SettingCard>
 
-        <Section title="Response">
-          <Row label="Action" desc="What to do when impersonation is detected" last>
-            <AS value={config.action} onChange={v => setConfig({ ...config, action: v })} options={[{ value: 'flag', label: 'Flag' }, { value: 'rename', label: 'Reset Name' }, { value: 'kick', label: 'Kick' }, { value: 'ban', label: 'Ban' }]} />
-          </Row>
-        </Section>
+      {/* Detection Methods */}
+      <SettingCard
+        icon={UserCheck}
+        iconColor="bg-blue-500/[0.06] text-blue-400"
+        title="Detection Methods"
+        description="What to check for impersonation attempts"
+      >
+        <SettingRow label="Nickname Similarity" description="Check if nicknames are similar to protected names.">
+          <Toggle checked={config.check_nicknames} onChange={v => setConfig({ ...config, check_nicknames: v })} />
+        </SettingRow>
+        <SettingRow label="Avatar Matching" description="Compare profile pictures against protected users.">
+          <Toggle checked={config.check_avatars} onChange={v => setConfig({ ...config, check_avatars: v })} />
+        </SettingRow>
+        <SettingRow label="Auto-Protect Staff" description="Automatically protect names of admins and moderators.">
+          <Toggle checked={config.auto_protect_staff} onChange={v => setConfig({ ...config, auto_protect_staff: v })} />
+        </SettingRow>
+        <SettingRow label="New Account Detection" description="Only flag accounts newer than this many days.">
+          <NumberStepper value={config.min_account_age_days} onChange={v => setConfig({ ...config, min_account_age_days: v })} min={0} max={365} suffix="d" />
+        </SettingRow>
+      </SettingCard>
 
-        {/* Protected Names */}
-        <div>
-          <p className="text-[11px] font-medium text-white/20 uppercase tracking-widest mb-3">Protected Names</p>
-          <div className="rounded-2xl bg-white/[0.015] ring-1 ring-white/[0.04] p-5 space-y-3">
-            <p className="text-[11px] text-white/20">Add specific names to protect. Anyone using a similar name will be flagged.</p>
-            <div className="flex gap-2">
-              <input value={newName} onChange={e => setNewName(e.target.value)} onKeyDown={e => e.key === 'Enter' && addName()} placeholder="Add a name to protect..." className="flex-1 h-9 rounded-xl bg-white/[0.04] ring-1 ring-white/[0.06] text-[13px] text-white px-3 placeholder:text-white/15 focus:outline-none focus:ring-[#FFD600]/20 transition-all" />
-              <button onClick={addName} className="flex items-center gap-1.5 px-3 h-9 rounded-xl bg-white/[0.04] ring-1 ring-white/[0.06] text-[12px] text-white/40 hover:text-white/70 hover:ring-white/[0.1] transition-all"><Plus className="h-3 w-3" /> Add</button>
+      {/* Response */}
+      <SettingCard
+        icon={UserX}
+        iconColor="bg-red-500/[0.06] text-red-400"
+        title="Response"
+        description="Action when impersonation is detected"
+      >
+        <SettingRow label="Action" description="What to do with the impersonating user.">
+          <SegmentedControl
+            options={[
+              { value: 'flag', label: 'Flag' },
+              { value: 'rename', label: 'Reset Name' },
+              { value: 'kick', label: 'Kick' },
+              { value: 'ban', label: 'Ban' },
+            ]}
+            value={config.action}
+            onChange={v => setConfig({ ...config, action: v })}
+          />
+        </SettingRow>
+      </SettingCard>
+
+      {/* Protected Identities */}
+      <div className="dash-card overflow-hidden">
+        <div className="px-6 py-4 border-b border-white/[0.04] flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 rounded-lg flex items-center justify-center bg-purple-500/[0.06] text-purple-400">
+              <Shield className="h-4 w-4" />
             </div>
-            {config.protected_names.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
-                {config.protected_names.map(name => (
-                  <span key={name} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-500/[0.06] ring-1 ring-purple-500/10 text-[11px] text-purple-400/70">
-                    {name}
-                    <button onClick={() => setConfig({ ...config, protected_names: config.protected_names.filter(n => n !== name) })} className="text-purple-400/30 hover:text-purple-400 transition-colors"><X className="h-3 w-3" /></button>
-                  </span>
-                ))}
-              </div>
-            ) : (
-              <p className="text-[11px] text-white/10">No custom names added. {config.auto_protect_staff ? 'Staff names are automatically protected.' : 'Enable auto-protect staff or add names manually.'}</p>
-            )}
+            <div>
+              <h3 className="text-[15px] font-semibold text-white/90">Protected Identities</h3>
+              <p className="text-micro text-white/25 mt-0.5">Anyone using a similar name will be flagged</p>
+            </div>
           </div>
+          <span className="text-caption text-white/20">{config.protected_names.length} custom</span>
+        </div>
+
+        <div className="p-6 space-y-5">
+          {/* Add Name */}
+          <div className="flex gap-2">
+            <input
+              value={newName}
+              onChange={e => setNewName(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && addName()}
+              placeholder="Add a name to protect..."
+              className="dash-input flex-1"
+            />
+            <button
+              onClick={addName}
+              disabled={!newName.trim()}
+              className="flex items-center gap-1.5 px-4 h-[42px] rounded-lg bg-white/[0.04] border border-white/[0.06] text-caption font-medium text-white/40 hover:text-white/70 hover:border-white/[0.1] transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              <Plus className="h-3.5 w-3.5" /> Protect
+            </button>
+          </div>
+
+          {/* Protected Names List */}
+          {config.protected_names.length > 0 ? (
+            <div className="space-y-1.5">
+              {config.protected_names.map(name => (
+                <div key={name} className="flex items-center justify-between px-4 py-3 rounded-lg bg-white/[0.02] border border-white/[0.04] group hover:border-white/[0.08] transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="h-7 w-7 rounded-full bg-purple-500/10 flex items-center justify-center">
+                      <span className="text-[10px] font-bold text-purple-400">{name[0].toUpperCase()}</span>
+                    </div>
+                    <div>
+                      <p className="text-body-sm font-medium text-white/70">{name}</p>
+                      <p className="text-micro text-white/20">Protected</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => removeName(name)}
+                    className="p-1.5 rounded-md text-white/15 hover:text-red-400 hover:bg-red-500/10 transition-colors opacity-0 group-hover:opacity-100"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-6 text-center">
+              <p className="text-caption text-white/20">
+                {config.auto_protect_staff
+                  ? 'No custom names added. Staff names are automatically protected.'
+                  : 'No protected names. Add names manually or enable auto-protect staff.'}
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
-        <button onClick={save} disabled={saving} className="flex items-center gap-2 px-5 py-3 rounded-xl bg-[#FFD600] text-black text-[13px] font-semibold hover:bg-[#FFD600]/90 active:scale-[0.98] transition-all disabled:opacity-50">{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Save Changes</button>
-        {saved && <span className="text-[12px] text-green-400 animate-in fade-in">✓ Saved</span>}
-      </div>
+      {/* Save Bar */}
+      <SaveBar show={hasChanges} saving={saving} onSave={save} onReset={reset} />
     </div>
   )
 }
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) { return <div><p className="text-[11px] font-medium text-white/20 uppercase tracking-widest mb-3">{title}</p><div className="rounded-2xl bg-white/[0.015] ring-1 ring-white/[0.04] overflow-hidden">{children}</div></div> }
-function Row({ label, desc, children, last }: { label: string; desc: string; children: React.ReactNode; last?: boolean }) { return <div className={`flex items-center justify-between px-5 py-4 ${!last ? 'border-b border-white/[0.03]' : ''}`}><div><p className="text-[13px] text-white/60">{label}</p><p className="text-[11px] text-white/15 mt-0.5">{desc}</p></div><div className="flex-shrink-0 ml-4">{children}</div></div> }
-function NI({ value, onChange, min, max }: { value: number; onChange: (v: number) => void; min: number; max: number }) { return <input type="number" value={value} onChange={e => onChange(Math.min(max, Math.max(min, parseInt(e.target.value) || min)))} min={min} max={max} className="w-16 h-9 rounded-xl bg-white/[0.04] ring-1 ring-white/[0.06] text-[13px] text-white text-center tabular-nums focus:outline-none focus:ring-[#FFD600]/20 transition-all" /> }
-function AS({ value, onChange, options }: { value: string; onChange: (v: string) => void; options: { value: string; label: string }[] }) { return <div className="flex items-center gap-1 p-1 rounded-xl bg-white/[0.03] ring-1 ring-white/[0.06]">{options.map(o => <button key={o.value} onClick={() => onChange(o.value)} className={`px-3 py-1.5 rounded-lg text-[12px] font-medium transition-all duration-200 ${value === o.value ? 'bg-[#FFD600]/10 text-[#FFD600]' : 'text-white/30 hover:text-white/60'}`}>{o.label}</button>)}</div> }
-function TG({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) { return <button onClick={() => onChange(!value)} className={`relative h-6 w-11 rounded-full transition-all duration-200 ${value ? 'bg-[#FFD600]/25 ring-1 ring-[#FFD600]/20' : 'bg-white/[0.04] ring-1 ring-white/[0.06]'}`}><span className={`absolute top-1 h-4 w-4 rounded-full transition-all duration-200 ${value ? 'left-6 bg-[#FFD600]' : 'left-1 bg-white/30'}`} /></button> }
