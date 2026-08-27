@@ -1,25 +1,34 @@
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
+export const fetchCache = 'force-no-store'
+export const revalidate = 0
 
 export async function GET(request: NextRequest) {
   const cookie = request.cookies.get('wembo_session')
 
   if (!cookie?.value) {
-    return new Response(JSON.stringify({ user: null }), {
-      status: 401,
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-store, no-cache, must-revalidate',
-      },
-    })
+    return NextResponse.json(
+      { user: null },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          'Pragma': 'no-cache',
+        },
+      }
+    )
   }
 
   try {
     const secret = process.env.AUTH_SECRET || 'fallback-secret-change-me'
 
-    // Decode from base64url (cookie-safe encoding)
-    const raw = Buffer.from(cookie.value, 'base64url').toString('binary')
+    // Try base64url first (new encoding), fall back to standard base64 (old encoding)
+    let raw: string
+    try {
+      raw = Buffer.from(cookie.value, 'base64url').toString('binary')
+    } catch {
+      raw = Buffer.from(cookie.value, 'base64').toString('binary')
+    }
 
     // Decrypt with XOR cipher
     let decrypted = ''
@@ -31,22 +40,39 @@ export async function GET(request: NextRequest) {
 
     const session = JSON.parse(decrypted)
 
-    return new Response(JSON.stringify({ user: session.user }), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-store, no-cache, must-revalidate',
-      },
-    })
+    if (!session?.user) {
+      throw new Error('No user in session')
+    }
+
+    return NextResponse.json(
+      { user: session.user },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          'Pragma': 'no-cache',
+        },
+      }
+    )
   } catch {
     // Cookie is corrupted or from an old session — clear it
-    return new Response(JSON.stringify({ user: null }), {
-      status: 401,
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-store, no-cache, must-revalidate',
-        'Set-Cookie': 'wembo_session=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0',
-      },
+    const response = NextResponse.json(
+      { user: null },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          'Pragma': 'no-cache',
+        },
+      }
+    )
+
+    response.cookies.set('wembo_session', '', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 0,
     })
+
+    return response
   }
 }

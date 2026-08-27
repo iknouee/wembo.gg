@@ -12,8 +12,13 @@ export async function GET(request: NextRequest) {
   try {
     const secret = process.env.AUTH_SECRET || 'fallback-secret-change-me'
 
-    // Decode from base64url (cookie-safe encoding)
-    const raw = Buffer.from(cookie.value, 'base64url').toString('binary')
+    // Try base64url first, fall back to standard base64
+    let raw: string
+    try {
+      raw = Buffer.from(cookie.value, 'base64url').toString('binary')
+    } catch {
+      raw = Buffer.from(cookie.value, 'base64').toString('binary')
+    }
 
     // Decrypt with XOR cipher
     let decrypted = ''

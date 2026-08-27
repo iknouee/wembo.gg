@@ -37,9 +37,9 @@ export function Navbar() {
 
   // Check if logged in
   useEffect(() => {
-    fetch('/api/auth/me', { cache: 'no-store' })
-      .then((r) => { if (r.ok) return r.json(); throw new Error() })
-      .then((data) => { if (data.user) setUser(data.user) })
+    fetch('/api/auth/me', { cache: 'no-store', credentials: 'same-origin' })
+      .then((r) => r.json())
+      .then((data) => { if (data?.user) setUser(data.user) })
       .catch(() => {})
   }, [pathname])
 
