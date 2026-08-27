@@ -118,8 +118,10 @@ async function handlePhishing(message: Message, matchedContent: string, reason: 
 
   // Try to warn the user
   try {
-    await message.channel.send({
-      content: `⚠️ A potentially malicious link was removed. Stay safe!`,
-    })
+    if ('send' in message.channel) {
+      await message.channel.send({
+        content: `⚠️ A potentially malicious link was removed. Stay safe!`,
+      })
+    }
   } catch {}
 }
