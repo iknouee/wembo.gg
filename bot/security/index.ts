@@ -14,6 +14,14 @@ const CACHE_TTL = 30000
 export function initSecurity(client: Client) {
   console.log('🛡️  Security module initialized')
 
+  // Initialize security settings for all guilds the bot is already in
+  client.guilds.cache.forEach(async (guild) => {
+    try {
+      await setupGuildDefaults(guild.id)
+    } catch {}
+  })
+  console.log(`📋 Checked security defaults for ${client.guilds.cache.size} guilds`)
+
   client.on(Events.GuildMemberAdd, async (member) => {
     try {
       await checkAntiRaid(member)
