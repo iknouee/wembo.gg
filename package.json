@@ -7,7 +7,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "bot:build": "tsc -p bot/tsconfig.json",
+    "bot:start": "node bot/dist/index.js",
+    "bot:dev": "ts-node bot/index.ts",
+    "bot:deploy-commands": "ts-node bot/deploy-commands.ts"
   },
   "dependencies": {
     "next": "14.2.15",
@@ -17,7 +21,9 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "tailwind-merge": "^2.5.2",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "discord.js": "^14.16.3",
+    "dotenv": "^16.4.5"
   },
   "devDependencies": {
     "@types/node": "^22.7.4",
@@ -28,6 +34,7 @@
     "eslint-config-next": "14.2.15",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.13",
-    "typescript": "^5.6.2"
+    "typescript": "^5.6.2",
+    "ts-node": "^10.9.2"
   }
 }
