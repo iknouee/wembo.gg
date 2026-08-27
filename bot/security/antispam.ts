@@ -36,6 +36,13 @@ export async function checkAntiSpam(message: Message) {
   const ACTION = config?.action ?? 'delete'
   const MUTE_MINS = config?.mute_duration_minutes ?? 10
 
+  // Log config on first message per guild (for debugging)
+  const configKey = `logged:${guildId}`
+  if (!messageHistory.has(configKey)) {
+    messageHistory.set(configKey, [1])
+    console.log(`📋 Anti-spam config for ${guildId}: limit=${MSG_LIMIT}, window=${WINDOW_MS}ms, action=${ACTION}, mute=${MUTE_MINS}min`)
+  }
+
   // Check exempt roles
   const exemptRoles: string[] = config?.exempt_roles ?? []
   if (exemptRoles.length > 0 && message.member.roles.cache.some(r => exemptRoles.includes(r.id))) {
@@ -62,14 +69,16 @@ export async function checkAntiSpam(message: Message) {
 
       try {
         if (ACTION === 'mute' && message.member) {
+          console.log(`🔇 Attempting to mute ${message.author.tag} for ${MUTE_MINS} minutes`)
           await message.member.timeout(MUTE_MINS * 60 * 1000, 'Anti-spam: message spam detected')
           actionTaken = 'muted'
+          console.log(`✅ Muted ${message.author.tag}`)
         } else if (ACTION === 'ban' && message.member?.bannable) {
           await message.member.ban({ reason: 'Anti-spam: severe spam detected' })
           actionTaken = 'banned'
         }
-      } catch (e) {
-        console.error('Anti-spam action failed:', e)
+      } catch (e: any) {
+        console.error(`❌ Anti-spam action "${ACTION}" failed for ${message.author.tag}:`, e?.message || e)
         actionTaken = 'message_deleted'
       }
 
