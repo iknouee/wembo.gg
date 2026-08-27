@@ -1,6 +1,10 @@
 import { Message } from 'discord.js'
 import { logSecurityEvent, isModuleEnabled, getModuleConfig } from './index'
 
+// Track cooldowns per user to avoid log spam
+const actionCooldown: Map<string, number> = new Map()
+const COOLDOWN_MS = 60000 // 1 minute between actions per user
+
 // Track message history per user per guild
 const messageHistory: Map<string, number[]> = new Map()
 const recentMessages: Map<string, string[]> = new Map()
@@ -63,36 +67,41 @@ export async function checkAntiSpam(message: Message) {
     // Always delete the spam message
     try { await message.delete() } catch {}
 
+    // Check cooldown — only log/action once per minute per user
+    const cooldownKey = `spam:${guildId}:${message.author.id}`
+    const lastAction = actionCooldown.get(cooldownKey) || 0
+    if (now - lastAction < COOLDOWN_MS) return // Already handled recently
+    actionCooldown.set(cooldownKey, now)
+
     // Take additional action on first trigger
-    if (recentCount === MSG_LIMIT) {
-      let actionTaken = 'message_deleted'
+    let actionTaken = 'message_deleted'
 
-      try {
-        if (ACTION === 'mute' && message.member) {
-          console.log(`🔇 Attempting to mute ${message.author.tag} for ${MUTE_MINS} minutes`)
-          await message.member.timeout(MUTE_MINS * 60 * 1000, 'Anti-spam: message spam detected')
-          actionTaken = 'muted'
-          console.log(`✅ Muted ${message.author.tag}`)
-        } else if (ACTION === 'ban' && message.member?.bannable) {
-          await message.member.ban({ reason: 'Anti-spam: severe spam detected' })
-          actionTaken = 'banned'
-        }
-      } catch (e: any) {
-        console.error(`❌ Anti-spam action "${ACTION}" failed for ${message.author.tag}:`, e?.message || e)
-        actionTaken = 'message_deleted'
+    try {
+      if (ACTION === 'mute' && message.member) {
+        console.log(`🔇 Attempting to mute ${message.author.tag} for ${MUTE_MINS} minutes`)
+        await message.member.timeout(MUTE_MINS * 60 * 1000, 'Anti-spam: message spam detected')
+        actionTaken = 'muted'
+        console.log(`✅ Muted ${message.author.tag}`)
+      } else if (ACTION === 'ban' && message.member?.bannable) {
+        await message.member.ban({ reason: 'Anti-spam: severe spam detected' })
+        actionTaken = 'banned'
       }
-
-      await logSecurityEvent({
-        guildId,
-        eventType: 'spam',
-        severity: 'medium',
-        description: `Rapid message spam (${recentCount} msgs in ${WINDOW_MS / 1000}s)`,
-        userId: message.author.id,
-        userTag: message.author.tag,
-        actionTaken,
-        metadata: { messageCount: recentCount, channelId: message.channel.id, action: ACTION },
-      })
+    } catch (e: any) {
+      console.error(`❌ Anti-spam action "${ACTION}" failed for ${message.author.tag}:`, e?.message || e)
+      actionTaken = 'message_deleted'
     }
+
+    await logSecurityEvent({
+      guildId,
+      eventType: 'spam',
+      severity: 'medium',
+      description: `Rapid message spam (${recentCount} msgs in ${WINDOW_MS / 1000}s)`,
+      userId: message.author.id,
+      userTag: message.author.tag,
+      actionTaken,
+      metadata: { messageCount: recentCount, channelId: message.channel.id, action: ACTION },
+    })
+
     return
   }
 
@@ -106,6 +115,12 @@ export async function checkAntiSpam(message: Message) {
   if (lastN.length >= DUP_LIMIT && lastN.every(m => m === lastN[0]) && lastN[0].length > 5) {
     // Always delete
     try { await message.delete() } catch {}
+
+    // Cooldown check
+    const dupKey = `dup:${guildId}:${message.author.id}`
+    const lastDup = actionCooldown.get(dupKey) || 0
+    if (now - lastDup < COOLDOWN_MS) return
+    actionCooldown.set(dupKey, now)
 
     let actionTaken = 'message_deleted'
     try {
