@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { guild_id, module_id, enabled } = body
+    const { guild_id, module_id, enabled, config } = body
 
     if (!guild_id || !module_id || typeof enabled !== 'boolean') {
       return NextResponse.json({ error: 'guild_id, module_id, and enabled required' }, { status: 400 })
@@ -46,14 +46,20 @@ export async function POST(request: NextRequest) {
 
     const supabase = getSupabase()
 
+    const updateData: any = {
+      guild_id,
+      module_id,
+      enabled,
+      updated_at: new Date().toISOString(),
+    }
+
+    if (config) {
+      updateData.config = config
+    }
+
     const { error } = await supabase
       .from('security_modules')
-      .upsert({
-        guild_id,
-        module_id,
-        enabled,
-        updated_at: new Date().toISOString(),
-      }, { onConflict: 'guild_id,module_id' })
+      .upsert(updateData, { onConflict: 'guild_id,module_id' })
 
     if (error) throw error
 
