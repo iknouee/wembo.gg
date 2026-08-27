@@ -74,7 +74,7 @@ export default function DashboardOverview() {
             <Link
               key={guild.id}
               href={`/dashboard/${guild.id}`}
-              className="group flex items-center gap-4 p-5 rounded-xl bg-[#0a0b0d] hover:bg-[#0f1012] transition-all duration-300"
+              className="group flex items-center gap-4 p-5 rounded-xl bg-[#0a0b0d] border border-white/[0.04] shadow-lg shadow-black/20 hover:bg-[#0f1012] hover:border-white/[0.06] transition-all duration-300"
             >
               {/* Server icon */}
               {guild.icon ? (

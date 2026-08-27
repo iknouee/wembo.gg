@@ -121,7 +121,7 @@ function ChannelRow({ name, messages, percentage }: { name: string; messages: nu
           <span className="text-sm font-medium">{name}</span>
           <span className="text-xs text-muted-foreground">{messages.toLocaleString()} msgs</span>
         </div>
-        <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+        <div className="h-1.5 rounded-full bg-[#0a0b0d] overflow-hidden">
           <div className="h-full bg-primary rounded-full" style={{ width: `${percentage}%` }} />
         </div>
       </div>

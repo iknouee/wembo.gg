@@ -78,7 +78,7 @@ function SettingRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between py-2 border-b /50 last:border-0">
       <span className="text-sm text-muted-foreground">{label}</span>
-      <div className="h-9 px-3 rounded-lg  bg-muted/30 flex items-center text-sm">
+      <div className="h-9 px-3 rounded-lg  bg-[#0a0b0d]/30 flex items-center text-sm">
         {value}
       </div>
     </div>
@@ -107,7 +107,7 @@ function ModuleToggle({
           <p className="text-xs text-muted-foreground">{description}</p>
         </div>
       </div>
-      <div className={`h-6 w-11 rounded-full transition-colors ${enabled ? 'bg-primary' : 'bg-muted'} relative`}>
+      <div className={`h-6 w-11 rounded-full transition-colors ${enabled ? 'bg-primary' : 'bg-[#0a0b0d]'} relative`}>
         <div className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${enabled ? 'translate-x-5' : 'translate-x-0.5'}`} />
       </div>
     </div>

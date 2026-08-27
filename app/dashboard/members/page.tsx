@@ -23,7 +23,7 @@ export default function DashboardMembersPage() {
           <input
             type="text"
             placeholder="Search members..."
-            className="w-full h-10 rounded-lg  bg-card pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+            className="w-full h-10 rounded-lg  bg-[#090A0C] pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
             readOnly
           />
         </div>

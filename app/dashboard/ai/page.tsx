@@ -139,7 +139,7 @@ function AIInteraction({
     <div className="p-4 rounded-lg /50">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center text-xs font-medium">
+          <div className="h-6 w-6 rounded-full bg-[#0a0b0d] flex items-center justify-center text-xs font-medium">
             {user[0]}
           </div>
           <span className="text-sm font-medium">{user}</span>

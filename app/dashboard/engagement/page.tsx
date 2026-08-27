@@ -112,7 +112,7 @@ function LeaderboardRow({
         <span className={`text-lg font-bold w-6 text-center ${rankColors[rank] || 'text-muted-foreground'}`}>
           {rank}
         </span>
-        <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-sm font-medium">
+        <div className="h-8 w-8 rounded-full bg-[#0a0b0d] flex items-center justify-center text-sm font-medium">
           {name[0]}
         </div>
         <div>

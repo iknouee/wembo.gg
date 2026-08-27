@@ -45,7 +45,7 @@ export default function ServerDashboard() {
 
 function FeatureCard({ icon: Icon, title, description }: { icon: React.ElementType; title: string; description: string }) {
   return (
-    <div className="rounded-xl bg-[#0a0b0d] p-5 hover:bg-[#0f1012] transition-colors">
+    <div className="rounded-xl bg-[#0a0b0d] border border-white/[0.04] shadow-lg shadow-black/20 p-5 hover:bg-[#0f1012] hover:border-white/[0.06] transition-colors">
       <div className="h-10 w-10 rounded-lg bg-[#141519] flex items-center justify-center mb-3">
         <Icon className="h-4 w-4 text-[#9A9CA3]" />
       </div>

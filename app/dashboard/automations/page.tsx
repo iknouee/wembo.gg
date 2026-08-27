@@ -50,7 +50,7 @@ export default function DashboardAutomationsPage() {
               >
                 <div className="flex items-center gap-4">
                   <div className={`h-9 w-9 rounded-lg flex items-center justify-center ${
-                    automation.status === 'active' ? 'bg-green-500/10' : 'bg-muted'
+                    automation.status === 'active' ? 'bg-green-500/10' : 'bg-[#0a0b0d]'
                   }`}>
                     <Zap className={`h-4 w-4 ${
                       automation.status === 'active' ? 'text-green-500' : 'text-muted-foreground'
