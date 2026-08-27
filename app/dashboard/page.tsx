@@ -1,10 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Server, Plus, ArrowRight, ArrowLeft, Shield, Zap, TrendingUp, Clock, Crown, Globe, Loader2 } from 'lucide-react'
-import { useDashboard } from '@/components/dashboard/dashboard-provider'
 
 interface Guild {
   id: string
@@ -13,36 +12,35 @@ interface Guild {
   owner: boolean
 }
 
+interface User {
+  id: string
+  username: string
+  avatar: string | null
+  global_name: string | null
+}
+
 export default function DashboardPage() {
   const searchParams = useSearchParams()
-  const { accessToken, user } = useDashboard()
   const selectedServerId = searchParams.get('server')
 
+  const [user, setUser] = useState<User | null>(null)
   const [guilds, setGuilds] = useState<Guild[]>([])
   const [loading, setLoading] = useState(true)
+  const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
-    if (!accessToken) {
-      setLoading(false)
-      return
-    }
-
-    // Fetch guilds directly from Discord using the access token from context
-    fetch('https://discord.com/api/v10/users/@me/guilds', {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    })
-      .then(r => r.ok ? r.json() : [])
-      .then((allGuilds) => {
-        // Filter to guilds where user has MANAGE_GUILD permission
-        const manageable = allGuilds.filter((g: any) => {
-          const perms = BigInt(g.permissions)
-          return g.owner || (perms & BigInt(0x20)) !== BigInt(0)
-        })
-        setGuilds(manageable)
+    if (loaded) return // Only fetch once
+    
+    fetch('/api/auth/session')
+      .then(r => r.json())
+      .then(data => {
+        setUser(data.user || null)
+        setGuilds(data.guilds || [])
         setLoading(false)
+        setLoaded(true)
       })
       .catch(() => setLoading(false))
-  }, [accessToken])
+  }, [loaded])
 
   if (loading) {
     return (
@@ -55,7 +53,6 @@ export default function DashboardPage() {
   // Server view
   if (selectedServerId) {
     const guild = guilds.find(g => g.id === selectedServerId)
-    // Also try to get from URL params
     const name = searchParams.get('name')
     const icon = searchParams.get('icon')
     const owner = searchParams.get('owner')
@@ -140,48 +137,27 @@ export default function DashboardPage() {
               >
                 {guild.owner && (
                   <div className="absolute top-2.5 right-2.5">
-                    <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-[#FFD600]/10 text-[#FFD600]">
-                      Owner
-                    </span>
+                    <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-[#FFD600]/10 text-[#FFD600]">Owner</span>
                   </div>
                 )}
-
                 {guild.icon ? (
-                  <img
-                    src={`https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png?size=64`}
-                    alt={guild.name}
-                    className="h-12 w-12 rounded-xl object-cover ring-1 ring-white/[0.06]"
-                  />
+                  <img src={`https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png?size=64`} alt={guild.name} className="h-12 w-12 rounded-xl object-cover ring-1 ring-white/[0.06]" />
                 ) : (
                   <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-white/[0.08] to-white/[0.02] flex items-center justify-center text-white/50 font-semibold text-sm ring-1 ring-white/[0.06]">
                     {guild.name.slice(0, 2).toUpperCase()}
                   </div>
                 )}
-
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-white/90 truncate group-hover:text-white transition-colors">
-                    {guild.name}
-                  </p>
+                  <p className="text-sm font-semibold text-white/90 truncate group-hover:text-white transition-colors">{guild.name}</p>
                   <div className="flex items-center gap-3 mt-1.5">
-                    <span className="flex items-center gap-1 text-xs text-white/25">
-                      <span className="h-1.5 w-1.5 rounded-full bg-green-500/60"></span>
-                      Active
-                    </span>
-                    <span className="flex items-center gap-1 text-xs text-white/25">
-                      <Shield className="h-3 w-3" />
-                      Protected
-                    </span>
+                    <span className="flex items-center gap-1 text-xs text-white/25"><span className="h-1.5 w-1.5 rounded-full bg-green-500/60"></span>Active</span>
+                    <span className="flex items-center gap-1 text-xs text-white/25"><Shield className="h-3 w-3" />Protected</span>
                   </div>
                 </div>
-
                 <ArrowRight className="h-4 w-4 text-white/10 group-hover:text-[#FFD600]/60 group-hover:translate-x-0.5 transition-all" />
               </Link>
             ))}
-
-            <a
-              href="/invite"
-              className="group flex items-center justify-center gap-3 p-5 rounded-xl border border-dashed border-white/[0.06] hover:border-[#FFD600]/20 hover:bg-[#FFD600]/[0.02] transition-all duration-300 min-h-[88px]"
-            >
+            <a href="/invite" className="group flex items-center justify-center gap-3 p-5 rounded-xl border border-dashed border-white/[0.06] hover:border-[#FFD600]/20 hover:bg-[#FFD600]/[0.02] transition-all duration-300 min-h-[88px]">
               <div className="h-8 w-8 rounded-lg bg-white/[0.04] group-hover:bg-[#FFD600]/10 flex items-center justify-center transition-colors">
                 <Plus className="h-4 w-4 text-white/20 group-hover:text-[#FFD600]/60 transition-colors" />
               </div>
@@ -215,131 +191,71 @@ export default function DashboardPage() {
   )
 }
 
-// ─── Server View ─────────────────────────────────────────────────────────────
-
 function ServerView({ guild }: { guild: Guild | null }) {
   if (!guild) {
     return (
       <div className="p-6 lg:p-8 space-y-6">
-        <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm text-[#9A9CA3] hover:text-white transition-colors">
-          <ArrowLeft className="h-4 w-4" />
-          Back to servers
-        </Link>
+        <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm text-[#9A9CA3] hover:text-white transition-colors"><ArrowLeft className="h-4 w-4" />Back to servers</Link>
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <div className="h-16 w-16 rounded-2xl bg-[#0d0e11] border border-white/[0.04] flex items-center justify-center mb-5">
-            <Globe className="h-7 w-7 text-white/15" />
-          </div>
+          <div className="h-16 w-16 rounded-2xl bg-[#0d0e11] border border-white/[0.04] flex items-center justify-center mb-5"><Globe className="h-7 w-7 text-white/15" /></div>
           <h2 className="text-lg font-semibold text-white mb-2">Server not found</h2>
-          <p className="text-[#9A9CA3] text-sm max-w-sm">
-            This server doesn&apos;t exist or you don&apos;t have permission to manage it.
-          </p>
+          <p className="text-[#9A9CA3] text-sm max-w-sm">This server doesn&apos;t exist or you don&apos;t have permission to manage it.</p>
         </div>
       </div>
     )
   }
 
-  const iconUrl = guild.icon
-    ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png?size=128`
-    : null
+  const iconUrl = guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png?size=128` : null
 
   return (
     <div className="p-6 lg:p-8 space-y-8">
-      <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm text-[#9A9CA3] hover:text-white transition-colors">
-        <ArrowLeft className="h-4 w-4" />
-        Back to servers
-      </Link>
-
+      <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm text-[#9A9CA3] hover:text-white transition-colors"><ArrowLeft className="h-4 w-4" />Back to servers</Link>
       <div className="flex items-center gap-5 p-6 rounded-xl bg-[#0a0b0d] border border-white/[0.04]">
         {iconUrl ? (
           <img src={iconUrl} alt={guild.name} className="h-16 w-16 rounded-xl object-cover ring-1 ring-white/[0.06]" />
         ) : (
-          <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-white/[0.08] to-white/[0.02] flex items-center justify-center text-white/50 font-bold text-lg ring-1 ring-white/[0.06]">
-            {guild.name.slice(0, 2).toUpperCase()}
-          </div>
+          <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-white/[0.08] to-white/[0.02] flex items-center justify-center text-white/50 font-bold text-lg ring-1 ring-white/[0.06]">{guild.name.slice(0, 2).toUpperCase()}</div>
         )}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2.5">
             <h1 className="text-xl font-bold text-white truncate">{guild.name}</h1>
-            {guild.owner && (
-              <span className="flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#FFD600]/10 text-[#FFD600]">
-                <Crown className="h-3 w-3" />
-                Owner
-              </span>
-            )}
+            {guild.owner && (<span className="flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#FFD600]/10 text-[#FFD600]"><Crown className="h-3 w-3" />Owner</span>)}
           </div>
           <div className="flex items-center gap-4 mt-2">
-            <span className="flex items-center gap-1.5 text-xs text-white/30">
-              <span className="h-2 w-2 rounded-full bg-green-500/60" />
-              Connected
-            </span>
-            <span className="flex items-center gap-1.5 text-xs text-white/30">
-              <Shield className="h-3 w-3" />
-              Protected
-            </span>
+            <span className="flex items-center gap-1.5 text-xs text-white/30"><span className="h-2 w-2 rounded-full bg-green-500/60" />Connected</span>
+            <span className="flex items-center gap-1.5 text-xs text-white/30"><Shield className="h-3 w-3" />Protected</span>
           </div>
         </div>
       </div>
-
       <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-[#0a0b0d] border border-white/[0.04] w-fit">
         <span className="text-xs text-white/20">Server ID:</span>
         <code className="text-xs text-white/50 font-mono">{guild.id}</code>
       </div>
-
       <div className="rounded-xl border border-[#FFD600]/10 bg-[#FFD600]/[0.02] p-5">
         <p className="text-sm text-[#FFD600]/80 font-medium">🚧 Server features are being built</p>
-        <p className="text-xs text-[#9A9CA3] mt-1">
-          Modules like AI, Security, Automations, and Analytics will appear here as they&apos;re added.
-        </p>
+        <p className="text-xs text-[#9A9CA3] mt-1">Modules like AI, Security, Automations, and Analytics will appear here as they&apos;re added.</p>
       </div>
     </div>
   )
 }
 
-// ─── Sub-components ──────────────────────────────────────────────────────────
-
 function QuickStat({ icon: Icon, label, value, color }: { icon: any; label: string; value: string; color: string }) {
-  const colors: Record<string, string> = {
-    yellow: 'bg-[#FFD600]/[0.06] text-[#FFD600]',
-    green: 'bg-green-500/[0.06] text-green-400',
-    blue: 'bg-blue-500/[0.06] text-blue-400',
-    purple: 'bg-purple-500/[0.06] text-purple-400',
-  }
+  const colors: Record<string, string> = { yellow: 'bg-[#FFD600]/[0.06] text-[#FFD600]', green: 'bg-green-500/[0.06] text-green-400', blue: 'bg-blue-500/[0.06] text-blue-400', purple: 'bg-purple-500/[0.06] text-purple-400' }
   return (
     <div className="flex items-center gap-3 p-4 rounded-xl bg-[#0a0b0d] border border-white/[0.04]">
-      <div className={`h-9 w-9 rounded-lg flex items-center justify-center ${colors[color]}`}>
-        <Icon className="h-4 w-4" />
-      </div>
-      <div>
-        <p className="text-lg font-bold text-white">{value}</p>
-        <p className="text-[11px] text-white/30">{label}</p>
-      </div>
+      <div className={`h-9 w-9 rounded-lg flex items-center justify-center ${colors[color]}`}><Icon className="h-4 w-4" /></div>
+      <div><p className="text-lg font-bold text-white">{value}</p><p className="text-[11px] text-white/30">{label}</p></div>
     </div>
   )
 }
 
 function Tip({ emoji, text }: { emoji: string; text: string }) {
-  return (
-    <div className="flex items-start gap-2.5">
-      <span className="text-sm mt-0.5">{emoji}</span>
-      <p className="text-xs text-white/40 leading-relaxed">{text}</p>
-    </div>
-  )
+  return (<div className="flex items-start gap-2.5"><span className="text-sm mt-0.5">{emoji}</span><p className="text-xs text-white/40 leading-relaxed">{text}</p></div>)
 }
 
 function UpdateItem({ badge, text, color }: { badge: string; text: string; color: string }) {
-  const colors: Record<string, string> = {
-    green: 'bg-green-500/10 text-green-400',
-    blue: 'bg-blue-500/10 text-blue-400',
-    yellow: 'bg-[#FFD600]/10 text-[#FFD600]',
-  }
-  return (
-    <div className="flex items-start gap-2.5">
-      <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded ${colors[color]} mt-0.5`}>
-        {badge}
-      </span>
-      <p className="text-xs text-white/40 leading-relaxed">{text}</p>
-    </div>
-  )
+  const colors: Record<string, string> = { green: 'bg-green-500/10 text-green-400', blue: 'bg-blue-500/10 text-blue-400', yellow: 'bg-[#FFD600]/10 text-[#FFD600]' }
+  return (<div className="flex items-start gap-2.5"><span className={`text-[9px] font-medium px-1.5 py-0.5 rounded ${colors[color]} mt-0.5`}>{badge}</span><p className="text-xs text-white/40 leading-relaxed">{text}</p></div>)
 }
 
 function getGreeting() {

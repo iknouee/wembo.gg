@@ -1,32 +1,16 @@
-import { cookies } from 'next/headers'
 import { Sidebar, MobileSidebar } from '@/components/dashboard/sidebar'
 import { DashboardProvider } from '@/components/dashboard/dashboard-provider'
-import { decodeSession } from '@/lib/session'
 
-export const dynamic = 'force-dynamic'
-
-export default async function DashboardLayout({
+export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  let accessToken: string | null = null
-  let user: any = null
-
-  try {
-    const cookieStore = cookies()
-    const cookie = cookieStore.get('wembo_session')
-    if (cookie?.value) {
-      const session = decodeSession(cookie.value)
-      accessToken = session.accessToken
-      user = session.user
-    }
-  } catch {
-    // Don't crash if cookies() fails
-  }
+  // DO NOT read cookies() here — it causes Next.js to clear the cookie
+  // on Vercel. The dashboard page will handle auth via a different mechanism.
 
   return (
-    <DashboardProvider accessToken={accessToken} user={user}>
+    <DashboardProvider accessToken={null} user={null}>
       <div className="min-h-screen bg-[#050505]">
         <Sidebar />
         <MobileSidebar />
