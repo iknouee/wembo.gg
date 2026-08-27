@@ -1,136 +1,204 @@
 'use client'
 
-import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { useAuth } from '@/components/dashboard/dashboard-shell'
-import { Server, Plus, ArrowRight, ArrowLeft, Shield, Zap, TrendingUp, Clock, Crown, Globe } from 'lucide-react'
+import {
+  Users,
+  Activity,
+  MessageSquare,
+  TrendingUp,
+  Shield,
+  Zap,
+  FileText,
+  Lightbulb,
+  Plus,
+  ArrowRight,
+  Sparkles,
+} from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { StatCard } from '@/components/stat-card'
+import { ActivityChart } from '@/components/activity-chart'
+import { mockStats, mockInsights, mockSecurityEvents } from '@/lib/mock-data'
 
-export default function DashboardPage() {
-  const searchParams = useSearchParams()
-  const { user, guilds, setSelectedGuild } = useAuth()
-  const selectedServerId = searchParams.get('server')
-
-  // Server view
-  if (selectedServerId) {
-    const guild = guilds.find(g => g.id === selectedServerId)
-    const name = searchParams.get('name')
-    const icon = searchParams.get('icon')
-    const owner = searchParams.get('owner')
-    const resolvedGuild = guild || (name ? { id: selectedServerId, name, icon: icon || null, owner: owner === '1', permissions: '0' } : null)
-
-    if (!resolvedGuild) {
-      return (
-        <div className="p-6 lg:p-8 space-y-6">
-          <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm text-[#9A9CA3] hover:text-white transition-colors"><ArrowLeft className="h-4 w-4" />Back to servers</Link>
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <Globe className="h-8 w-8 text-white/15 mb-4" />
-            <h2 className="text-lg font-semibold text-white mb-2">Server not found</h2>
-          </div>
-        </div>
-      )
-    }
-
-    const iconUrl = resolvedGuild.icon ? `https://cdn.discordapp.com/icons/${resolvedGuild.id}/${resolvedGuild.icon}.png?size=128` : null
-
-    return (
-      <div className="p-6 lg:p-8 space-y-8">
-        <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm text-[#9A9CA3] hover:text-white transition-colors"><ArrowLeft className="h-4 w-4" />Back to servers</Link>
-        <div className="flex items-center gap-5 p-6 rounded-xl bg-[#0a0b0d] border border-white/[0.04]">
-          {iconUrl ? <img src={iconUrl} alt={resolvedGuild.name} className="h-16 w-16 rounded-xl object-cover ring-1 ring-white/[0.06]" /> : <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-white/[0.08] to-white/[0.02] flex items-center justify-center text-white/50 font-bold text-lg ring-1 ring-white/[0.06]">{resolvedGuild.name.slice(0, 2).toUpperCase()}</div>}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2.5">
-              <h1 className="text-xl font-bold text-white truncate">{resolvedGuild.name}</h1>
-              {resolvedGuild.owner && <span className="flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#FFD600]/10 text-[#FFD600]"><Crown className="h-3 w-3" />Owner</span>}
-            </div>
-            <div className="flex items-center gap-4 mt-2">
-              <span className="flex items-center gap-1.5 text-xs text-white/30"><span className="h-2 w-2 rounded-full bg-green-500/60" />Connected</span>
-              <span className="flex items-center gap-1.5 text-xs text-white/30"><Shield className="h-3 w-3" />Protected</span>
-            </div>
-          </div>
-        </div>
-        <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-[#0a0b0d] border border-white/[0.04] w-fit">
-          <span className="text-xs text-white/20">Server ID:</span>
-          <code className="text-xs text-white/50 font-mono">{resolvedGuild.id}</code>
-        </div>
-        <div className="rounded-xl border border-[#FFD600]/10 bg-[#FFD600]/[0.02] p-5">
-          <p className="text-sm text-[#FFD600]/80 font-medium">🚧 Server features are being built</p>
-          <p className="text-xs text-[#9A9CA3] mt-1">Modules like AI, Security, Automations, and Analytics will appear here as they&apos;re added.</p>
-        </div>
-      </div>
-    )
-  }
-
-  // Overview
+export default function DashboardOverview() {
   const greeting = getGreeting()
-  const displayName = user?.global_name || user?.username || ''
-  const avatarUrl = user?.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=128` : null
 
   return (
-    <div className="p-6 lg:p-8 space-y-8">
-      <div className="flex items-start gap-4">
-        {avatarUrl ? <img src={avatarUrl} alt="" className="h-12 w-12 rounded-xl object-cover hidden sm:block" /> : user ? <div className="h-12 w-12 rounded-xl bg-[#FFD600]/10 items-center justify-center text-[#FFD600] font-bold text-sm hidden sm:flex">{(displayName || '?')[0].toUpperCase()}</div> : null}
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold text-white">{greeting}{displayName ? `, ${displayName}` : ''} 👋</h1>
-          <p className="text-[#9A9CA3] mt-1 text-sm">Here&apos;s an overview of your servers. Select one to manage.</p>
+    <div className="p-5 lg:p-8 space-y-6">
+      {/* Page Header */}
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight">{greeting} 👋</h1>
+          <p className="text-[13px] text-muted-foreground mt-0.5">
+            Here&apos;s what&apos;s happening in your community today.
+          </p>
         </div>
-        <div className="hidden lg:flex items-center gap-2 text-xs text-white/20"><Clock className="h-3.5 w-3.5" />{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}</div>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+            <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-[12px] font-semibold text-emerald-500">
+              {mockStats.communityHealth}/100
+            </span>
+          </div>
+        </div>
       </div>
 
-      {guilds.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <QuickStat icon={Server} label="Servers" value={guilds.length.toString()} color="yellow" />
-          <QuickStat icon={Shield} label="Protected" value={guilds.length.toString()} color="green" />
-          <QuickStat icon={Zap} label="Automations" value={`${guilds.length * 4}`} color="blue" />
-          <QuickStat icon={TrendingUp} label="Health" value="98%" color="purple" />
-        </div>
-      )}
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <StatCard
+          title="Members"
+          value={mockStats.members.toLocaleString()}
+          icon={Users}
+          trend="+124"
+          trendUp={true}
+        />
+        <StatCard
+          title="Active"
+          value={mockStats.active.toLocaleString()}
+          icon={Activity}
+          trend="+8%"
+          trendUp={true}
+        />
+        <StatCard
+          title="Messages"
+          value={mockStats.messages.toLocaleString()}
+          icon={MessageSquare}
+          trend="+12%"
+          trendUp={true}
+        />
+        <StatCard
+          title="Growth"
+          value={mockStats.growth}
+          icon={TrendingUp}
+          trend="+2.1%"
+          trendUp={true}
+        />
+      </div>
 
-      {guilds.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <Server className="h-8 w-8 text-white/15 mb-4" />
-          <h2 className="text-lg font-semibold text-white mb-2">No servers found</h2>
-          <p className="text-[#9A9CA3] text-sm max-w-sm mb-6">You don&apos;t have any servers where you can manage Wembo. Add Wembo to a server to get started.</p>
-          <a href="/invite" className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#FFD600] text-black text-xs font-semibold hover:bg-[#FFD600]/90 transition-colors"><Plus className="h-3.5 w-3.5" />Add Wembo to a Server</a>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-medium text-white/60">Your Servers</h2>
-            <span className="text-xs text-white/20">{guilds.length} server{guilds.length !== 1 ? 's' : ''}</span>
+      {/* Two Column: Insights + Security */}
+      <div className="grid lg:grid-cols-2 gap-4">
+        {/* AI Insights */}
+        <div className="rounded-xl border border-border/60 bg-card overflow-hidden">
+          <div className="px-4 py-3 border-b border-border/60 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-3.5 w-3.5 text-primary" />
+              <h3 className="text-[13px] font-medium">Wembo noticed</h3>
+            </div>
+            <Link href="/dashboard/ai">
+              <Button variant="ghost" size="sm" className="h-7 text-[11px] text-muted-foreground hover:text-foreground">
+                View all
+              </Button>
+            </Link>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {guilds.map((guild) => (
-              <Link key={guild.id} href={`/dashboard?server=${guild.id}&name=${encodeURIComponent(guild.name)}&icon=${encodeURIComponent(guild.icon || '')}&owner=${guild.owner ? '1' : '0'}`} onClick={() => setSelectedGuild(guild.id)} className="group relative flex items-center gap-4 p-5 rounded-xl bg-[#0a0b0d] border border-white/[0.04] shadow-lg shadow-black/20 hover:bg-[#0f1012] hover:border-[#FFD600]/10 transition-all duration-300">
-                {guild.owner && <div className="absolute top-2.5 right-2.5"><span className="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-[#FFD600]/10 text-[#FFD600]">Owner</span></div>}
-                {guild.icon ? <img src={`https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png?size=64`} alt={guild.name} className="h-12 w-12 rounded-xl object-cover ring-1 ring-white/[0.06]" /> : <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-white/[0.08] to-white/[0.02] flex items-center justify-center text-white/50 font-semibold text-sm ring-1 ring-white/[0.06]">{guild.name.slice(0, 2).toUpperCase()}</div>}
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-white/90 truncate group-hover:text-white transition-colors">{guild.name}</p>
-                  <div className="flex items-center gap-3 mt-1.5">
-                    <span className="flex items-center gap-1 text-xs text-white/25"><span className="h-1.5 w-1.5 rounded-full bg-green-500/60"></span>Active</span>
-                    <span className="flex items-center gap-1 text-xs text-white/25"><Shield className="h-3 w-3" />Protected</span>
-                  </div>
-                </div>
-                <ArrowRight className="h-4 w-4 text-white/10 group-hover:text-[#FFD600]/60 transition-all" />
-              </Link>
+          <div className="p-3 space-y-1.5">
+            {mockInsights.map((insight) => (
+              <div
+                key={insight.id}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-accent/50 transition-colors"
+              >
+                <div
+                  className={`h-2 w-2 rounded-full flex-shrink-0 ${
+                    insight.color === 'orange'
+                      ? 'bg-amber-500'
+                      : insight.color === 'green'
+                      ? 'bg-emerald-500'
+                      : 'bg-red-500'
+                  }`}
+                />
+                <span className="text-[13px] text-foreground/90">{insight.message}</span>
+              </div>
             ))}
-            <a href="/invite" className="group flex items-center justify-center gap-3 p-5 rounded-xl border border-dashed border-white/[0.06] hover:border-[#FFD600]/20 hover:bg-[#FFD600]/[0.02] transition-all min-h-[88px]">
-              <Plus className="h-4 w-4 text-white/20 group-hover:text-[#FFD600]/60 transition-colors" />
-              <span className="text-sm text-white/30 group-hover:text-white/50 transition-colors">Add a server</span>
-            </a>
           </div>
         </div>
-      )}
+
+        {/* Security Events */}
+        <div className="rounded-xl border border-border/60 bg-card overflow-hidden">
+          <div className="px-4 py-3 border-b border-border/60 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Shield className="h-3.5 w-3.5 text-muted-foreground" />
+              <h3 className="text-[13px] font-medium">Security Events</h3>
+            </div>
+            <Link href="/dashboard/security">
+              <Button variant="ghost" size="sm" className="h-7 text-[11px] text-muted-foreground hover:text-foreground">
+                View all
+              </Button>
+            </Link>
+          </div>
+          <div className="p-3 space-y-1.5">
+            {mockSecurityEvents.slice(0, 3).map((event) => (
+              <div
+                key={event.id}
+                className="flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-accent/50 transition-colors"
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="text-[13px] font-medium truncate">{event.description}</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">{event.timestamp}</p>
+                </div>
+                <Badge
+                  variant={
+                    event.severity === 'high'
+                      ? 'danger'
+                      : event.severity === 'medium'
+                      ? 'warning'
+                      : 'secondary'
+                  }
+                  className="ml-3 text-[10px] flex-shrink-0"
+                >
+                  {event.severity}
+                </Badge>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Activity Chart */}
+      <div className="rounded-xl border border-border/60 bg-card overflow-hidden">
+        <div className="px-4 py-3 border-b border-border/60 flex items-center justify-between">
+          <h3 className="text-[13px] font-medium">Activity</h3>
+          <Badge variant="secondary" className="text-[10px] font-medium">Last 7 days</Badge>
+        </div>
+        <div className="p-4">
+          <ActivityChart />
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="rounded-xl border border-border/60 bg-card overflow-hidden">
+        <div className="px-4 py-3 border-b border-border/60">
+          <h3 className="text-[13px] font-medium">Quick Actions</h3>
+        </div>
+        <div className="p-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+            <QuickAction icon={Zap} label="Automation" href="/dashboard/automations" />
+            <QuickAction icon={FileText} label="Form" href="/dashboard/forms" />
+            <QuickAction icon={Lightbulb} label="Knowledge" href="/dashboard/knowledge" />
+            <QuickAction icon={Shield} label="Security" href="/dashboard/security" />
+            <QuickAction icon={Plus} label="Invite Bot" href="/dashboard/integrations" />
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
 
-function QuickStat({ icon: Icon, label, value, color }: { icon: any; label: string; value: string; color: string }) {
-  const colors: Record<string, string> = { yellow: 'bg-[#FFD600]/[0.06] text-[#FFD600]', green: 'bg-green-500/[0.06] text-green-400', blue: 'bg-blue-500/[0.06] text-blue-400', purple: 'bg-purple-500/[0.06] text-purple-400' }
+function QuickAction({
+  icon: Icon,
+  label,
+  href,
+}: {
+  icon: React.ElementType
+  label: string
+  href: string
+}) {
   return (
-    <div className="flex items-center gap-3 p-4 rounded-xl bg-[#0a0b0d] border border-white/[0.04]">
-      <div className={`h-9 w-9 rounded-lg flex items-center justify-center ${colors[color]}`}><Icon className="h-4 w-4" /></div>
-      <div><p className="text-lg font-bold text-white">{value}</p><p className="text-[11px] text-white/30">{label}</p></div>
-    </div>
+    <Link
+      href={href}
+      className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg border border-border/40 hover:border-primary/30 hover:bg-primary/5 transition-all duration-150 group"
+    >
+      <Icon className="h-4 w-4 text-primary/70 group-hover:text-primary transition-colors" />
+      <span className="text-[12px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">{label}</span>
+    </Link>
   )
 }
 
