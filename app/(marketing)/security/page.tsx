@@ -18,6 +18,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { siteConfig } from '@/config/site'
 
 export const metadata: Metadata = {
   title: 'Security',
@@ -180,12 +181,12 @@ export default function SecurityPage() {
           <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
             Smart security runs 24/7 so your moderators don&apos;t have to.
           </p>
-          <Link href="#">
+          <a href={siteConfig.links.invite} target="_blank" rel="noopener noreferrer">
             <Button size="lg" className="gap-2">
               Add Wembo to Discord
               <ArrowRight className="h-4 w-4" />
             </Button>
-          </Link>
+          </a>
         </div>
       </div>
     </div>

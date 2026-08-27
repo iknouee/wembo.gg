@@ -32,7 +32,7 @@ interface JWTPayload {
   discriminator: string
   avatar: string | null
   email?: string | null
-  guilds?: Array<{ id: string; name: string; icon: string | null; owner: boolean; permissions: number }>
+  guilds?: Array<{ id: string; name: string; icon?: string | null; owner: boolean; permissions: number }>
   iat: number
   exp: number
 }
@@ -126,7 +126,7 @@ export interface SessionUser {
   discriminator: string
   avatar: string | null
   email?: string | null
-  guilds?: Array<{ id: string; name: string; icon: string | null; owner: boolean; permissions: number }>
+  guilds?: Array<{ id: string; name: string; icon?: string | null; owner: boolean; permissions: number }>
 }
 
 export function getSessionFromCookie(cookieValue: string | undefined): SessionUser | null {
@@ -225,4 +225,39 @@ export async function fetchDiscordGuilds(accessToken: string): Promise<DiscordGu
   return response.json()
 }
 
+// ─── OAuth State (CSRF Protection) ───────────────────────────────────────────
+
+const STATE_COOKIE_NAME = 'wembo_oauth_state'
+const STATE_MAX_AGE = 60 * 10 // 10 minutes
+
+export function generateOAuthState(): string {
+  return crypto.randomBytes(32).toString('hex')
+}
+
+export function getStateCookieConfig(state: string) {
+  const isProduction = process.env.NODE_ENV === 'production'
+  return {
+    name: STATE_COOKIE_NAME,
+    value: state,
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: 'lax' as const,
+    path: '/',
+    maxAge: STATE_MAX_AGE,
+  }
+}
+
+export function getDeleteStateCookieConfig() {
+  return {
+    name: STATE_COOKIE_NAME,
+    value: '',
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax' as const,
+    path: '/',
+    maxAge: 0,
+  }
+}
+
+export const STATE_COOKIE_NAME_EXPORT = STATE_COOKIE_NAME
 export const COOKIE_NAME_EXPORT = COOKIE_NAME

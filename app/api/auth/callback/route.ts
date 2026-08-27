@@ -5,12 +5,15 @@ import {
   fetchDiscordGuilds,
   signJWT,
   getSessionCookieConfig,
+  getDeleteStateCookieConfig,
+  STATE_COOKIE_NAME_EXPORT,
 } from '@/lib/auth'
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const code = searchParams.get('code')
   const error = searchParams.get('error')
+  const state = searchParams.get('state')
 
   // Handle OAuth errors (user denied, etc.)
   if (error) {
@@ -23,6 +26,14 @@ export async function GET(request: NextRequest) {
   if (!code) {
     return NextResponse.redirect(
       new URL('/login?error=no_code', request.url)
+    )
+  }
+
+  // Verify OAuth state for CSRF protection
+  const storedState = request.cookies.get(STATE_COOKIE_NAME_EXPORT)?.value
+  if (!state || !storedState || state !== storedState) {
+    return NextResponse.redirect(
+      new URL('/login?error=invalid_state', request.url)
     )
   }
 
@@ -43,13 +54,22 @@ export async function GET(request: NextRequest) {
     }
 
     // Step 4: Create a signed JWT session token
+    // Only store minimal guild info (id, name, owner, permissions) to prevent cookie overflow.
+    // Browsers have a ~4KB cookie limit — full guild objects with icons easily exceed this.
+    const minimalGuilds = guilds.slice(0, 20).map(({ id, name, owner, permissions }) => ({
+      id,
+      name,
+      owner,
+      permissions,
+    }))
+
     const token = signJWT({
       sub: discordUser.id,
       username: discordUser.global_name || discordUser.username,
       discriminator: discordUser.discriminator,
       avatar: discordUser.avatar,
       email: discordUser.email || null,
-      guilds: guilds.slice(0, 100), // Limit to prevent cookie overflow
+      guilds: minimalGuilds,
     })
 
     // Step 5: Set the cookie and redirect to dashboard
@@ -62,6 +82,16 @@ export async function GET(request: NextRequest) {
       sameSite: cookieConfig.sameSite,
       path: cookieConfig.path,
       maxAge: cookieConfig.maxAge,
+    })
+
+    // Clear the OAuth state cookie
+    const deleteStateCookie = getDeleteStateCookieConfig()
+    response.cookies.set(deleteStateCookie.name, deleteStateCookie.value, {
+      httpOnly: deleteStateCookie.httpOnly,
+      secure: deleteStateCookie.secure,
+      sameSite: deleteStateCookie.sameSite,
+      path: deleteStateCookie.path,
+      maxAge: deleteStateCookie.maxAge,
     })
 
     return response

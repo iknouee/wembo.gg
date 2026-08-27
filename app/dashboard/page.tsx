@@ -10,7 +10,6 @@ import {
   Zap,
   FileText,
   Lightbulb,
-  Eye,
   Plus,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -178,7 +177,7 @@ export default function DashboardOverview() {
             <QuickAction icon={FileText} label="Create Form" href="/dashboard/forms" />
             <QuickAction icon={Lightbulb} label="Add Knowledge" href="/dashboard/knowledge" />
             <QuickAction icon={Shield} label="View Security" href="/dashboard/security" />
-            <QuickAction icon={Plus} label="Invite Wembo" href="#" />
+            <QuickAction icon={Plus} label="Invite Wembo" href="/dashboard/integrations" />
           </div>
         </CardContent>
       </Card>

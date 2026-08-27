@@ -17,6 +17,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { siteConfig } from '@/config/site'
 
 export const metadata: Metadata = {
   title: 'AI',
@@ -168,12 +169,12 @@ export default function AIPage() {
           <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
             Set up Wembo AI in minutes. Add knowledge sources, configure permissions, and let your community ask away.
           </p>
-          <Link href="#">
+          <a href={siteConfig.links.invite} target="_blank" rel="noopener noreferrer">
             <Button size="lg" className="gap-2">
               Add Wembo to Discord
               <ArrowRight className="h-4 w-4" />
             </Button>
-          </Link>
+          </a>
         </div>
       </div>
     </div>

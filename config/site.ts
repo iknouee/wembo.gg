@@ -8,6 +8,7 @@ export const siteConfig = {
     discord: 'https://discord.gg/wembo',
     github: 'https://github.com/wembo',
     twitter: 'https://x.com/wembo',
+    invite: 'https://discord.com/oauth2/authorize?client_id=YOUR_BOT_CLIENT_ID&permissions=8&scope=bot%20applications.commands',
   },
   nav: {
     main: [
@@ -34,10 +35,10 @@ export const siteConfig = {
       { title: 'Changelog', href: '/docs#changelog' },
     ],
     company: [
-      { title: 'About', href: '#' },
-      { title: 'Contact', href: '#' },
-      { title: 'Privacy', href: '#' },
-      { title: 'Terms', href: '#' },
+      { title: 'About', href: '/about' },
+      { title: 'Contact', href: '/contact' },
+      { title: 'Privacy', href: '/privacy' },
+      { title: 'Terms', href: '/terms' },
     ],
   },
 }

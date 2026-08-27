@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { siteConfig } from '@/config/site'
 
 export function CTASection() {
   return (
@@ -18,12 +19,12 @@ export function CTASection() {
               Join thousands of Discord communities using Wembo for AI, automation, security, and more.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="#">
+              <a href={siteConfig.links.invite} target="_blank" rel="noopener noreferrer">
                 <Button size="lg" className="gap-2">
                   Add Wembo to Discord
                   <ArrowRight className="h-4 w-4" />
                 </Button>
-              </Link>
+              </a>
               <Link href="/features">
                 <Button size="lg" variant="outline">
                   Learn More

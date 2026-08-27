@@ -57,9 +57,9 @@ export function Navbar() {
               Login
             </Button>
           </Link>
-          <Link href="#">
+          <a href={siteConfig.links.invite} target="_blank" rel="noopener noreferrer">
             <Button size="sm">Add Wembo</Button>
-          </Link>
+          </a>
         </div>
 
         {/* Mobile Toggle */}
@@ -92,9 +92,9 @@ export function Navbar() {
                 Login
               </Button>
             </Link>
-            <Link href="#" onClick={() => setIsMobileOpen(false)}>
+            <a href={siteConfig.links.invite} target="_blank" rel="noopener noreferrer" onClick={() => setIsMobileOpen(false)}>
               <Button className="w-full">Add Wembo</Button>
-            </Link>
+            </a>
           </div>
         </div>
       )}

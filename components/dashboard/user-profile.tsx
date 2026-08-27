@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { LogOut, Settings, User } from 'lucide-react'
 
@@ -68,9 +69,11 @@ export function UserProfile() {
         onClick={() => setMenuOpen(!menuOpen)}
         className="w-full flex items-center gap-3 p-2 rounded-lg text-sm hover:bg-accent transition-colors"
       >
-        <img
+        <Image
           src={avatarUrl}
           alt={user.username}
+          width={32}
+          height={32}
           className="h-8 w-8 rounded-full object-cover"
         />
         <div className="flex-1 text-left min-w-0">

@@ -5,6 +5,7 @@ import { ArrowRight, Activity, Users, MessageSquare, TrendingUp } from 'lucide-r
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { siteConfig } from '@/config/site'
 
 export function HeroSection() {
   return (
@@ -28,12 +29,12 @@ export function HeroSection() {
             knowledge, analytics, and community tools — all from one beautiful dashboard.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 opacity-0 animate-fade-in-up animate-delay-200">
-            <Link href="#">
+            <a href={siteConfig.links.invite} target="_blank" rel="noopener noreferrer">
               <Button size="lg" className="gap-2">
                 Add Wembo to Discord
                 <ArrowRight className="h-4 w-4" />
               </Button>
-            </Link>
+            </a>
             <Link href="/features">
               <Button size="lg" variant="outline">
                 Explore Features

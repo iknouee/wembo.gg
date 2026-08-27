@@ -25,7 +25,7 @@ export const pricingPlans: PricingPlan[] = [
       'Community support',
     ],
     cta: 'Get Started',
-    href: '#',
+    href: '/api/auth/login',
   },
   {
     name: 'Pro',
@@ -44,7 +44,7 @@ export const pricingPlans: PricingPlan[] = [
       'Priority support',
     ],
     cta: 'Start Pro',
-    href: '#',
+    href: '/api/auth/login',
     highlighted: true,
   },
   {
@@ -62,6 +62,6 @@ export const pricingPlans: PricingPlan[] = [
       'Dedicated account manager',
     ],
     cta: 'Contact Us',
-    href: '#',
+    href: '/contact',
   },
 ]
