@@ -3,13 +3,15 @@ import { logSecurityEvent, isModuleEnabled, getModuleConfig } from './index'
 
 /**
  * Check if a member is impersonating a protected name.
- * Uses both the custom protected_names list AND auto-detected staff names.
  */
 export async function checkImpersonation(member: GuildMember) {
   const guildId = member.guild.id
 
   const enabled = await isModuleEnabled(guildId, 'impersonation')
-  if (!enabled) return
+  if (!enabled) {
+    console.log(`👤 Impersonation: disabled for ${guildId}`)
+    return
+  }
 
   const config = await getModuleConfig(guildId, 'impersonation')
   const THRESHOLD = config?.similarity_threshold ?? 80
@@ -17,24 +19,30 @@ export async function checkImpersonation(member: GuildMember) {
   const CHECK_NICKNAMES = config?.check_nicknames ?? true
   const AUTO_PROTECT_STAFF = config?.auto_protect_staff ?? true
   const PROTECTED_NAMES: string[] = config?.protected_names ?? []
-  const MIN_ACCOUNT_AGE_DAYS = config?.min_account_age_days ?? 7
 
   if (!CHECK_NICKNAMES) return
 
-  // Skip if member has mod permissions (they're staff themselves)
-  if (member.permissions.has('Administrator') || member.permissions.has('ModerateMembers')) return
-
-  // Skip if account is old enough (not suspicious)
-  const accountAgeDays = (Date.now() - member.user.createdTimestamp) / (1000 * 60 * 60 * 24)
-  if (MIN_ACCOUNT_AGE_DAYS > 0 && accountAgeDays > MIN_ACCOUNT_AGE_DAYS) return
+  // Skip if member is staff themselves
+  if (member.permissions.has('Administrator') || member.permissions.has('ModerateMembers')) {
+    console.log(`👤 Impersonation: skipping ${member.user.tag} (is staff)`)
+    return
+  }
 
   const memberName = (member.nickname || member.user.displayName || member.user.username).toLowerCase()
+  console.log(`👤 Impersonation check: "${memberName}" against protected names`)
 
   // Build list of protected names
   const namesToProtect: string[] = [...PROTECTED_NAMES.map(n => n.toLowerCase())]
 
   // Add staff names if auto-protect is enabled
   if (AUTO_PROTECT_STAFF) {
+    // Fetch members if cache is empty
+    if (member.guild.members.cache.size < 5) {
+      try {
+        await member.guild.members.fetch()
+      } catch {}
+    }
+
     const staffMembers = member.guild.members.cache.filter(m =>
       m.id !== member.id &&
       (m.permissions.has('Administrator') || m.permissions.has('ModerateMembers') || m.permissions.has('ManageMessages'))
@@ -47,76 +55,91 @@ export async function checkImpersonation(member: GuildMember) {
     })
   }
 
+  console.log(`👤 Protected names: [${namesToProtect.join(', ')}]`)
+
   if (namesToProtect.length === 0) return
 
   // Check against all protected names
-  for (const protectedName of namesToProtect) {
-    if (protectedName === memberName) continue // exact match = same name, not impersonation
+  for (let i = 0; i < namesToProtect.length; i++) {
+    const protectedName = namesToProtect[i]
+
+    // Skip exact match with self
+    if (protectedName === memberName) {
+      // This IS an exact match — definitely impersonation if they're not staff
+      console.log(`👤 EXACT MATCH: "${memberName}" === "${protectedName}"`)
+      await handleDetection(member, guildId, protectedName, 100, ACTION)
+      return
+    }
 
     const similarity = calculateSimilarity(memberName, protectedName)
 
     if (similarity >= THRESHOLD) {
-      console.log(`⚠️ Impersonation detected: "${memberName}" ≈ "${protectedName}" (${similarity}%)`)
-
-      let actionTaken = 'flagged'
-
-      try {
-        if (ACTION === 'ban' && member.bannable) {
-          await member.ban({ reason: `Wembo: Impersonating "${protectedName}" (${similarity}% match)` })
-          actionTaken = 'banned'
-        } else if (ACTION === 'kick' && member.kickable) {
-          await member.kick(`Wembo: Impersonating "${protectedName}" (${similarity}% match)`)
-          actionTaken = 'kicked'
-        } else if (ACTION === 'rename' && member.manageable) {
-          await member.setNickname(`Renamed_${member.user.id.slice(-4)}`, 'Wembo: Impersonation detected')
-          actionTaken = 'renamed'
-        }
-      } catch (e: any) {
-        console.error(`Impersonation action failed:`, e?.message)
-        actionTaken = 'flagged'
-      }
-
-      await logSecurityEvent({
-        guildId,
-        eventType: 'impersonation',
-        severity: 'high',
-        description: `"${member.nickname || member.user.username}" impersonating "${protectedName}" (${similarity}% match)`,
-        userId: member.user.id,
-        userTag: member.user.tag,
-        actionTaken,
-        metadata: { protectedName, similarity, memberName, action: ACTION },
-      })
-
-      // Increment flagged accounts
-      try {
-        const { getSupabase } = await import('../lib/supabase')
-        const supabase = getSupabase()
-        await supabase.rpc('increment_flagged_accounts', { p_guild_id: guildId })
-      } catch {}
-
-      break
+      console.log(`👤 MATCH: "${memberName}" ~ "${protectedName}" (${similarity}%)`)
+      await handleDetection(member, guildId, protectedName, similarity, ACTION)
+      return
     }
   }
+
+  console.log(`👤 No impersonation detected for "${memberName}"`)
+}
+
+async function handleDetection(member: GuildMember, guildId: string, protectedName: string, similarity: number, action: string) {
+  let actionTaken = 'flagged'
+
+  try {
+    if (action === 'ban' && member.bannable) {
+      await member.ban({ reason: `Wembo: Impersonating "${protectedName}" (${similarity}% match)` })
+      actionTaken = 'banned'
+    } else if (action === 'kick' && member.kickable) {
+      await member.kick(`Wembo: Impersonating "${protectedName}" (${similarity}% match)`)
+      actionTaken = 'kicked'
+    } else if (action === 'rename' && member.manageable) {
+      await member.setNickname(`Renamed_${member.user.id.slice(-4)}`, 'Wembo: Impersonation detected')
+      actionTaken = 'renamed'
+    }
+  } catch (e: any) {
+    console.error(`👤 Action failed:`, e?.message)
+    actionTaken = 'flagged'
+  }
+
+  console.log(`👤 Action taken: ${actionTaken}`)
+
+  await logSecurityEvent({
+    guildId,
+    eventType: 'impersonation',
+    severity: 'high',
+    description: `"${member.nickname || member.user.username}" impersonating "${protectedName}" (${similarity}% match)`,
+    userId: member.user.id,
+    userTag: member.user.tag,
+    actionTaken,
+    metadata: { protectedName, similarity, action },
+  })
+
+  try {
+    const { getSupabase } = await import('../lib/supabase')
+    const supabase = getSupabase()
+    await supabase.rpc('increment_flagged_accounts', { p_guild_id: guildId })
+  } catch {}
 }
 
 /**
- * Levenshtein distance similarity (0-100%).
+ * Levenshtein + l33tspeak + substring similarity (0-100%).
  */
 function calculateSimilarity(a: string, b: string): number {
   if (a === b) return 100
   if (a.length === 0 || b.length === 0) return 0
 
-  // Also check if one contains the other (common impersonation technique)
+  // Substring check — "admin_panto" contains "panto"
   if (a.includes(b) || b.includes(a)) {
-    const containScore = Math.round((Math.min(a.length, b.length) / Math.max(a.length, b.length)) * 100)
-    if (containScore >= 70) return Math.max(containScore, 85)
+    const ratio = Math.min(a.length, b.length) / Math.max(a.length, b.length)
+    if (ratio >= 0.6) return Math.max(Math.round(ratio * 100), 85)
   }
 
-  // Check for common substitutions (0→o, 1→l, etc)
-  const normalized_a = a.replace(/0/g, 'o').replace(/1/g, 'l').replace(/3/g, 'e').replace(/4/g, 'a').replace(/5/g, 's')
-  const normalized_b = b.replace(/0/g, 'o').replace(/1/g, 'l').replace(/3/g, 'e').replace(/4/g, 'a').replace(/5/g, 's')
-  if (normalized_a === normalized_b) return 95
+  // L33tspeak normalization
+  const normalize = (s: string) => s.replace(/0/g, 'o').replace(/1/g, 'l').replace(/3/g, 'e').replace(/4/g, 'a').replace(/5/g, 's').replace(/7/g, 't')
+  if (normalize(a) === normalize(b)) return 95
 
+  // Levenshtein distance
   const matrix: number[][] = []
   for (let i = 0; i <= a.length; i++) matrix[i] = [i]
   for (let j = 0; j <= b.length; j++) matrix[0][j] = j
