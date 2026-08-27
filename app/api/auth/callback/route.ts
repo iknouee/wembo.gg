@@ -45,14 +45,13 @@ export async function GET(request: NextRequest) {
 
     const user = await userRes.json()
 
-    // Store session as simple JSON, then hex-encode it (safe for cookies, no special chars)
+    // Build minimal session and hex-encode
     const session = JSON.stringify({
       at: tokens.access_token,
       rt: tokens.refresh_token,
       u: { id: user.id, username: user.username, avatar: user.avatar, gn: user.global_name },
     })
 
-    // Simple XOR + hex encoding (produces only 0-9a-f chars — guaranteed cookie-safe)
     const secret = process.env.AUTH_SECRET || 'fallback-secret-change-me'
     let hex = ''
     for (let i = 0; i < session.length; i++) {
@@ -60,15 +59,15 @@ export async function GET(request: NextRequest) {
       hex += byte.toString(16).padStart(2, '0')
     }
 
-    const response = NextResponse.redirect(new URL('/dashboard', request.url))
+    // Set cookie using raw Set-Cookie header to have full control
+    const redirectUrl = new URL('/dashboard', request.url)
+    const response = NextResponse.redirect(redirectUrl)
 
-    response.cookies.set('wembo_session', hex, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 60 * 60 * 24 * 7,
-    })
+    // Use the raw header — no framework magic
+    response.headers.set(
+      'Set-Cookie',
+      `wembo_session=${hex}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=604800`
+    )
 
     return response
   } catch (err: any) {
