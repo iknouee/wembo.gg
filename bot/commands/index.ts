@@ -1,133 +1,258 @@
-import { SlashCommandBuilder, ChatInputCommandInteraction, PermissionFlagsBits, TextChannel } from 'discord.js'
-import { getRulesEmbed } from '../embeds/rules'
-import { getLinksEmbed } from '../embeds/links'
-import { getFaqEmbed } from '../embeds/faq'
-import { getGettingStartedEmbed } from '../embeds/getting-started'
-import { getStatusEmbed } from '../embeds/status'
-import { getWelcomeEmbed } from '../embeds/welcome'
-import { getTicketEmbed } from '../embeds/ticket'
-import { getRoadmapEmbed } from '../embeds/roadmap'
-import { getTosEmbed } from '../embeds/tos'
+import { SlashCommandBuilder, ChatInputCommandInteraction, PermissionFlagsBits, TextChannel, EmbedBuilder } from 'discord.js'
+import { BRAND } from '../config'
+import { getSupabase } from '../lib/supabase'
 
 export const commands = [
   new SlashCommandBuilder()
-    .setName('sendrules')
-    .setDescription('Send the server rules embed')
+    .setName('security')
+    .setDescription('View security status for this server')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   new SlashCommandBuilder()
-    .setName('sendlinks')
-    .setDescription('Send the official links embed with buttons')
+    .setName('lockdown')
+    .setDescription('Toggle server lockdown mode')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   new SlashCommandBuilder()
-    .setName('sendfaq')
-    .setDescription('Send the FAQ embed')
-    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+    .setName('threats')
+    .setDescription('View recent security threats')
+    .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers),
 
   new SlashCommandBuilder()
-    .setName('sendgettingstarted')
-    .setDescription('Send the getting started guide with buttons')
-    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
-  new SlashCommandBuilder()
-    .setName('sendstatus')
-    .setDescription('Send the bot status embed')
-    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
-  new SlashCommandBuilder()
-    .setName('sendwelcome')
-    .setDescription('Send the welcome embed with buttons')
-    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
-  new SlashCommandBuilder()
-    .setName('sendticket')
-    .setDescription('Send the ticket panel with Open Ticket button')
-    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
-  new SlashCommandBuilder()
-    .setName('sendroadmap')
-    .setDescription('Send the roadmap embed')
-    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
-  new SlashCommandBuilder()
-    .setName('sendtos')
-    .setDescription('Send the terms of service embed with buttons')
-    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+    .setName('whitelist')
+    .setDescription('Manage the bot whitelist')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+    .addSubcommand(sub =>
+      sub.setName('add').setDescription('Add a bot to the whitelist')
+        .addUserOption(opt => opt.setName('bot').setDescription('The bot to whitelist').setRequired(true))
+    )
+    .addSubcommand(sub =>
+      sub.setName('remove').setDescription('Remove a bot from the whitelist')
+        .addUserOption(opt => opt.setName('bot').setDescription('The bot to remove').setRequired(true))
+    )
+    .addSubcommand(sub =>
+      sub.setName('list').setDescription('View all whitelisted bots')
+    ),
 ]
 
 export async function handleCommand(interaction: ChatInputCommandInteraction) {
   const { commandName } = interaction
-  const channel = interaction.channel
+  const guildId = interaction.guildId
 
-  if (!channel || !('send' in channel)) {
-    await interaction.reply({ content: 'This command can only be used in a text channel.', ephemeral: true })
+  if (!guildId) {
+    await interaction.reply({ content: 'This command can only be used in a server.', ephemeral: true })
     return
   }
 
-  const ch = channel as TextChannel
-
   switch (commandName) {
-    case 'sendrules': {
-      await ch.send({ embeds: [getRulesEmbed()] })
-      await interaction.reply({ content: '✅ Rules embed sent.', ephemeral: true })
+    case 'security': {
+      await handleSecurityCommand(interaction, guildId)
       break
     }
 
-    case 'sendlinks': {
-      const { embed, rows } = getLinksEmbed()
-      await ch.send({ embeds: [embed], components: rows })
-      await interaction.reply({ content: '✅ Links embed sent.', ephemeral: true })
+    case 'lockdown': {
+      await handleLockdownCommand(interaction, guildId)
       break
     }
 
-    case 'sendfaq': {
-      await ch.send({ embeds: [getFaqEmbed()] })
-      await interaction.reply({ content: '✅ FAQ embed sent.', ephemeral: true })
+    case 'threats': {
+      await handleThreatsCommand(interaction, guildId)
       break
     }
 
-    case 'sendgettingstarted': {
-      const { embed, row } = getGettingStartedEmbed()
-      await ch.send({ embeds: [embed], components: [row] })
-      await interaction.reply({ content: '✅ Getting Started embed sent.', ephemeral: true })
-      break
-    }
-
-    case 'sendstatus': {
-      await ch.send({ embeds: [getStatusEmbed()] })
-      await interaction.reply({ content: '✅ Status embed sent.', ephemeral: true })
-      break
-    }
-
-    case 'sendwelcome': {
-      const { embed, row } = getWelcomeEmbed()
-      await ch.send({ embeds: [embed], components: [row] })
-      await interaction.reply({ content: '✅ Welcome embed sent.', ephemeral: true })
-      break
-    }
-
-    case 'sendticket': {
-      const { embed, components } = getTicketEmbed()
-      await ch.send({ embeds: [embed], components })
-      await interaction.reply({ content: '✅ Ticket panel sent.', ephemeral: true })
-      break
-    }
-
-    case 'sendroadmap': {
-      await ch.send({ embeds: [getRoadmapEmbed()] })
-      await interaction.reply({ content: '✅ Roadmap embed sent.', ephemeral: true })
-      break
-    }
-
-    case 'sendtos': {
-      const { embed, row } = getTosEmbed()
-      await ch.send({ embeds: [embed], components: [row] })
-      await interaction.reply({ content: '✅ Terms of Service embed sent.', ephemeral: true })
+    case 'whitelist': {
+      await handleWhitelistCommand(interaction, guildId)
       break
     }
 
     default:
       await interaction.reply({ content: 'Unknown command.', ephemeral: true })
+  }
+}
+
+// ─── /security ───────────────────────────────────────────────────────────────
+
+async function handleSecurityCommand(interaction: ChatInputCommandInteraction, guildId: string) {
+  await interaction.deferReply({ ephemeral: true })
+
+  try {
+    const supabase = getSupabase()
+
+    const [modulesRes, statsRes, settingsRes] = await Promise.all([
+      supabase.from('security_modules').select('module_id, enabled').eq('guild_id', guildId),
+      supabase.from('security_stats').select('*').eq('guild_id', guildId).single(),
+      supabase.from('server_settings').select('lockdown_active').eq('guild_id', guildId).single(),
+    ])
+
+    const modules = modulesRes.data || []
+    const stats = statsRes.data
+    const lockdown = settingsRes.data?.lockdown_active || false
+
+    const moduleStatus = (id: string) => {
+      const mod = modules.find(m => m.module_id === id)
+      return mod?.enabled ? '✅' : '❌'
+    }
+
+    const embed = new EmbedBuilder()
+      .setTitle('🛡️ Security Status')
+      .setColor(BRAND.color)
+      .setDescription(lockdown ? '🔒 **SERVER IS IN LOCKDOWN**' : '✅ All systems operational')
+      .addFields(
+        { name: 'Modules', value: [
+          `${moduleStatus('antiraid')} Anti-Raid`,
+          `${moduleStatus('antispam')} Anti-Spam`,
+          `${moduleStatus('antinuke')} Anti-Nuke`,
+          `${moduleStatus('phishing')} Link Blocker`,
+          `${moduleStatus('impersonation')} Impersonation Guard`,
+          `${moduleStatus('botguard')} Bot Guard`,
+        ].join('\n'), inline: true },
+        { name: 'Stats', value: [
+          `**${stats?.threats_blocked_week ?? 0}** threats this week`,
+          `**${stats?.raids_prevented_month ?? 0}** raids prevented`,
+          `**${stats?.links_scanned_total ?? 0}** links scanned`,
+          `**${stats?.accounts_flagged ?? 0}** accounts flagged`,
+        ].join('\n'), inline: true },
+      )
+      .setFooter({ text: 'Wembo Security • wembo.xyz/dashboard' })
+      .setTimestamp()
+
+    await interaction.editReply({ embeds: [embed] })
+  } catch (err) {
+    await interaction.editReply({ content: '❌ Failed to fetch security status.' })
+  }
+}
+
+// ─── /lockdown ───────────────────────────────────────────────────────────────
+
+async function handleLockdownCommand(interaction: ChatInputCommandInteraction, guildId: string) {
+  await interaction.deferReply({ ephemeral: true })
+
+  try {
+    const supabase = getSupabase()
+
+    const { data } = await supabase.from('server_settings').select('lockdown_active').eq('guild_id', guildId).single()
+    const currentState = data?.lockdown_active || false
+    const newState = !currentState
+
+    await supabase.from('server_settings').upsert({ guild_id: guildId, lockdown_active: newState }, { onConflict: 'guild_id' })
+
+    const embed = new EmbedBuilder()
+      .setTitle(newState ? '🔒 Lockdown Activated' : '🔓 Lockdown Deactivated')
+      .setColor(newState ? 0xEF4444 : 0x4ade80)
+      .setDescription(newState
+        ? 'Server lockdown is now **active**. New joins will be blocked.'
+        : 'Server lockdown has been **deactivated**. Normal operation resumed.')
+      .setFooter({ text: `By ${interaction.user.tag}` })
+      .setTimestamp()
+
+    await interaction.editReply({ embeds: [embed] })
+  } catch (err) {
+    await interaction.editReply({ content: '❌ Failed to toggle lockdown.' })
+  }
+}
+
+// ─── /threats ────────────────────────────────────────────────────────────────
+
+async function handleThreatsCommand(interaction: ChatInputCommandInteraction, guildId: string) {
+  await interaction.deferReply({ ephemeral: true })
+
+  try {
+    const supabase = getSupabase()
+
+    const { data: events } = await supabase
+      .from('security_events')
+      .select('*')
+      .eq('guild_id', guildId)
+      .order('created_at', { ascending: false })
+      .limit(5)
+
+    if (!events || events.length === 0) {
+      await interaction.editReply({ content: '🎉 No threats detected recently. Your server is secure!' })
+      return
+    }
+
+    const severityIcons = { high: '🔴', medium: '🟠', low: '🟡' }
+
+    const embed = new EmbedBuilder()
+      .setTitle('🛡️ Recent Threats')
+      .setColor(BRAND.color)
+      .setDescription(events.map(e =>
+        `${severityIcons[e.severity as keyof typeof severityIcons] || '⚪'} **${e.description}**\n  └ ${e.action_taken || 'Logged'} • <t:${Math.floor(new Date(e.created_at).getTime() / 1000)}:R>`
+      ).join('\n\n'))
+      .setFooter({ text: `${events.length} most recent • wembo.xyz/dashboard/security` })
+      .setTimestamp()
+
+    await interaction.editReply({ embeds: [embed] })
+  } catch (err) {
+    await interaction.editReply({ content: '❌ Failed to fetch threats.' })
+  }
+}
+
+// ─── /whitelist ──────────────────────────────────────────────────────────────
+
+async function handleWhitelistCommand(interaction: ChatInputCommandInteraction, guildId: string) {
+  const sub = interaction.options.getSubcommand()
+  await interaction.deferReply({ ephemeral: true })
+
+  try {
+    const supabase = getSupabase()
+
+    // Get current botguard config
+    const { data: mod } = await supabase
+      .from('security_modules')
+      .select('config')
+      .eq('guild_id', guildId)
+      .eq('module_id', 'botguard')
+      .single()
+
+    const config = mod?.config || { whitelisted_bots: [] }
+    const whitelist: string[] = config.whitelisted_bots || []
+
+    if (sub === 'add') {
+      const bot = interaction.options.getUser('bot', true)
+      if (!bot.bot) {
+        await interaction.editReply({ content: '❌ That user is not a bot.' })
+        return
+      }
+      if (whitelist.includes(bot.id)) {
+        await interaction.editReply({ content: `✅ \`${bot.tag}\` is already whitelisted.` })
+        return
+      }
+      whitelist.push(bot.id)
+      await supabase.from('security_modules').upsert({
+        guild_id: guildId, module_id: 'botguard', enabled: true,
+        config: { ...config, whitelisted_bots: whitelist },
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'guild_id,module_id' })
+      await interaction.editReply({ content: `✅ \`${bot.tag}\` has been whitelisted.` })
+
+    } else if (sub === 'remove') {
+      const bot = interaction.options.getUser('bot', true)
+      if (!whitelist.includes(bot.id)) {
+        await interaction.editReply({ content: `❌ \`${bot.tag}\` is not on the whitelist.` })
+        return
+      }
+      const updated = whitelist.filter(id => id !== bot.id)
+      await supabase.from('security_modules').upsert({
+        guild_id: guildId, module_id: 'botguard', enabled: true,
+        config: { ...config, whitelisted_bots: updated },
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'guild_id,module_id' })
+      await interaction.editReply({ content: `✅ \`${bot.tag}\` removed from whitelist.` })
+
+    } else if (sub === 'list') {
+      if (whitelist.length === 0) {
+        await interaction.editReply({ content: 'No bots are whitelisted. Use `/whitelist add` to add one.' })
+        return
+      }
+      const embed = new EmbedBuilder()
+        .setTitle('🤖 Whitelisted Bots')
+        .setColor(BRAND.color)
+        .setDescription(whitelist.map(id => `• <@${id}> (\`${id}\`)`).join('\n'))
+        .setFooter({ text: `${whitelist.length} bot${whitelist.length !== 1 ? 's' : ''}` })
+      await interaction.editReply({ embeds: [embed] })
+    }
+  } catch (err) {
+    await interaction.editReply({ content: '❌ Failed to manage whitelist.' })
   }
 }

@@ -7,8 +7,10 @@ const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.GuildMembers,        // Required for anti-raid (member join events)
+    GatewayIntentBits.GuildMembers,        // Required for anti-raid, bot guard (member join events)
     GatewayIntentBits.MessageContent,      // Required for spam/phishing scanning
+    GatewayIntentBits.GuildModeration,     // Required for anti-nuke (ban/kick audit events)
+    GatewayIntentBits.GuildWebhooks,       // Required for anti-nuke (webhook monitoring)
   ],
 })
 
