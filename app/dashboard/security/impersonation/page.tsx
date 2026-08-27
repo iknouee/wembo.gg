@@ -32,7 +32,7 @@ export default function ImpersonationPage() {
   if (loading) return <div className="flex items-center justify-center min-h-[60vh]"><Loader2 className="h-6 w-6 text-[#FFD600] animate-spin" /></div>
 
   return (
-    <div className="p-8 lg:p-10 max-w-3xl space-y-10">
+    <div className="p-6 lg:p-8 space-y-8">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="h-12 w-12 rounded-2xl bg-purple-500/[0.06] flex items-center justify-center"><UserX className="h-6 w-6 text-purple-400" /></div>

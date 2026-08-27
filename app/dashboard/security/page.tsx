@@ -45,7 +45,7 @@ export default function SecurityOverview() {
   if (loading) return <div className="flex items-center justify-center min-h-[60vh]"><Loader2 className="h-6 w-6 text-[#FFD600] animate-spin" /></div>
 
   return (
-    <div className="p-8 lg:p-10 max-w-5xl space-y-10">
+    <div className="p-6 lg:p-8 space-y-8">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
