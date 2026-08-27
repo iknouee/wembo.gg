@@ -1,22 +1,16 @@
-import { cookies } from 'next/headers'
 import { Navbar } from '@/components/navbar'
 import { Footer } from '@/components/footer'
-import { decodeSession } from '@/lib/session'
-
-export const dynamic = 'force-dynamic'
 
 export default function MarketingLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const cookieStore = cookies()
-  const cookie = cookieStore.get('wembo_session')
-  const { user } = cookie?.value ? decodeSession(cookie.value) : { user: null }
-
+  // Temporarily removed cookies() reading to test if it was
+  // clearing the wembo_session cookie on dashboard routes
   return (
     <div className="relative min-h-screen">
-      <Navbar initialUser={user} />
+      <Navbar initialUser={null} />
       <main className="pt-16">{children}</main>
       <Footer />
     </div>
