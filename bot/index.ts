@@ -45,6 +45,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 })
 
 // Login
+// Login
 client.login(config.token).catch((error) => {
   console.error('Failed to login:', error)
   process.exit(1)
