@@ -7,7 +7,7 @@ import { Server, Plus, ArrowRight, ArrowLeft, Shield, Zap, TrendingUp, Clock, Cr
 
 export default function DashboardPage() {
   const searchParams = useSearchParams()
-  const { user, guilds } = useAuth()
+  const { user, guilds, setSelectedGuild } = useAuth()
   const selectedServerId = searchParams.get('server')
 
   // Server view
@@ -100,7 +100,7 @@ export default function DashboardPage() {
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {guilds.map((guild) => (
-              <Link key={guild.id} href={`/dashboard?server=${guild.id}&name=${encodeURIComponent(guild.name)}&icon=${encodeURIComponent(guild.icon || '')}&owner=${guild.owner ? '1' : '0'}`} className="group relative flex items-center gap-4 p-5 rounded-xl bg-[#0a0b0d] border border-white/[0.04] shadow-lg shadow-black/20 hover:bg-[#0f1012] hover:border-[#FFD600]/10 transition-all duration-300">
+              <Link key={guild.id} href={`/dashboard?server=${guild.id}&name=${encodeURIComponent(guild.name)}&icon=${encodeURIComponent(guild.icon || '')}&owner=${guild.owner ? '1' : '0'}`} onClick={() => setSelectedGuild(guild.id)} className="group relative flex items-center gap-4 p-5 rounded-xl bg-[#0a0b0d] border border-white/[0.04] shadow-lg shadow-black/20 hover:bg-[#0f1012] hover:border-[#FFD600]/10 transition-all duration-300">
                 {guild.owner && <div className="absolute top-2.5 right-2.5"><span className="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-[#FFD600]/10 text-[#FFD600]">Owner</span></div>}
                 {guild.icon ? <img src={`https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png?size=64`} alt={guild.name} className="h-12 w-12 rounded-xl object-cover ring-1 ring-white/[0.06]" /> : <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-white/[0.08] to-white/[0.02] flex items-center justify-center text-white/50 font-semibold text-sm ring-1 ring-white/[0.06]">{guild.name.slice(0, 2).toUpperCase()}</div>}
                 <div className="flex-1 min-w-0">

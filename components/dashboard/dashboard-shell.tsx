@@ -10,9 +10,9 @@ import { cn } from '@/lib/utils'
 
 interface User { id: string; username: string; avatar: string | null; global_name: string | null }
 interface Guild { id: string; name: string; icon: string | null; owner: boolean; permissions: string }
-interface AuthState { user: User | null; guilds: Guild[]; loading: boolean; token: string | null }
+interface AuthState { user: User | null; guilds: Guild[]; loading: boolean; token: string | null; selectedGuild: string | null; setSelectedGuild: (id: string) => void }
 
-const AuthContext = createContext<AuthState>({ user: null, guilds: [], loading: true, token: null })
+const AuthContext = createContext<AuthState>({ user: null, guilds: [], loading: true, token: null, selectedGuild: null, setSelectedGuild: () => {} })
 export const useAuth = () => useContext(AuthContext)
 
 function getToken(): string | null {
@@ -34,14 +34,15 @@ const securitySubNav = [
 // ─── Shell ───────────────────────────────────────────────────────────────────
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
-  const [auth, setAuth] = useState<AuthState>({ user: null, guilds: [], loading: true, token: null })
+  const [auth, setAuth] = useState<AuthState>({ user: null, guilds: [], loading: true, token: null, selectedGuild: null, setSelectedGuild: () => {} })
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [selectedGuild, setSelectedGuild] = useState<string | null>(null)
   const pathname = usePathname()
   const [securityOpen, setSecurityOpen] = useState(pathname.includes('/security'))
 
   useEffect(() => {
     const token = getToken()
-    if (!token) { setAuth({ user: null, guilds: [], loading: false, token: null }); return }
+    if (!token) { setAuth({ user: null, guilds: [], loading: false, token: null, selectedGuild: null, setSelectedGuild: () => {} }); return }
 
     Promise.all([
       fetch('https://discord.com/api/v10/users/@me', { headers: { Authorization: `Bearer ${token}` } }).then(r => r.ok ? r.json() : null),
@@ -49,8 +50,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     ]).then(([userData, allGuilds]) => {
       const user = userData ? { id: userData.id, username: userData.username, avatar: userData.avatar, global_name: userData.global_name } : null
       const guilds = (allGuilds || []).filter((g: any) => { const p = BigInt(g.permissions); return g.owner || (p & BigInt(0x20)) !== BigInt(0) })
-      setAuth({ user, guilds, loading: false, token })
-    }).catch(() => setAuth({ user: null, guilds: [], loading: false, token: null }))
+      setAuth({ user, guilds, loading: false, token, selectedGuild: null, setSelectedGuild: () => {} })
+    }).catch(() => setAuth({ user: null, guilds: [], loading: false, token: null, selectedGuild: null, setSelectedGuild: () => {} }))
   }, [])
 
   useEffect(() => { setSidebarOpen(false) }, [pathname])
@@ -67,7 +68,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const isSecurityPage = pathname.includes('/security')
 
   return (
-    <AuthContext.Provider value={auth}>
+    <AuthContext.Provider value={{ ...auth, selectedGuild, setSelectedGuild }}>
       <div className="min-h-screen bg-[#050505]">
         {/* Desktop Sidebar */}
         <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-[#090A0C]">
