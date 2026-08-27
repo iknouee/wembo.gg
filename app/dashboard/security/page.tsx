@@ -88,7 +88,7 @@ export default function SecurityOverview() {
         <div className="grid sm:grid-cols-2 gap-3">
           <ModuleCard href="/dashboard/security/antiraid" icon={Zap} name="Anti-Raid" desc="Mass join detection" color="yellow" />
           <ModuleCard href="/dashboard/security/antispam" icon={Ban} name="Anti-Spam" desc="Message flood protection" color="red" />
-          <ModuleCard href="/dashboard/security/phishing" icon={Link2} name="Phishing" desc="Malicious link scanning" color="blue" />
+          <ModuleCard href="/dashboard/security/phishing" icon={Link2} name="Link Blocker" desc="Block links except whitelisted" color="blue" />
           <ModuleCard href="/dashboard/security/impersonation" icon={UserX} name="Impersonation" desc="Staff identity protection" color="purple" />
         </div>
       </div>

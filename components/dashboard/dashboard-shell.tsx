@@ -27,7 +27,7 @@ const securitySubNav = [
   { title: 'Overview', href: '/dashboard/security', icon: Shield },
   { title: 'Anti-Raid', href: '/dashboard/security/antiraid', icon: Zap },
   { title: 'Anti-Spam', href: '/dashboard/security/antispam', icon: Ban },
-  { title: 'Phishing', href: '/dashboard/security/phishing', icon: Link2 },
+  { title: 'Link Blocker', href: '/dashboard/security/phishing', icon: Link2 },
   { title: 'Impersonation', href: '/dashboard/security/impersonation', icon: UserX },
 ]
 
