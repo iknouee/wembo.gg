@@ -1,5 +1,4 @@
 import { NextRequest } from 'next/server'
-import { exchangeCode, fetchUser, encryptSessionData } from '@/lib/auth'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -7,34 +6,73 @@ export async function GET(request: NextRequest) {
   const error = searchParams.get('error')
 
   if (error || !code) {
-    return Response.redirect(new URL('/login?error=access_denied', request.url))
+    return Response.redirect(new URL('/login?error=no_code', request.url))
   }
 
   try {
-    const tokens = await exchangeCode(code)
-    const user = await fetchUser(tokens.access_token)
+    // Exchange code for tokens
+    const tokenParams = new URLSearchParams({
+      client_id: process.env.DISCORD_CLIENT_ID || '',
+      client_secret: process.env.DISCORD_CLIENT_SECRET || '',
+      grant_type: 'authorization_code',
+      code,
+      redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback`,
+    })
 
-    const session = {
+    const tokenRes = await fetch('https://discord.com/api/v10/oauth2/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: tokenParams.toString(),
+    })
+
+    if (!tokenRes.ok) {
+      const errText = await tokenRes.text()
+      return new Response(`Token exchange failed: ${errText}`, { status: 400 })
+    }
+
+    const tokens = await tokenRes.json()
+
+    // Fetch user
+    const userRes = await fetch('https://discord.com/api/v10/users/@me', {
+      headers: { Authorization: `Bearer ${tokens.access_token}` },
+    })
+
+    if (!userRes.ok) {
+      return new Response('User fetch failed', { status: 400 })
+    }
+
+    const user = await userRes.json()
+
+    // Build session
+    const session = JSON.stringify({
       accessToken: tokens.access_token,
       refreshToken: tokens.refresh_token,
       expiresAt: Date.now() + tokens.expires_in * 1000,
       user,
-    }
-
-    const encrypted = encryptSessionData(JSON.stringify(session))
-
-    // Return HTML page that sets cookie via Set-Cookie header and redirects
-    const html = `<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=/dashboard"></head><body></body></html>`
-
-    return new Response(html, {
-      status: 200,
-      headers: {
-        'Content-Type': 'text/html',
-        'Set-Cookie': `wembo_session=${encrypted}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${60 * 60 * 24 * 7}`,
-      },
     })
-  } catch (err) {
-    console.error('OAuth callback error:', err)
-    return Response.redirect(new URL('/login?error=auth_failed', request.url))
+
+    // Encrypt
+    const secret = process.env.AUTH_SECRET || 'fallback-secret-change-me'
+    let encrypted = ''
+    for (let i = 0; i < session.length; i++) {
+      encrypted += String.fromCharCode(
+        session.charCodeAt(i) ^ secret.charCodeAt(i % secret.length)
+      )
+    }
+    const cookieValue = btoa(encrypted)
+
+    // Return HTML that sets cookie and redirects
+    return new Response(
+      `<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=/dashboard"></head><body>Redirecting...</body></html>`,
+      {
+        status: 200,
+        headers: {
+          'Content-Type': 'text/html',
+          'Set-Cookie': `wembo_session=${cookieValue}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=604800`,
+        },
+      }
+    )
+  } catch (err: any) {
+    return new Response(`Error: ${err?.message || 'Unknown'}`, { status: 500 })
   }
 }
