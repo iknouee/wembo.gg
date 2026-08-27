@@ -1,7 +1,6 @@
 import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Users, Shield, Hash, Crown, Globe, Calendar } from 'lucide-react'
+import { ArrowLeft, Shield, Crown, Globe } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,9 +9,6 @@ interface GuildInfo {
   name: string
   icon: string | null
   owner: boolean
-  approximate_member_count?: number
-  approximate_presence_count?: number
-  description?: string | null
 }
 
 function getAccessToken(): string | null {
@@ -41,7 +37,6 @@ function getAccessToken(): string | null {
 
 async function fetchGuild(accessToken: string, serverId: string): Promise<GuildInfo | null> {
   try {
-    // Fetch user's guilds and find the matching one
     const res = await fetch('https://discord.com/api/v10/users/@me/guilds', {
       headers: { Authorization: `Bearer ${accessToken}` },
       next: { revalidate: 60 },
@@ -50,9 +45,7 @@ async function fetchGuild(accessToken: string, serverId: string): Promise<GuildI
     if (!res.ok) return null
 
     const guilds = await res.json()
-    const guild = guilds.find((g: any) => g.id === serverId)
-
-    return guild || null
+    return guilds.find((g: any) => g.id === serverId) || null
   } catch {
     return null
   }
@@ -64,9 +57,7 @@ export default async function ServerDashboard({
   params: { serverId: string }
 }) {
   const accessToken = getAccessToken()
-  if (!accessToken) redirect('/login')
-
-  const guild = await fetchGuild(accessToken, params.serverId)
+  const guild = accessToken ? await fetchGuild(accessToken, params.serverId) : null
 
   if (!guild) {
     return (

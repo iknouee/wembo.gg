@@ -1,22 +1,10 @@
-import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
 import { Sidebar, MobileSidebar } from '@/components/dashboard/sidebar'
-
-export const dynamic = 'force-dynamic'
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  // Server-side auth check — read cookie directly
-  const cookieStore = cookies()
-  const sessionCookie = cookieStore.get('wembo_session')
-
-  if (!sessionCookie?.value) {
-    redirect('/login')
-  }
-
   return (
     <div className="min-h-screen bg-[#050505]">
       <Sidebar />
