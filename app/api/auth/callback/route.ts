@@ -45,37 +45,29 @@ export async function GET(request: NextRequest) {
 
     const user = await userRes.json()
 
-    // Build MINIMAL session — only store what we need to keep cookie under 4KB
+    // Store session as simple JSON, then hex-encode it (safe for cookies, no special chars)
     const session = JSON.stringify({
       at: tokens.access_token,
       rt: tokens.refresh_token,
-      u: {
-        id: user.id,
-        username: user.username,
-        avatar: user.avatar,
-        gn: user.global_name,
-      },
+      u: { id: user.id, username: user.username, avatar: user.avatar, gn: user.global_name },
     })
 
-    // Encrypt session using XOR cipher
+    // Simple XOR + hex encoding (produces only 0-9a-f chars — guaranteed cookie-safe)
     const secret = process.env.AUTH_SECRET || 'fallback-secret-change-me'
-    let encrypted = ''
+    let hex = ''
     for (let i = 0; i < session.length; i++) {
-      encrypted += String.fromCharCode(
-        session.charCodeAt(i) ^ secret.charCodeAt(i % secret.length)
-      )
+      const byte = session.charCodeAt(i) ^ secret.charCodeAt(i % secret.length)
+      hex += byte.toString(16).padStart(2, '0')
     }
-    const cookieValue = Buffer.from(encrypted, 'binary').toString('base64url')
 
-    // Use a proper 302 redirect with the cookie
     const response = NextResponse.redirect(new URL('/dashboard', request.url))
 
-    response.cookies.set('wembo_session', cookieValue, {
+    response.cookies.set('wembo_session', hex, {
       httpOnly: true,
       secure: true,
       sameSite: 'lax',
       path: '/',
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+      maxAge: 60 * 60 * 24 * 7,
     })
 
     return response
