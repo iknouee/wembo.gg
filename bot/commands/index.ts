@@ -6,46 +6,53 @@ import { getGettingStartedEmbed } from '../embeds/getting-started'
 import { getStatusEmbed } from '../embeds/status'
 import { getWelcomeEmbed } from '../embeds/welcome'
 import { getTicketEmbed } from '../embeds/ticket'
+import { getRoadmapEmbed } from '../embeds/roadmap'
+import { getTosEmbed } from '../embeds/tos'
 
 export const commands = [
   new SlashCommandBuilder()
     .setName('sendrules')
-    .setDescription('Send the server rules embed to this channel')
+    .setDescription('Send the server rules embed')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   new SlashCommandBuilder()
     .setName('sendlinks')
-    .setDescription('Send the official links embed to this channel')
+    .setDescription('Send the official links embed with buttons')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   new SlashCommandBuilder()
     .setName('sendfaq')
-    .setDescription('Send the FAQ embed to this channel')
+    .setDescription('Send the FAQ embed')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   new SlashCommandBuilder()
     .setName('sendgettingstarted')
-    .setDescription('Send the getting started embed to this channel')
+    .setDescription('Send the getting started guide with buttons')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   new SlashCommandBuilder()
     .setName('sendstatus')
-    .setDescription('Send the bot status embed to this channel')
+    .setDescription('Send the bot status embed')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   new SlashCommandBuilder()
     .setName('sendwelcome')
-    .setDescription('Send the welcome/announcements embed to this channel')
+    .setDescription('Send the welcome embed with buttons')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   new SlashCommandBuilder()
     .setName('sendticket')
-    .setDescription('Send the ticket panel with button to this channel')
+    .setDescription('Send the ticket panel with Open Ticket button')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   new SlashCommandBuilder()
-    .setName('sendall')
-    .setDescription('Send all setup embeds to the current channel (for testing)')
+    .setName('sendroadmap')
+    .setDescription('Send the roadmap embed')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+
+  new SlashCommandBuilder()
+    .setName('sendtos')
+    .setDescription('Send the terms of service embed with buttons')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 ]
 
@@ -58,62 +65,65 @@ export async function handleCommand(interaction: ChatInputCommandInteraction) {
     return
   }
 
-  const textChannel = channel as TextChannel
+  const ch = channel as TextChannel
 
   switch (commandName) {
     case 'sendrules': {
-      await textChannel.send({ embeds: [getRulesEmbed()] })
+      await ch.send({ embeds: [getRulesEmbed()] })
       await interaction.reply({ content: '✅ Rules embed sent.', ephemeral: true })
       break
     }
 
     case 'sendlinks': {
-      await textChannel.send({ embeds: [getLinksEmbed()] })
+      const { embed, rows } = getLinksEmbed()
+      await ch.send({ embeds: [embed], components: rows })
       await interaction.reply({ content: '✅ Links embed sent.', ephemeral: true })
       break
     }
 
     case 'sendfaq': {
-      await textChannel.send({ embeds: [getFaqEmbed()] })
+      await ch.send({ embeds: [getFaqEmbed()] })
       await interaction.reply({ content: '✅ FAQ embed sent.', ephemeral: true })
       break
     }
 
     case 'sendgettingstarted': {
-      await textChannel.send({ embeds: [getGettingStartedEmbed()] })
+      const { embed, row } = getGettingStartedEmbed()
+      await ch.send({ embeds: [embed], components: [row] })
       await interaction.reply({ content: '✅ Getting Started embed sent.', ephemeral: true })
       break
     }
 
     case 'sendstatus': {
-      await textChannel.send({ embeds: [getStatusEmbed()] })
+      await ch.send({ embeds: [getStatusEmbed()] })
       await interaction.reply({ content: '✅ Status embed sent.', ephemeral: true })
       break
     }
 
     case 'sendwelcome': {
-      await textChannel.send({ embeds: [getWelcomeEmbed()] })
+      const { embed, row } = getWelcomeEmbed()
+      await ch.send({ embeds: [embed], components: [row] })
       await interaction.reply({ content: '✅ Welcome embed sent.', ephemeral: true })
       break
     }
 
     case 'sendticket': {
       const { embed, row } = getTicketEmbed()
-      await textChannel.send({ embeds: [embed], components: [row] })
+      await ch.send({ embeds: [embed], components: [row] })
       await interaction.reply({ content: '✅ Ticket panel sent.', ephemeral: true })
       break
     }
 
-    case 'sendall': {
-      await textChannel.send({ embeds: [getRulesEmbed()] })
-      await textChannel.send({ embeds: [getLinksEmbed()] })
-      await textChannel.send({ embeds: [getFaqEmbed()] })
-      await textChannel.send({ embeds: [getGettingStartedEmbed()] })
-      await textChannel.send({ embeds: [getStatusEmbed()] })
-      await textChannel.send({ embeds: [getWelcomeEmbed()] })
-      const { embed, row } = getTicketEmbed()
-      await textChannel.send({ embeds: [embed], components: [row] })
-      await interaction.reply({ content: '✅ All embeds sent.', ephemeral: true })
+    case 'sendroadmap': {
+      await ch.send({ embeds: [getRoadmapEmbed()] })
+      await interaction.reply({ content: '✅ Roadmap embed sent.', ephemeral: true })
+      break
+    }
+
+    case 'sendtos': {
+      const { embed, row } = getTosEmbed()
+      await ch.send({ embeds: [embed], components: [row] })
+      await interaction.reply({ content: '✅ Terms of Service embed sent.', ephemeral: true })
       break
     }
 

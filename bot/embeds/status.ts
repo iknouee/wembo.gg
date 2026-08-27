@@ -4,14 +4,16 @@ import { BRAND } from '../config'
 export function getStatusEmbed() {
   return new EmbedBuilder()
     .setColor(BRAND.color)
-    .setTitle('Wembo Status')
-    .setImage(BRAND.banner)
-    .setDescription('Current operational status of Wembo services.')
-    .addFields(
-      { name: '🤖 Bot', value: 'Online', inline: true },
-      { name: '🌐 Dashboard', value: 'Online', inline: true },
-      { name: '📡 API', value: 'Online', inline: true },
+    .setAuthor({ name: 'Wembo • System Status' })
+    .setDescription(
+      '```\n' +
+      '  Service        Status\n' +
+      '  ─────────────────────\n' +
+      '  Bot            ● Online\n' +
+      '  Dashboard      ● Online\n' +
+      '  API            ● Online\n' +
+      '```'
     )
-    .setFooter({ text: `Last updated: ${new Date().toUTCString()} • wembo.xyz/status` })
+    .setFooter({ text: `Last updated • ${new Date().toUTCString()}` })
     .setTimestamp()
 }

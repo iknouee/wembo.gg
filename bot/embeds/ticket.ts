@@ -4,11 +4,14 @@ import { BRAND } from '../config'
 export function getTicketEmbed() {
   const embed = new EmbedBuilder()
     .setColor(BRAND.color)
-    .setTitle('Support Tickets')
-    .setImage(BRAND.banner)
-    .setDescription('Need private help? Click the button below to open a support ticket.\n\nA staff member will respond as soon as possible.')
-    .addFields(
-      { name: 'Before opening a ticket:', value: '• Check #faq for common solutions\n• Check #get-help for public answers\n• Include details about your issue' },
+    .setAuthor({ name: 'Wembo • Support Tickets' })
+    .setDescription(
+      '> Need private help? Open a ticket below.\n\n' +
+      'A staff member will respond as soon as possible.\n\n' +
+      '**Before opening a ticket:**\n' +
+      '• Check <#faq> for common answers\n' +
+      '• Check <#get-help> for public support\n' +
+      '• Be ready to describe your issue clearly'
     )
 
   const row = new ActionRowBuilder<ButtonBuilder>().addComponents(

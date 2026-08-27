@@ -1,15 +1,24 @@
-import { EmbedBuilder } from 'discord.js'
+import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js'
 import { BRAND } from '../config'
 
 export function getWelcomeEmbed() {
-  return new EmbedBuilder()
+  const embed = new EmbedBuilder()
     .setColor(BRAND.color)
-    .setTitle('Welcome to Wembo')
+    .setAuthor({ name: 'Welcome to Wembo' })
     .setImage(BRAND.banner)
-    .setDescription('Welcome to the official Wembo Discord community.\n\nWembo is an AI-powered Discord platform for automation, security, analytics, and community management.\n\nThis server is the place for:\n• Updates and announcements\n• Support and help\n• Feature discussions\n• Bug reports\n• Community conversation')
-    .addFields(
-      { name: 'Get started', value: 'Head to #getting-started to set up Wembo in your server.' },
-      { name: 'Stay updated', value: 'Check #changelog for the latest updates.' },
+    .setDescription(
+      'Welcome to the official **Wembo** Discord community.\n\n' +
+      'Wembo is an AI-powered Discord platform for automation, security, analytics, and community management.\n\n' +
+      '**→** <#getting-started> to set up Wembo\n' +
+      '**→** <#changelog> for the latest updates\n' +
+      '**→** <#suggestions> to share ideas\n' +
+      '**→** <#get-help> for support'
     )
-    .setFooter({ text: BRAND.footer })
+
+  const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+    new ButtonBuilder().setLabel('Website').setURL('https://wembo.xyz').setStyle(ButtonStyle.Link),
+    new ButtonBuilder().setLabel('Invite Bot').setURL('https://wembo.xyz/invite').setStyle(ButtonStyle.Link),
+  )
+
+  return { embed, row }
 }

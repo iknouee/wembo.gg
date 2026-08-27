@@ -1,19 +1,24 @@
-import { EmbedBuilder } from 'discord.js'
+import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js'
 import { BRAND } from '../config'
 
 export function getLinksEmbed() {
-  return new EmbedBuilder()
+  const embed = new EmbedBuilder()
     .setColor(BRAND.color)
-    .setTitle('Official Wembo Links')
-    .setImage(BRAND.banner)
-    .setDescription('All official Wembo links in one place.')
-    .addFields(
-      { name: '🌐 Website', value: '[wembo.xyz](https://wembo.xyz)' },
-      { name: '📊 Dashboard', value: '[wembo.xyz/dashboard](https://wembo.xyz/dashboard)' },
-      { name: '📄 Documentation', value: '[wembo.xyz/docs](https://wembo.xyz/docs)' },
-      { name: '🤖 Bot Invite', value: '[wembo.xyz/invite](https://wembo.xyz/invite)' },
-      { name: '🟢 Status', value: '[wembo.xyz/status](https://wembo.xyz/status)' },
-      { name: '💰 Pricing', value: '[wembo.xyz/pricing](https://wembo.xyz/pricing)' },
-    )
-    .setFooter({ text: 'Only trust links from this channel. Wembo staff will never DM you asking for personal information.' })
+    .setAuthor({ name: 'Wembo • Official Links' })
+    .setDescription('> All official Wembo links. Only trust URLs from this channel.')
+    .setFooter({ text: 'Wembo staff will never DM you asking for personal information.' })
+
+  const row1 = new ActionRowBuilder<ButtonBuilder>().addComponents(
+    new ButtonBuilder().setLabel('Website').setURL('https://wembo.xyz').setStyle(ButtonStyle.Link),
+    new ButtonBuilder().setLabel('Dashboard').setURL('https://wembo.xyz/dashboard').setStyle(ButtonStyle.Link),
+    new ButtonBuilder().setLabel('Documentation').setURL('https://wembo.xyz/docs').setStyle(ButtonStyle.Link),
+  )
+
+  const row2 = new ActionRowBuilder<ButtonBuilder>().addComponents(
+    new ButtonBuilder().setLabel('Invite Bot').setURL('https://wembo.xyz/invite').setStyle(ButtonStyle.Link),
+    new ButtonBuilder().setLabel('Status').setURL('https://wembo.xyz/status').setStyle(ButtonStyle.Link),
+    new ButtonBuilder().setLabel('Pricing').setURL('https://wembo.xyz/pricing').setStyle(ButtonStyle.Link),
+  )
+
+  return { embed, rows: [row1, row2] }
 }
