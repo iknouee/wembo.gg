@@ -63,7 +63,7 @@ export function Navbar() {
               <Link href="/login">
                 <Button variant="ghost" size="sm" className="text-[12px]">Log In</Button>
               </Link>
-              <Link href="#">
+              <Link href="/invite">
                 <Button size="sm" className="text-[12px] h-8 gap-1.5">
                   Add to Discord <ArrowRight className="h-3 w-3" />
                 </Button>
@@ -87,7 +87,7 @@ export function Navbar() {
           </nav>
           <div className="mt-8 space-y-3">
             <Link href="/login"><Button variant="outline" className="w-full h-12">Log In</Button></Link>
-            <Link href="#"><Button className="w-full h-12 gap-2">Add to Discord <ArrowRight className="h-4 w-4" /></Button></Link>
+            <Link href="/invite"><Button className="w-full h-12 gap-2">Add to Discord <ArrowRight className="h-4 w-4" /></Button></Link>
           </div>
         </div>
       )}

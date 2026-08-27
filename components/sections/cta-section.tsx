@@ -38,7 +38,7 @@ export function CTASection() {
 
         {/* Buttons */}
         <div className="flex flex-wrap items-center justify-center gap-3 mb-5">
-          <Link href="#">
+          <Link href="/invite">
             <Button size="xl" className="gap-2.5 group glow-md">
               Add Wembo to Discord
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />

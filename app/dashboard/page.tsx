@@ -60,7 +60,7 @@ export default function DashboardOverview() {
           <p className="text-[#9A9CA3] text-sm max-w-sm mb-6">
             You don&apos;t have any servers where you can manage Wembo. Add Wembo to a server to get started.
           </p>
-          <Link href="#">
+          <Link href="/invite">
             <Button className="gap-2">
               <Plus className="h-4 w-4" />
               Add Wembo to a Server

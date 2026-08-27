@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { exchangeCode, fetchUser, setSession } from '@/lib/auth'
+import { exchangeCode, fetchUser, encryptSessionData } from '@/lib/auth'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -18,16 +18,28 @@ export async function GET(request: NextRequest) {
     // Fetch user profile
     const user = await fetchUser(tokens.access_token)
 
-    // Create session
-    setSession({
+    // Build session data
+    const session = {
       accessToken: tokens.access_token,
       refreshToken: tokens.refresh_token,
       expiresAt: Date.now() + tokens.expires_in * 1000,
       user,
+    }
+
+    // Encrypt session
+    const encrypted = encryptSessionData(JSON.stringify(session))
+
+    // Create redirect response and set cookie on it
+    const response = NextResponse.redirect(new URL('/dashboard', request.url))
+    response.cookies.set('wembo_session', encrypted, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: '/',
     })
 
-    // Redirect to dashboard
-    return NextResponse.redirect(new URL('/dashboard', request.url))
+    return response
   } catch (err) {
     console.error('OAuth callback error:', err)
     return NextResponse.redirect(new URL('/login?error=auth_failed', request.url))

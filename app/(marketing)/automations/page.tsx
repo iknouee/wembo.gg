@@ -143,7 +143,7 @@ export default function AutomationsPage() {
             <p className="text-muted-foreground mb-8 max-w-lg mx-auto leading-relaxed">
               Let Wembo handle the repetitive work while you focus on growing your community.
             </p>
-            <Link href="#">
+            <Link href="/invite">
               <Button size="lg" className="gap-2.5 group shadow-lg shadow-primary/20">
                 Add Wembo to Discord
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />

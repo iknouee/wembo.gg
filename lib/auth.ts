@@ -164,3 +164,18 @@ export function getAuthUrl(): string {
 
   return `${DISCORD_API}/oauth2/authorize?${params.toString()}`
 }
+
+
+/**
+ * Public export of encryption for use in route handlers
+ */
+export function encryptSessionData(data: string): string {
+  const secret = process.env.AUTH_SECRET || 'fallback-secret-change-me'
+  let encrypted = ''
+  for (let i = 0; i < data.length; i++) {
+    encrypted += String.fromCharCode(
+      data.charCodeAt(i) ^ secret.charCodeAt(i % secret.length)
+    )
+  }
+  return Buffer.from(encrypted, 'binary').toString('base64')
+}

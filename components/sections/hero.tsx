@@ -79,7 +79,7 @@ export function HeroSection() {
 
             {/* CTAs */}
             <div className={`flex flex-wrap gap-3 mb-7 transition-all duration-700 delay-[500ms] ${loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5'}`}>
-              <Link href="#">
+              <Link href="/invite">
                 <Button size="xl" className="gap-2 group">
                   Add Wembo to Discord
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />

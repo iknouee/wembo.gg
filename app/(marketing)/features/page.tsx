@@ -248,7 +248,7 @@ export default function FeaturesPage() {
 
         {/* CTA */}
         <div className="text-center mt-20">
-          <Link href="#">
+          <Link href="/invite">
             <Button size="lg" className="gap-2">
               Add Wembo to Discord
               <ArrowRight className="h-4 w-4" />

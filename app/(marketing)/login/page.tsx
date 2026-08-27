@@ -78,7 +78,7 @@ export default function LoginPage() {
           <div className="mt-6 text-center">
             <p className="text-xs text-[#9A9CA3]/50">
               Don&apos;t have Wembo yet?{' '}
-              <Link href="#" className="text-[#FFD600] hover:text-[#FFD600]/80 transition-colors">
+              <Link href="/invite" className="text-[#FFD600] hover:text-[#FFD600]/80 transition-colors">
                 Add Wembo to your server
               </Link>
             </p>
