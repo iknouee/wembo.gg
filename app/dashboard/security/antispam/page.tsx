@@ -3,11 +3,12 @@
 import { useState, useEffect } from 'react'
 import { Ban, Loader2, Save } from 'lucide-react'
 import { useAuth } from '@/components/dashboard/dashboard-shell'
+import { ServerSelect, useSelectedGuild } from '@/components/dashboard/server-select'
 
 export default function AntiSpamPage() {
   const { guilds } = useAuth()
-  const guild = guilds.find(g => g.owner) || guilds[0] || null
-  const guildId = guild?.id || null
+  
+  const guildId = useSelectedGuild()
 
   const [enabled, setEnabled] = useState(false)
   const [config, setConfig] = useState({ message_limit: 5, time_window_seconds: 3, duplicate_limit: 3, action: 'delete', mute_duration_minutes: 10 })
@@ -44,9 +45,10 @@ export default function AntiSpamPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="h-12 w-12 rounded-2xl bg-red-500/[0.06] flex items-center justify-center"><Ban className="h-6 w-6 text-red-400" /></div>
-          <div><h1 className="text-xl font-bold text-white">Anti-Spam</h1><p className="text-[13px] text-white/30 mt-0.5">Detect rapid messaging, floods, and duplicates</p>{guild && <p className="text-[11px] text-white/15 mt-0.5">Configuring: {guild.name}</p>}</div>
+          <div><h1 className="text-xl font-bold text-white">Anti-Spam</h1><p className="text-[13px] text-white/30 mt-0.5">Detect rapid messaging, floods, and duplicates</p></div>
         </div>
-        <button onClick={() => setEnabled(!enabled)} className={`relative h-7 w-12 rounded-full transition-colors ${enabled ? 'bg-green-500/30' : 'bg-white/[0.06]'}`}><span className={`absolute top-1.5 h-4 w-4 rounded-full transition-all ${enabled ? 'left-7 bg-green-400' : 'left-1 bg-white/30'}`} /></button>
+        
+        <div className="flex items-center gap-3"><ServerSelect /><button onClick={() => setEnabled(!enabled)} className={`relative h-7 w-12 rounded-full transition-colors ${enabled ? 'bg-green-500/30' : 'bg-white/[0.06]'}`}><span className={`absolute top-1.5 h-4 w-4 rounded-full transition-all ${enabled ? 'left-7 bg-green-400' : 'left-1 bg-white/30'}`} /></button></div>
       </div>
 
       <div className="space-y-6">

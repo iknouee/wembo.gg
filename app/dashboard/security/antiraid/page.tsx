@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react'
 import { Zap, Loader2, Save } from 'lucide-react'
 import { useAuth } from '@/components/dashboard/dashboard-shell'
+import { ServerSelect, useSelectedGuild } from '@/components/dashboard/server-select'
 
 export default function AntiRaidPage() {
   const { guilds } = useAuth()
-  const guildId = guilds.find(g => g.owner)?.id || guilds[0]?.id || null
+  const guildId = useSelectedGuild()
 
   const [enabled, setEnabled] = useState(false)
   const [config, setConfig] = useState({ join_threshold: 10, time_window_seconds: 10, action: 'kick', min_account_age_hours: 24, notify_channel: true })
@@ -44,9 +45,12 @@ export default function AntiRaidPage() {
             <p className="text-[13px] text-white/30 mt-0.5">Detect and block mass join attacks</p>
           </div>
         </div>
-        <button onClick={() => { setEnabled(!enabled); }} className={`relative h-7 w-12 rounded-full transition-colors ${enabled ? 'bg-green-500/30' : 'bg-white/[0.06]'}`}>
+        <div className="flex items-center gap-3">
+          <ServerSelect />
+          <button onClick={() => { setEnabled(!enabled); }} className={`relative h-7 w-12 rounded-full transition-colors ${enabled ? 'bg-green-500/30' : 'bg-white/[0.06]'}`}>
           <span className={`absolute top-1.5 h-4 w-4 rounded-full transition-all ${enabled ? 'left-7 bg-green-400' : 'left-1 bg-white/30'}`} />
         </button>
+        </div>
       </div>
 
       {/* Config */}
