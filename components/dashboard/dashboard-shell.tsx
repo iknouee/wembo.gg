@@ -3,7 +3,7 @@
 import { useState, useEffect, createContext, useContext } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, LogOut, Menu, X, Loader2 } from 'lucide-react'
+import { Home, LogOut, Menu, X, Loader2, Shield } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 // ─── Auth Context ────────────────────────────────────────────────────────────
@@ -123,9 +123,17 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               <li>
                 <Link href="/dashboard" className={cn(
                   'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-200',
-                  pathname === '/dashboard' ? 'bg-[#FFD600]/10 text-[#FFD600] font-medium' : 'text-white/40 hover:text-white/70 hover:bg-white/[0.04]'
+                  pathname === '/dashboard' && !pathname.includes('security') ? 'bg-[#FFD600]/10 text-[#FFD600] font-medium' : 'text-white/40 hover:text-white/70 hover:bg-white/[0.04]'
                 )}>
                   <Home className="h-4 w-4" /> Overview
+                </Link>
+              </li>
+              <li>
+                <Link href="/dashboard/security" className={cn(
+                  'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-200',
+                  pathname === '/dashboard/security' ? 'bg-[#FFD600]/10 text-[#FFD600] font-medium' : 'text-white/40 hover:text-white/70 hover:bg-white/[0.04]'
+                )}>
+                  <Shield className="h-4 w-4" /> Security
                 </Link>
               </li>
             </ul>
@@ -156,8 +164,17 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 <button onClick={() => setSidebarOpen(false)} className="p-2 rounded-lg hover:bg-white/[0.04]"><X className="h-5 w-5 text-white/50" /></button>
               </div>
               <nav className="flex-1 px-3 py-4">
-                <Link href="/dashboard" onClick={() => setSidebarOpen(false)} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-[#FFD600] bg-[#FFD600]/10 font-medium">
+                <Link href="/dashboard" onClick={() => setSidebarOpen(false)} className={cn(
+                  'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm mb-1',
+                  pathname === '/dashboard' && !pathname.includes('security') ? 'text-[#FFD600] bg-[#FFD600]/10 font-medium' : 'text-white/40 hover:text-white/70 hover:bg-white/[0.04]'
+                )}>
                   <Home className="h-4 w-4" /> Overview
+                </Link>
+                <Link href="/dashboard/security" onClick={() => setSidebarOpen(false)} className={cn(
+                  'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm',
+                  pathname === '/dashboard/security' ? 'text-[#FFD600] bg-[#FFD600]/10 font-medium' : 'text-white/40 hover:text-white/70 hover:bg-white/[0.04]'
+                )}>
+                  <Shield className="h-4 w-4" /> Security
                 </Link>
               </nav>
               <div className="p-3">
