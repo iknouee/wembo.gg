@@ -1,21 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { decodeSession } from '@/lib/session'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
     const cookie = request.cookies.get('wembo_session')
-    if (!cookie?.value) return NextResponse.json({ guilds: [] }, { status: 401 })
-
-    const { accessToken } = decodeSession(cookie.value)
-    if (!accessToken) return NextResponse.json({ guilds: [] }, { status: 401 })
+    if (!cookie?.value || cookie.value.length < 10) {
+      return NextResponse.json({ guilds: [] })
+    }
 
     const res = await fetch('https://discord.com/api/v10/users/@me/guilds', {
-      headers: { Authorization: `Bearer ${accessToken}` },
+      headers: { Authorization: `Bearer ${cookie.value}` },
     })
 
-    if (!res.ok) return NextResponse.json({ guilds: [] }, { status: 500 })
+    if (!res.ok) return NextResponse.json({ guilds: [] })
 
     const guilds = await res.json()
     const manageable = guilds.filter((g: any) => {
@@ -25,6 +23,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ guilds: manageable })
   } catch {
-    return NextResponse.json({ guilds: [] }, { status: 500 })
+    return NextResponse.json({ guilds: [] })
   }
 }

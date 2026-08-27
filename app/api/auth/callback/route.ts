@@ -33,40 +33,12 @@ export async function GET(request: NextRequest) {
 
     const tokens = await tokenRes.json()
 
-    // Fetch user profile
-    const userRes = await fetch('https://discord.com/api/v10/users/@me', {
-      headers: { Authorization: `Bearer ${tokens.access_token}` },
-    })
+    // Just store the access token directly — it's alphanumeric and cookie-safe
+    const response = NextResponse.redirect(new URL('/dashboard', request.url))
 
-    if (!userRes.ok) {
-      console.error('User fetch failed:', userRes.status)
-      return NextResponse.redirect(new URL('/login?error=user_failed', request.url))
-    }
-
-    const user = await userRes.json()
-
-    // Build minimal session and hex-encode
-    const session = JSON.stringify({
-      at: tokens.access_token,
-      rt: tokens.refresh_token,
-      u: { id: user.id, username: user.username, avatar: user.avatar, gn: user.global_name },
-    })
-
-    const secret = process.env.AUTH_SECRET || 'fallback-secret-change-me'
-    let hex = ''
-    for (let i = 0; i < session.length; i++) {
-      const byte = session.charCodeAt(i) ^ secret.charCodeAt(i % secret.length)
-      hex += byte.toString(16).padStart(2, '0')
-    }
-
-    // Set cookie using raw Set-Cookie header to have full control
-    const redirectUrl = new URL('/dashboard', request.url)
-    const response = NextResponse.redirect(redirectUrl)
-
-    // Use the raw header — no framework magic
-    response.headers.set(
+    response.headers.append(
       'Set-Cookie',
-      `wembo_session=${hex}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=604800`
+      `wembo_session=${tokens.access_token}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=604800`
     )
 
     return response

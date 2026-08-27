@@ -1,6 +1,7 @@
 /**
- * Shared session decode logic.
- * Cookie value is XOR-encrypted JSON encoded as hex string (only 0-9a-f chars).
+ * Session utilities.
+ * The cookie value is simply the Discord access token (no encryption needed
+ * since it's httpOnly and the token itself is opaque).
  */
 
 export interface SessionData {
@@ -13,30 +14,11 @@ export interface SessionData {
   } | null
 }
 
-export function decodeSession(cookieValue: string): SessionData {
-  try {
-    const secret = process.env.AUTH_SECRET || 'fallback-secret-change-me'
-
-    // Hex decode + XOR decrypt
-    let decrypted = ''
-    for (let i = 0; i < cookieValue.length; i += 2) {
-      const byte = parseInt(cookieValue.substring(i, i + 2), 16)
-      decrypted += String.fromCharCode(byte ^ secret.charCodeAt((i / 2) % secret.length))
-    }
-
-    const session = JSON.parse(decrypted)
-
-    const accessToken = session.at || session.accessToken || null
-    const userData = session.u || session.user || null
-    const user = userData ? {
-      id: userData.id,
-      username: userData.username,
-      avatar: userData.avatar || null,
-      global_name: userData.gn || userData.global_name || null,
-    } : null
-
-    return { accessToken, user }
-  } catch {
-    return { accessToken: null, user: null }
-  }
+/**
+ * Extract the access token from the cookie value.
+ * The cookie just stores the raw Discord access token.
+ */
+export function getAccessToken(cookieValue: string): string | null {
+  if (!cookieValue || cookieValue.length < 10) return null
+  return cookieValue
 }
