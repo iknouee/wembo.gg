@@ -23,7 +23,6 @@ client.once(Events.ClientReady, (readyClient) => {
     activities: [{ name: 'wembo.xyz | Protecting servers', type: ActivityType.Watching }],
     status: 'online',
   })
-
   // Initialize security monitoring
   initSecurity(client)
 })
