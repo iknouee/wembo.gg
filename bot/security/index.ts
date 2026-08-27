@@ -54,6 +54,7 @@ export function initSecurity(client: Client) {
 
 /**
  * Create default module settings for a new guild.
+ * Only inserts if no settings exist yet — never overwrites existing config.
  */
 async function setupGuildDefaults(guildId: string) {
   const supabase = getSupabase()
@@ -66,13 +67,25 @@ async function setupGuildDefaults(guildId: string) {
   }
 
   for (const [moduleId, settings] of Object.entries(defaults)) {
+    // Only insert if no row exists — ignoreDuplicates prevents overwriting
     await supabase
       .from('security_modules')
-      .upsert({ guild_id: guildId, module_id: moduleId, enabled: settings.enabled, config: settings.config }, { onConflict: 'guild_id,module_id' })
+      .insert({ guild_id: guildId, module_id: moduleId, enabled: settings.enabled, config: settings.config })
+      .select()
+      .maybeSingle()
+    // If row already exists, insert silently fails due to unique constraint — that's fine
   }
 
-  await supabase.from('server_settings').upsert({ guild_id: guildId, lockdown_active: false }, { onConflict: 'guild_id' })
-  await supabase.from('security_stats').upsert({ guild_id: guildId }, { onConflict: 'guild_id' })
+  // Same for server_settings and security_stats — only insert if missing
+  const { data: existing } = await supabase.from('server_settings').select('id').eq('guild_id', guildId).maybeSingle()
+  if (!existing) {
+    await supabase.from('server_settings').insert({ guild_id: guildId, lockdown_active: false })
+  }
+
+  const { data: existingStats } = await supabase.from('security_stats').select('id').eq('guild_id', guildId).maybeSingle()
+  if (!existingStats) {
+    await supabase.from('security_stats').insert({ guild_id: guildId })
+  }
 }
 
 /**
