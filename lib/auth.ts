@@ -83,9 +83,8 @@ export async function fetchGuilds(accessToken: string): Promise<DiscordGuild[]> 
 }
 
 /**
- * Simple encryption/decryption for session cookie.
- * Uses base64 encoding with the AUTH_SECRET as a basic XOR cipher.
- * For production, use a proper encryption library.
+ * Encrypt session data using XOR cipher with AUTH_SECRET.
+ * Uses base64url encoding which is safe for cookie values (no +, /, = characters).
  */
 function encryptSession(data: string): string {
   const secret = process.env.AUTH_SECRET || 'fallback-secret-change-me'
@@ -95,12 +94,15 @@ function encryptSession(data: string): string {
       data.charCodeAt(i) ^ secret.charCodeAt(i % secret.length)
     )
   }
-  return Buffer.from(encrypted, 'binary').toString('base64')
+  return Buffer.from(encrypted, 'binary').toString('base64url')
 }
 
-function decryptSession(encrypted: string): string {
+/**
+ * Decrypt session data from base64url-encoded cookie.
+ */
+function decryptSession(encoded: string): string {
   const secret = process.env.AUTH_SECRET || 'fallback-secret-change-me'
-  const data = Buffer.from(encrypted, 'base64').toString('binary')
+  const data = Buffer.from(encoded, 'base64url').toString('binary')
   let decrypted = ''
   for (let i = 0; i < data.length; i++) {
     decrypted += String.fromCharCode(
@@ -119,7 +121,7 @@ export function setSession(session: Session) {
 
   cookieStore.set(COOKIE_NAME, encrypted, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: true,
     sameSite: 'lax',
     maxAge: COOKIE_MAX_AGE,
     path: '/',
@@ -165,17 +167,9 @@ export function getAuthUrl(): string {
   return `${DISCORD_API}/oauth2/authorize?${params.toString()}`
 }
 
-
 /**
  * Public export of encryption for use in route handlers
  */
 export function encryptSessionData(data: string): string {
-  const secret = process.env.AUTH_SECRET || 'fallback-secret-change-me'
-  let encrypted = ''
-  for (let i = 0; i < data.length; i++) {
-    encrypted += String.fromCharCode(
-      data.charCodeAt(i) ^ secret.charCodeAt(i % secret.length)
-    )
-  }
-  return Buffer.from(encrypted, 'binary').toString('base64')
+  return encryptSession(data)
 }

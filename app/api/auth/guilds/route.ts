@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-// Force dynamic — never cache this route
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
@@ -12,16 +11,21 @@ export async function GET(request: NextRequest) {
 
   try {
     const secret = process.env.AUTH_SECRET || 'fallback-secret-change-me'
-    const data = Buffer.from(cookie.value, 'base64').toString('binary')
+
+    // Decode from base64url (cookie-safe encoding)
+    const raw = Buffer.from(cookie.value, 'base64url').toString('binary')
+
+    // Decrypt with XOR cipher
     let decrypted = ''
-    for (let i = 0; i < data.length; i++) {
+    for (let i = 0; i < raw.length; i++) {
       decrypted += String.fromCharCode(
-        data.charCodeAt(i) ^ secret.charCodeAt(i % secret.length)
+        raw.charCodeAt(i) ^ secret.charCodeAt(i % secret.length)
       )
     }
+
     const session = JSON.parse(decrypted)
 
-    // Fetch guilds from Discord
+    // Fetch guilds from Discord using the stored access token
     const res = await fetch('https://discord.com/api/v10/users/@me/guilds', {
       headers: { Authorization: `Bearer ${session.accessToken}` },
     })
