@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Set cookie using raw Set-Cookie header to have full control
-    const redirectUrl = new URL('/api/auth/debug', request.url)
+    const redirectUrl = new URL('/dashboard', request.url)
     const response = NextResponse.redirect(redirectUrl)
 
     // Use the raw header — no framework magic

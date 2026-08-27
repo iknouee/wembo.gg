@@ -10,9 +10,20 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  const cookieStore = cookies()
-  const cookie = cookieStore.get('wembo_session')
-  const { accessToken, user } = cookie?.value ? decodeSession(cookie.value) : { accessToken: null, user: null }
+  let accessToken: string | null = null
+  let user: any = null
+
+  try {
+    const cookieStore = cookies()
+    const cookie = cookieStore.get('wembo_session')
+    if (cookie?.value) {
+      const session = decodeSession(cookie.value)
+      accessToken = session.accessToken
+      user = session.user
+    }
+  } catch {
+    // Don't crash if cookies() fails
+  }
 
   return (
     <DashboardProvider accessToken={accessToken} user={user}>
