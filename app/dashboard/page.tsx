@@ -1,5 +1,4 @@
 import { cookies } from 'next/headers'
-import Link from 'next/link'
 import { Server, Plus, ArrowRight, ArrowLeft, Shield, Zap, TrendingUp, Clock, Crown, Globe } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
@@ -53,7 +52,6 @@ async function fetchGuilds(accessToken: string): Promise<Guild[]> {
     if (!res.ok) return []
 
     const guilds = await res.json()
-
     return guilds.filter((g: any) => {
       const perms = BigInt(g.permissions)
       return g.owner || (perms & BigInt(0x20)) !== BigInt(0)
@@ -70,16 +68,15 @@ export default async function DashboardPage({
 }) {
   const { user, accessToken } = getSessionData()
   const guilds = accessToken ? await fetchGuilds(accessToken) : []
-
-  // If a server is selected, show the server view
   const selectedServerId = searchParams.server
-  const selectedGuild = selectedServerId ? guilds.find((g) => g.id === selectedServerId) : null
+  const selectedGuild = selectedServerId ? guilds.find(g => g.id === selectedServerId) : null
 
+  // Server view
   if (selectedServerId) {
-    return <ServerView guild={selectedGuild} serverId={selectedServerId} />
+    return <ServerView guild={selectedGuild} />
   }
 
-  // Otherwise show the overview
+  // Overview
   const greeting = getGreeting()
   const displayName = user?.global_name || user?.username || ''
   const avatarUrl = user?.avatar
@@ -88,7 +85,6 @@ export default async function DashboardPage({
 
   return (
     <div className="p-6 lg:p-8 space-y-8">
-      {/* Welcome Header */}
       <div className="flex items-start gap-4">
         {avatarUrl ? (
           <img src={avatarUrl} alt="" className="h-12 w-12 rounded-xl object-cover hidden sm:block" />
@@ -111,7 +107,6 @@ export default async function DashboardPage({
         </div>
       </div>
 
-      {/* Quick Stats */}
       {guilds.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <QuickStat icon={Server} label="Servers" value={guilds.length.toString()} color="yellow" />
@@ -121,7 +116,6 @@ export default async function DashboardPage({
         </div>
       )}
 
-      {/* Server list */}
       {guilds.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <div className="h-20 w-20 rounded-2xl bg-[#0d0e11] border border-white/[0.04] flex items-center justify-center mb-6">
@@ -131,10 +125,10 @@ export default async function DashboardPage({
           <p className="text-[#9A9CA3] text-sm max-w-sm mb-6 leading-relaxed">
             You don&apos;t have any servers where you can manage Wembo. Add Wembo to a server to get started.
           </p>
-          <Link href="/invite" className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#FFD600] text-black text-xs font-semibold hover:bg-[#FFD600]/90 transition-colors">
+          <a href="/invite" className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#FFD600] text-black text-xs font-semibold hover:bg-[#FFD600]/90 transition-colors">
             <Plus className="h-3.5 w-3.5" />
             Add Wembo to a Server
-          </Link>
+          </a>
         </div>
       ) : (
         <div className="space-y-4">
@@ -145,7 +139,7 @@ export default async function DashboardPage({
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {guilds.map((guild) => (
-              <Link
+              <a
                 key={guild.id}
                 href={`/dashboard?server=${guild.id}`}
                 className="group relative flex items-center gap-4 p-5 rounded-xl bg-[#0a0b0d] border border-white/[0.04] shadow-lg shadow-black/20 hover:bg-[#0f1012] hover:border-[#FFD600]/10 hover:shadow-[#FFD600]/[0.02] transition-all duration-300"
@@ -187,10 +181,10 @@ export default async function DashboardPage({
                 </div>
 
                 <ArrowRight className="h-4 w-4 text-white/10 group-hover:text-[#FFD600]/60 group-hover:translate-x-0.5 transition-all" />
-              </Link>
+              </a>
             ))}
 
-            <Link
+            <a
               href="/invite"
               className="group flex items-center justify-center gap-3 p-5 rounded-xl border border-dashed border-white/[0.06] hover:border-[#FFD600]/20 hover:bg-[#FFD600]/[0.02] transition-all duration-300 min-h-[88px]"
             >
@@ -198,12 +192,11 @@ export default async function DashboardPage({
                 <Plus className="h-4 w-4 text-white/20 group-hover:text-[#FFD600]/60 transition-colors" />
               </div>
               <span className="text-sm text-white/30 group-hover:text-white/50 transition-colors">Add a server</span>
-            </Link>
+            </a>
           </div>
         </div>
       )}
 
-      {/* Tips + Updates */}
       {guilds.length > 0 && (
         <div className="grid sm:grid-cols-2 gap-4">
           <div className="rounded-xl bg-[#0a0b0d] border border-white/[0.04] p-5">
@@ -230,14 +223,14 @@ export default async function DashboardPage({
 
 // ─── Server View ─────────────────────────────────────────────────────────────
 
-function ServerView({ guild, serverId }: { guild: Guild | null; serverId: string }) {
+function ServerView({ guild }: { guild: Guild | null }) {
   if (!guild) {
     return (
       <div className="p-6 lg:p-8 space-y-6">
-        <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm text-[#9A9CA3] hover:text-white transition-colors">
+        <a href="/dashboard" className="inline-flex items-center gap-2 text-sm text-[#9A9CA3] hover:text-white transition-colors">
           <ArrowLeft className="h-4 w-4" />
           Back to servers
-        </Link>
+        </a>
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <div className="h-16 w-16 rounded-2xl bg-[#0d0e11] border border-white/[0.04] flex items-center justify-center mb-5">
             <Globe className="h-7 w-7 text-white/15" />
@@ -257,20 +250,14 @@ function ServerView({ guild, serverId }: { guild: Guild | null; serverId: string
 
   return (
     <div className="p-6 lg:p-8 space-y-8">
-      {/* Back link */}
-      <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm text-[#9A9CA3] hover:text-white transition-colors">
+      <a href="/dashboard" className="inline-flex items-center gap-2 text-sm text-[#9A9CA3] hover:text-white transition-colors">
         <ArrowLeft className="h-4 w-4" />
         Back to servers
-      </Link>
+      </a>
 
-      {/* Server Header */}
       <div className="flex items-center gap-5 p-6 rounded-xl bg-[#0a0b0d] border border-white/[0.04]">
         {iconUrl ? (
-          <img
-            src={iconUrl}
-            alt={guild.name}
-            className="h-16 w-16 rounded-xl object-cover ring-1 ring-white/[0.06]"
-          />
+          <img src={iconUrl} alt={guild.name} className="h-16 w-16 rounded-xl object-cover ring-1 ring-white/[0.06]" />
         ) : (
           <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-white/[0.08] to-white/[0.02] flex items-center justify-center text-white/50 font-bold text-lg ring-1 ring-white/[0.06]">
             {guild.name.slice(0, 2).toUpperCase()}
@@ -299,13 +286,11 @@ function ServerView({ guild, serverId }: { guild: Guild | null; serverId: string
         </div>
       </div>
 
-      {/* Server ID */}
       <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-[#0a0b0d] border border-white/[0.04] w-fit">
         <span className="text-xs text-white/20">Server ID:</span>
         <code className="text-xs text-white/50 font-mono">{guild.id}</code>
       </div>
 
-      {/* Coming soon */}
       <div className="rounded-xl border border-[#FFD600]/10 bg-[#FFD600]/[0.02] p-5">
         <p className="text-sm text-[#FFD600]/80 font-medium">🚧 Server features are being built</p>
         <p className="text-xs text-[#9A9CA3] mt-1">
@@ -325,7 +310,6 @@ function QuickStat({ icon: Icon, label, value, color }: { icon: any; label: stri
     blue: 'bg-blue-500/[0.06] text-blue-400',
     purple: 'bg-purple-500/[0.06] text-purple-400',
   }
-
   return (
     <div className="flex items-center gap-3 p-4 rounded-xl bg-[#0a0b0d] border border-white/[0.04]">
       <div className={`h-9 w-9 rounded-lg flex items-center justify-center ${colors[color]}`}>
@@ -354,7 +338,6 @@ function UpdateItem({ badge, text, color }: { badge: string; text: string; color
     blue: 'bg-blue-500/10 text-blue-400',
     yellow: 'bg-[#FFD600]/10 text-[#FFD600]',
   }
-
   return (
     <div className="flex items-start gap-2.5">
       <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded ${colors[color]} mt-0.5`}>

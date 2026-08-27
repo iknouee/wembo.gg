@@ -1,4 +1,7 @@
+import { cookies } from 'next/headers'
 import { Sidebar, MobileSidebar } from '@/components/dashboard/sidebar'
+
+export const dynamic = 'force-dynamic'
 
 export default function DashboardLayout({
   children,
