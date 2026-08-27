@@ -108,8 +108,8 @@ export async function handleCommand(interaction: ChatInputCommandInteraction) {
     }
 
     case 'sendticket': {
-      const { embed, row } = getTicketEmbed()
-      await ch.send({ embeds: [embed], components: [row] })
+      const { embed, components } = getTicketEmbed()
+      await ch.send({ embeds: [embed], components })
       await interaction.reply({ content: '✅ Ticket panel sent.', ephemeral: true })
       break
     }

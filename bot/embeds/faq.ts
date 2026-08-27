@@ -14,13 +14,13 @@ export function getFaqEmbed() {
       '**Can I use Wembo in multiple servers?**\n' +
       'Yes. Each server is configured independently.\n\n' +
       '**Where do I report bugs?**\n' +
-      'Use <#bug-reports> with details, steps to reproduce, and screenshots.\n\n' +
+      'Use <#1542325874613821450> with details, steps to reproduce, and screenshots.\n\n' +
       '**How do I suggest a feature?**\n' +
-      'Post in <#suggestions> — be specific about what and why.\n\n' +
+      'Post in <#1542325791138775132> — be specific about what and why.\n\n' +
       '**Is my data safe?**\n' +
-      'Yes. We don\'t sell or share your data. See <#terms-of-service> for details.\n\n' +
+      'Yes. We don\'t sell or share your data. See <#1542325660863955025> for details.\n\n' +
       '**How do I get support?**\n' +
-      'Ask in <#get-help> or open a private ticket in <#open-ticket>.'
+      'Ask in <#1542325853952807083> or open a private ticket in <#1542325921695010917>.'
     )
     .setFooter({ text: 'Still have questions? Open a ticket.' })
 }

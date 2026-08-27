@@ -9,10 +9,10 @@ export function getWelcomeEmbed() {
     .setDescription(
       'Welcome to the official **Wembo** Discord community.\n\n' +
       'Wembo is an AI-powered Discord platform for automation, security, analytics, and community management.\n\n' +
-      '**→** <#getting-started> to set up Wembo\n' +
-      '**→** <#changelog> for the latest updates\n' +
-      '**→** <#suggestions> to share ideas\n' +
-      '**→** <#get-help> for support'
+      '**→** <#1542326743975596042> to set up Wembo\n' +
+      '**→** <#1542325615556829184> for the latest updates\n' +
+      '**→** <#1542325791138775132> to share ideas\n' +
+      '**→** <#1542325853952807083> for support'
     )
 
   const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
