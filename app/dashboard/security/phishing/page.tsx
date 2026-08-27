@@ -12,6 +12,7 @@ export default function LinkBlockerPage() {
   const [enabled, setEnabled] = useState(false)
   const [config, setConfig] = useState({
     block_all_links: true,
+    block_invites: true,
     action: 'delete',
     timeout_minutes: 5,
     warn_in_channel: true,
@@ -64,6 +65,9 @@ export default function LinkBlockerPage() {
         <Section title="Settings">
           <Row label="Block All Links" desc="Block every link except whitelisted domains">
             <TG value={config.block_all_links} onChange={v => setConfig({ ...config, block_all_links: v })} />
+          </Row>
+          <Row label="Block Invite Links" desc="Block discord.gg and discord.com/invite links">
+            <TG value={config.block_invites} onChange={v => setConfig({ ...config, block_invites: v })} />
           </Row>
           <Row label="Action" desc="What to do when a blocked link is posted">
             <AS value={config.action} onChange={v => setConfig({ ...config, action: v })} options={[{ value: 'delete', label: 'Delete' }, { value: 'timeout', label: 'Timeout' }, { value: 'kick', label: 'Kick' }, { value: 'ban', label: 'Ban' }]} />

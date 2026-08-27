@@ -6,12 +6,15 @@ const URL_REGEX = /https?:\/\/[^\s<>]+/gi
 
 // Default whitelist — common safe domains for gifs, media, discord itself
 const DEFAULT_WHITELIST = [
-  'discord.com', 'discordapp.com', 'discord.gg', 'cdn.discordapp.com',
+  'discord.com', 'discordapp.com', 'cdn.discordapp.com',
   'media.discordapp.net', 'tenor.com', 'giphy.com', 'imgur.com',
   'youtube.com', 'youtu.be', 'twitch.tv', 'twitter.com', 'x.com',
   'reddit.com', 'i.redd.it', 'spotify.com', 'open.spotify.com',
   'github.com', 'google.com', 'wikipedia.org',
 ]
+
+// Discord invite patterns (discord.gg, discord.com/invite)
+const INVITE_REGEX = /(discord\.gg|discord\.com\/invite)\/[a-zA-Z0-9]+/i
 
 /**
  * Link blocker — blocks all links except whitelisted domains.
@@ -34,9 +37,17 @@ export async function checkPhishing(message: Message) {
   const WARN = config?.warn_in_channel ?? true
   const WHITELIST: string[] = config?.whitelisted_domains ?? []
   const BLOCK_ALL = config?.block_all_links ?? true
+  const BLOCK_INVITES = config?.block_invites ?? true
 
   // Combine default whitelist + user whitelist
   const allWhitelisted = [...DEFAULT_WHITELIST, ...WHITELIST.map(d => d.toLowerCase().trim())]
+
+  // --- Check for Discord invite links first ---
+  if (BLOCK_INVITES && INVITE_REGEX.test(message.content)) {
+    console.log(`🔗 Blocked invite from ${message.author.tag}`)
+    await handleBlocked(message, guildId, 'Discord invite link', ACTION, TIMEOUT_MINS, WARN)
+    return
+  }
 
   // Extract URLs from message
   const urls = message.content.match(URL_REGEX) || []
@@ -71,24 +82,26 @@ export async function checkPhishing(message: Message) {
   if (blockedUrls.length === 0) return // All links are whitelisted
 
   console.log(`🔗 Blocked link from ${message.author.tag}: ${blockedUrls[0]}`)
+  await handleBlocked(message, guildId, blockedUrls[0].slice(0, 80), ACTION, TIMEOUT_MINS, WARN)
+}
 
-  // Take action
+async function handleBlocked(message: Message, guildId: string, reason: string, action: string, timeoutMins: number, warn: boolean) {
   let actionTaken = 'detected'
 
   try {
-    // Always delete the message with blocked links
+    // Always delete the message
     await message.delete()
     actionTaken = 'message_deleted'
 
-    // Additional action based on config
-    if (ACTION === 'timeout' && message.member) {
-      await message.member.timeout(TIMEOUT_MINS * 60 * 1000, 'Wembo: Posted blocked link')
+    // Additional action
+    if (action === 'timeout' && message.member) {
+      await message.member.timeout(timeoutMins * 60 * 1000, `Wembo: ${reason}`)
       actionTaken = 'timed_out'
-    } else if (ACTION === 'kick' && message.member.kickable) {
-      await message.member.kick('Wembo: Posted blocked link')
+    } else if (action === 'kick' && message.member?.kickable) {
+      await message.member.kick(`Wembo: ${reason}`)
       actionTaken = 'kicked'
-    } else if (ACTION === 'ban' && message.member.bannable) {
-      await message.member.ban({ reason: 'Wembo: Posted blocked link' })
+    } else if (action === 'ban' && message.member?.bannable) {
+      await message.member.ban({ reason: `Wembo: ${reason}` })
       actionTaken = 'banned'
     }
   } catch (e: any) {
@@ -96,32 +109,23 @@ export async function checkPhishing(message: Message) {
     actionTaken = 'detected_no_perms'
   }
 
-  // Log event
   await logSecurityEvent({
     guildId,
     eventType: 'phishing',
-    severity: ACTION === 'ban' || ACTION === 'kick' ? 'high' : 'medium',
-    description: `Blocked link: ${blockedUrls[0].slice(0, 80)}`,
+    severity: action === 'ban' || action === 'kick' ? 'high' : 'medium',
+    description: `Blocked: ${reason}`,
     userId: message.author.id,
     userTag: message.author.tag,
     actionTaken,
-    metadata: { urls: blockedUrls.slice(0, 5), action: ACTION },
+    metadata: { reason, action },
   })
 
-  // Warn in channel
-  if (WARN && 'send' in message.channel) {
+  if (warn && 'send' in message.channel) {
     try {
-      await message.channel.send({
-        content: `⚠️ <@${message.author.id}> Links are not allowed in this server.`,
+      const warning = await (message.channel as any).send({
+        content: `⚠️ <@${message.author.id}> That link is not allowed here.`,
       })
-      // Auto-delete warning after 5 seconds
-      setTimeout(async () => {
-        try {
-          const msgs = await (message.channel as any).messages.fetch({ limit: 5 })
-          const warning = msgs.find((m: any) => m.author.id === message.client.user?.id && m.content.includes('Links are not allowed'))
-          if (warning) await warning.delete()
-        } catch {}
-      }, 5000)
+      setTimeout(async () => { try { await warning.delete() } catch {} }, 5000)
     } catch {}
   }
 }
