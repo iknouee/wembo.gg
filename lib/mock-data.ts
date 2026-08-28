@@ -297,3 +297,65 @@ export const mockStatusServices = [
   { name: 'Database', status: 'operational' as const, uptime: '99.99%' },
   { name: 'Website', status: 'operational' as const, uptime: '100%' },
 ]
+
+
+// ============================================
+// Welcome & Goodbye Message Configuration
+// ============================================
+
+export interface WelcomeGoodbyeConfig {
+  enabled: boolean
+  channelId: string
+  channelName: string
+  embed: {
+    title: string
+    description: string
+    color: string
+    imageUrl: string
+    thumbnailUrl: string
+    footerText: string
+  }
+  dmEnabled: boolean
+  dmMessage: string
+}
+
+export const mockWelcomeConfig: WelcomeGoodbyeConfig = {
+  enabled: true,
+  channelId: '1',
+  channelName: '#welcome',
+  embed: {
+    title: 'Welcome to {server}! 🎉',
+    description: 'Hey {user}, welcome to **{server}**! You are member #{membercount}.\n\nMake sure to read the rules and have fun!',
+    color: '#5865F2',
+    imageUrl: '',
+    thumbnailUrl: '',
+    footerText: 'Enjoy your stay!',
+  },
+  dmEnabled: false,
+  dmMessage: 'Welcome to {server}, {user}! We\'re glad to have you. Check out #rules to get started.',
+}
+
+export const mockGoodbyeConfig: WelcomeGoodbyeConfig = {
+  enabled: true,
+  channelId: '1',
+  channelName: '#goodbye',
+  embed: {
+    title: 'Goodbye! 👋',
+    description: '{user} has left **{server}**. We now have {membercount} members.',
+    color: '#ED4245',
+    imageUrl: '',
+    thumbnailUrl: '',
+    footerText: 'We\'ll miss you!',
+  },
+  dmEnabled: false,
+  dmMessage: '',
+}
+
+export const mockChannels = [
+  { id: '1', name: '#welcome' },
+  { id: '2', name: '#goodbye' },
+  { id: '3', name: '#general' },
+  { id: '4', name: '#announcements' },
+  { id: '5', name: '#off-topic' },
+  { id: '6', name: '#introductions' },
+]

@@ -12,12 +12,14 @@ import {
   Shield,
   Ticket,
   Trophy,
+  UserPlus,
   Users,
   Zap,
 } from 'lucide-react'
 
 export const dashboardNav = [
   { title: 'Overview', href: '/dashboard', icon: Home },
+  { title: 'Welcome & Goodbye', href: '/dashboard/welcome', icon: UserPlus },
   { title: 'AI', href: '/dashboard/ai', icon: Bot },
   { title: 'Automations', href: '/dashboard/automations', icon: Zap },
   { title: 'Security', href: '/dashboard/security', icon: Shield },
