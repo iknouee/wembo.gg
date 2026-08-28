@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+// ─── Allowed Discord User IDs ────────────────────────────────────────────────
+// Only these users can log in. Add more IDs as needed.
+const ALLOWED_USERS = [
+  '1314713632457752636', // panto
+]
+
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get('code')
   const error = request.nextUrl.searchParams.get('error')
@@ -26,6 +32,23 @@ export async function GET(request: NextRequest) {
     }
 
     const tokens = await tokenRes.json()
+
+    // Fetch user to check if they're allowed
+    const userRes = await fetch('https://discord.com/api/v10/users/@me', {
+      headers: { Authorization: `Bearer ${tokens.access_token}` },
+    })
+
+    if (!userRes.ok) {
+      return NextResponse.redirect(new URL('/login?error=user_fetch_failed', request.url))
+    }
+
+    const user = await userRes.json()
+
+    // Block unauthorized users
+    if (!ALLOWED_USERS.includes(user.id)) {
+      return NextResponse.redirect(new URL('/login?error=unauthorized', request.url))
+    }
+
     const response = NextResponse.redirect(new URL('/dashboard', request.url))
 
     // Store token as a NON-httpOnly cookie so client JS can read it
