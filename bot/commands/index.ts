@@ -81,7 +81,11 @@ export async function handleCommand(interaction: ChatInputCommandInteraction) {
     case 'warn':
     case 'warns':
     case 'clearwarn':
-    case 'clearwarns': {
+    case 'clearwarns':
+    case 'kick':
+    case 'ban':
+    case 'mute':
+    case 'unban': {
       await handleModerationCommand(interaction)
       break
     }
