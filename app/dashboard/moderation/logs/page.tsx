@@ -42,6 +42,18 @@ export default function ModLogsPage() {
   const [channelDropdownOpen, setChannelDropdownOpen] = useState(false)
   const [channelSearch, setChannelSearch] = useState('')
 
+  // ─── Fetch Channels (separate, only on guild change) ─────────────────
+  useEffect(() => {
+    if (!guildId) return
+    fetch(`/api/security/channels?guild_id=${guildId}`)
+      .then(r => r.json())
+      .then(data => {
+        console.log('[ModLogs] Channels fetched:', data.channels?.length || 0)
+        setChannels(data.channels || [])
+      })
+      .catch(err => console.error('[ModLogs] Channel fetch error:', err))
+  }, [guildId])
+
   // ─── Fetch Logs + Settings ───────────────────────────────────────────
   useEffect(() => {
     if (!guildId) { setLoading(false); return }
@@ -50,11 +62,9 @@ export default function ModLogsPage() {
 
     Promise.all([
       fetch(`/api/moderation/logs?${params}`).then(r => r.json()),
-      fetch(`/api/security/channels?guild_id=${guildId}`).then(r => r.json()),
       fetch(`/api/security/settings?guild_id=${guildId}`).then(r => r.json()),
-    ]).then(([logData, channelData, settingsData]) => {
+    ]).then(([logData, settingsData]) => {
       setLogs(logData.logs || [])
-      setChannels(channelData.channels || [])
       if (settingsData?.settings?.mod_log_channel_id) {
         setModLogChannelId(settingsData.settings.mod_log_channel_id)
       }
