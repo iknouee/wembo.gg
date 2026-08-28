@@ -1,6 +1,41 @@
-import { SlashCommandBuilder, ChatInputCommandInteraction, PermissionFlagsBits, EmbedBuilder, Client } from 'discord.js'
+import { SlashCommandBuilder, ChatInputCommandInteraction, PermissionFlagsBits, EmbedBuilder, Client, TextChannel, ChannelType } from 'discord.js'
 import { getSupabase } from '../lib/supabase'
 import { BRAND } from '../config'
+
+// ─── Mod Log Channel Sender ──────────────────────────────────────────────────
+
+let botClient: Client | null = null
+
+export function initModeration(client: Client) {
+  botClient = client
+  console.log('⚖️  Moderation module initialized')
+}
+
+async function sendModLogEmbed(guildId: string, embed: EmbedBuilder) {
+  if (!botClient) return
+
+  try {
+    const supabase = getSupabase()
+    const { data } = await supabase
+      .from('server_settings')
+      .select('mod_log_channel_id')
+      .eq('guild_id', guildId)
+      .single()
+
+    const channelId = data?.mod_log_channel_id
+    if (!channelId) return
+
+    const guild = botClient.guilds.cache.get(guildId)
+    if (!guild) return
+
+    const channel = guild.channels.cache.get(channelId)
+    if (!channel || channel.type !== ChannelType.GuildText) return
+
+    await (channel as TextChannel).send({ embeds: [embed] })
+  } catch (err) {
+    console.error('[ModLog] Failed to send log embed:', err)
+  }
+}
 
 // ─── Command Definitions ─────────────────────────────────────────────────────
 
@@ -137,6 +172,22 @@ async function handleWarn(interaction: ChatInputCommandInteraction, guildId: str
       .setTimestamp()
 
     await interaction.editReply({ embeds: [embed] })
+
+    // Send to mod log channel
+    const logEmbed = new EmbedBuilder()
+      .setTitle('⚠️ Warning Issued')
+      .setColor(0xFB923C)
+      .addFields(
+        { name: 'User', value: `<@${user.id}> (${user.tag})`, inline: true },
+        { name: 'Moderator', value: `<@${interaction.user.id}>`, inline: true },
+        { name: 'Reason', value: reason },
+        { name: 'Total Warnings', value: `${totalWarns}`, inline: true },
+        { name: 'Case', value: `#${caseNumber}`, inline: true },
+      )
+      .setFooter({ text: 'Wembo Moderation' })
+      .setTimestamp()
+
+    await sendModLogEmbed(guildId, logEmbed)
   } catch (err) {
     await interaction.editReply({ content: '❌ Failed to issue warning.' })
   }

@@ -2,6 +2,7 @@ import { Client, GatewayIntentBits, Events, ActivityType } from 'discord.js'
 import { config } from './config'
 import { handleCommand } from './commands'
 import { initSecurity } from './security'
+import { initModeration } from './moderation'
 
 const client = new Client({
   intents: [
@@ -26,6 +27,9 @@ client.once(Events.ClientReady, (readyClient) => {
 
   // Initialize security monitoring
   initSecurity(client)
+
+  // Initialize moderation
+  initModeration(client)
 })
 
 client.on(Events.InteractionCreate, async (interaction) => {

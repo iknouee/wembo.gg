@@ -19,15 +19,21 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { guild_id, log_channel_id } = body
+    const { guild_id, log_channel_id, mod_log_channel_id } = body
     if (!guild_id) return NextResponse.json({ error: 'guild_id required' }, { status: 400 })
 
     const supabase = getSupabase()
-    await supabase.from('server_settings').upsert({
+
+    const updateData: any = {
       guild_id,
-      log_channel_id: log_channel_id || null,
       updated_at: new Date().toISOString(),
-    }, { onConflict: 'guild_id' })
+    }
+
+    // Only include fields that were explicitly passed
+    if ('log_channel_id' in body) updateData.log_channel_id = log_channel_id || null
+    if ('mod_log_channel_id' in body) updateData.mod_log_channel_id = mod_log_channel_id || null
+
+    await supabase.from('server_settings').upsert(updateData, { onConflict: 'guild_id' })
 
     return NextResponse.json({ success: true })
   } catch (err: any) {
