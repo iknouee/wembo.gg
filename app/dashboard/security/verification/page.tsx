@@ -45,6 +45,7 @@ export default function VerificationPage() {
   const [hasChanges, setHasChanges] = useState(false)
   const [channels, setChannels] = useState<{ id: string; name: string }[]>([])
   const [channelDropdownOpen, setChannelDropdownOpen] = useState(false)
+  const [channelSearch, setChannelSearch] = useState('')
   const [refreshingChannels, setRefreshingChannels] = useState(false)
   const initialState = useRef<{ enabled: boolean; config: typeof DEFAULT_CONFIG } | null>(null)
 
@@ -258,37 +259,70 @@ export default function VerificationPage() {
               <div className="flex items-center gap-2">
                 <div className="relative">
                   <button
-                    onClick={() => setChannelDropdownOpen(!channelDropdownOpen)}
-                    className="dash-input w-48 flex items-center justify-between gap-2 cursor-pointer"
+                    onClick={() => { setChannelDropdownOpen(!channelDropdownOpen); setChannelSearch('') }}
+                    className="dash-input w-52 flex items-center justify-between gap-2 cursor-pointer"
                   >
                     <span className="truncate text-left">
-                      {config.channel_id ? `# ${channels.find(c => c.id === config.channel_id)?.name || config.channel_id}` : 'Select channel'}
+                      {config.channel_id
+                        ? `# ${channels.find(c => c.id === config.channel_id)?.name || config.channel_id}`
+                        : 'Select or type ID'}
                     </span>
                     <ChevronDown className={`h-3.5 w-3.5 text-white/20 transition-transform ${channelDropdownOpen ? 'rotate-180' : ''}`} />
                   </button>
                   {channelDropdownOpen && (
                     <>
                       <div className="fixed inset-0 z-40" onClick={() => setChannelDropdownOpen(false)} />
-                      <div className="absolute top-full left-0 right-0 mt-1 z-50 rounded-xl bg-[#111214] border border-white/[0.06] shadow-xl shadow-black/40 overflow-hidden max-h-[240px] overflow-y-auto">
-                        <button
-                          onClick={() => { setConfig({ ...config, channel_id: '' }); setChannelDropdownOpen(false) }}
-                          className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-left text-body-sm transition-colors ${!config.channel_id ? 'bg-[#FFD600]/[0.04] text-white/70' : 'text-white/40 hover:bg-white/[0.03]'}`}
-                        >
-                          <span className="text-white/20">—</span>
-                          <span>None</span>
-                          {!config.channel_id && <Check className="h-3 w-3 text-[#FFD600] ml-auto" />}
-                        </button>
-                        {channels.map(ch => (
-                          <button
-                            key={ch.id}
-                            onClick={() => { setConfig({ ...config, channel_id: ch.id }); setChannelDropdownOpen(false) }}
-                            className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-left text-body-sm transition-colors ${config.channel_id === ch.id ? 'bg-[#FFD600]/[0.04] text-white/70' : 'text-white/40 hover:bg-white/[0.03]'}`}
-                          >
-                            <Hash className="h-3.5 w-3.5 text-white/20 flex-shrink-0" />
-                            <span className="truncate">{ch.name}</span>
-                            {config.channel_id === ch.id && <Check className="h-3 w-3 text-[#FFD600] ml-auto flex-shrink-0" />}
-                          </button>
-                        ))}
+                      <div className="absolute top-full left-0 mt-1 z-50 w-64 rounded-xl bg-[#111214] border border-white/[0.06] shadow-xl shadow-black/40 overflow-hidden">
+                        {/* Search / manual ID input */}
+                        <div className="p-2 border-b border-white/[0.04]">
+                          <input
+                            value={channelSearch}
+                            onChange={e => setChannelSearch(e.target.value)}
+                            placeholder="Search or paste channel ID..."
+                            className="w-full h-8 rounded-lg bg-white/[0.03] border border-white/[0.04] px-3 text-[12px] text-white/70 placeholder:text-white/20 focus:outline-none focus:border-white/[0.1]"
+                            autoFocus
+                          />
+                        </div>
+                        <div className="max-h-[200px] overflow-y-auto">
+                          {/* If they typed a channel ID directly */}
+                          {channelSearch && /^\d{17,20}$/.test(channelSearch.trim()) && (
+                            <button
+                              onClick={() => { setConfig({ ...config, channel_id: channelSearch.trim() }); setChannelDropdownOpen(false); setChannelSearch('') }}
+                              className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left text-body-sm text-[#FFD600]/70 hover:bg-white/[0.03] transition-colors"
+                            >
+                              <Hash className="h-3.5 w-3.5 flex-shrink-0" />
+                              <span>Use ID: {channelSearch.trim()}</span>
+                            </button>
+                          )}
+                          {/* None option */}
+                          {!channelSearch && (
+                            <button
+                              onClick={() => { setConfig({ ...config, channel_id: '' }); setChannelDropdownOpen(false) }}
+                              className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-left text-body-sm transition-colors ${!config.channel_id ? 'bg-[#FFD600]/[0.04] text-white/70' : 'text-white/40 hover:bg-white/[0.03]'}`}
+                            >
+                              <span className="text-white/20">—</span>
+                              <span>None</span>
+                              {!config.channel_id && <Check className="h-3 w-3 text-[#FFD600] ml-auto" />}
+                            </button>
+                          )}
+                          {/* Channel list (filtered) */}
+                          {channels
+                            .filter(ch => !channelSearch || ch.name.toLowerCase().includes(channelSearch.toLowerCase()))
+                            .map(ch => (
+                              <button
+                                key={ch.id}
+                                onClick={() => { setConfig({ ...config, channel_id: ch.id }); setChannelDropdownOpen(false); setChannelSearch('') }}
+                                className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-left text-body-sm transition-colors ${config.channel_id === ch.id ? 'bg-[#FFD600]/[0.04] text-white/70' : 'text-white/40 hover:bg-white/[0.03]'}`}
+                              >
+                                <Hash className="h-3.5 w-3.5 text-white/20 flex-shrink-0" />
+                                <span className="truncate">{ch.name}</span>
+                                {config.channel_id === ch.id && <Check className="h-3 w-3 text-[#FFD600] ml-auto flex-shrink-0" />}
+                              </button>
+                            ))}
+                          {channels.filter(ch => !channelSearch || ch.name.toLowerCase().includes(channelSearch.toLowerCase())).length === 0 && channelSearch && !/^\d{17,20}$/.test(channelSearch.trim()) && (
+                            <p className="px-3 py-3 text-[11px] text-white/20 text-center">No channels found. Paste a channel ID instead.</p>
+                          )}
+                        </div>
                       </div>
                     </>
                   )}
