@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Shield, Lock, Loader2, Zap, Ban, Link2, UserX, AlertTriangle, Bomb, Bot, ShieldCheck } from 'lucide-react'
+import { Shield, Lock, Loader2, Zap, Ban, Link2, UserX, AlertTriangle, Bomb, Bot, ShieldCheck, UserMinus } from 'lucide-react'
 import { useAuth } from '@/components/dashboard/dashboard-shell'
 import { PageHeader, StatCard, ModuleCard, SecurityScore, ConfirmModal, EmptyState } from '@/components/dashboard/ui'
 
@@ -226,6 +226,15 @@ export default function SecurityOverview() {
             active={true}
             statLabel="Custom embed + button"
           />
+          <ModuleCard
+            href="/dashboard/security/altdetection"
+            icon={UserMinus}
+            iconColor="bg-amber-500/[0.06] text-amber-400"
+            name="Alt Detection"
+            description="Detect and take action on alt accounts and new accounts."
+            active={true}
+            statLabel="Monitoring join patterns"
+          />
         </div>
       </div>
 
@@ -240,6 +249,7 @@ export default function SecurityOverview() {
               { value: 'spam', label: 'Spam' },
               { value: 'phishing', label: 'Links' },
               { value: 'impersonation', label: 'Impersonation' },
+              { value: 'alt_detected', label: 'Alts' },
             ].map(f => (
               <button
                 key={f.value}

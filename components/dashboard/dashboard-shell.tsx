@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   Home, LogOut, Menu, X, Loader2, Shield, ChevronDown, Ban, Link2, UserX, Zap, ScrollText,
-  Bell, HelpCircle, Search, Settings, Users, ChevronRight, Bomb, Bot, ShieldCheck
+  Bell, HelpCircle, Search, Settings, Users, ChevronRight, Bomb, Bot, ShieldCheck, UserMinus
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ToastProvider } from '@/components/dashboard/ui/toast'
@@ -40,6 +40,7 @@ const securitySubNav = [
   { title: 'Impersonation', href: '/dashboard/security/impersonation', icon: UserX },
   { title: 'Bot Guard', href: '/dashboard/security/botguard', icon: Bot },
   { title: 'Verification', href: '/dashboard/security/verification', icon: ShieldCheck },
+  { title: 'Alt Detection', href: '/dashboard/security/altdetection', icon: UserMinus },
   { title: 'Security Logs', href: '/dashboard/security/logs', icon: ScrollText },
 ]
 
@@ -55,6 +56,7 @@ function getPageTitle(pathname: string): string {
   if (pathname === '/dashboard/security/impersonation') return 'Security / Impersonation'
   if (pathname === '/dashboard/security/botguard') return 'Security / Bot Guard'
   if (pathname === '/dashboard/security/verification') return 'Security / Verification'
+  if (pathname === '/dashboard/security/altdetection') return 'Security / Alt Detection'
   if (pathname === '/dashboard/security/logs') return 'Security / Logs'
   return 'Dashboard'
 }

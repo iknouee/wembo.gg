@@ -9,6 +9,7 @@ import { initLogger, sendSecurityLog } from './logger'
 import { initAntiNuke } from './antinuke'
 import { initBotGuard } from './botguard'
 import { initVerification } from './verification'
+import { initAltDetection } from './altdetection'
 
 // Cache module settings to avoid spamming DB
 const moduleCache: Map<string, { data: any; expires: number }> = new Map()
@@ -40,6 +41,9 @@ export function initSecurity(client: Client) {
 
   // Initialize Verification Gate
   initVerification(client)
+
+  // Initialize Alt Detection
+  initAltDetection(client)
 
   // ─── Member Join ─────────────────────────────────────────────────────
   client.on(Events.GuildMemberAdd, async (member) => {
@@ -116,6 +120,7 @@ async function setupGuildDefaults(guildId: string) {
     antinuke: { enabled: true, config: { max_channel_deletes: 3, max_role_deletes: 3, max_bans: 5, max_kicks: 5, time_window_seconds: 60, action: 'strip_roles', monitor_permission_changes: true, monitor_webhook_creation: true, monitor_channel_deletes: true, monitor_role_deletes: true, monitor_mass_bans: true, monitor_mass_kicks: true, whitelist_owner: true } },
     botguard: { enabled: false, config: { action: 'kick', notify_on_add: true, quarantine_unverified: true, auto_kick_unverified: false, require_verification: true, log_bot_actions: true, whitelisted_bots: [] } },
     verification: { enabled: false, config: { embed_title: 'Verify to Access the Server', embed_description: 'Click the button below to verify that you are a human and gain access to the server.', embed_color: '#FFD600', embed_image: '', embed_thumbnail: '', embed_footer: 'Wembo Verification', button_label: '✓ Verify', button_style: 'Success', verified_role_id: '', unverified_role_id: '', channel_id: '', remove_unverified_role: true, log_verifications: true, kick_unverified_after: 0 } },
+    altdetection: { enabled: false, config: { min_account_age_days: 7, suspicious_age_days: 30, action_new_account: 'flag', action_suspicious: 'flag', check_no_avatar: true, check_no_banner: true, check_default_username: true, check_no_mutual_servers: true, check_join_velocity: true, join_velocity_threshold: 3, join_velocity_window: 60, bypass_verified_email: false, bypass_phone_verified: true, bypass_nitro: true, quarantine_role_id: '', quarantine_duration_hours: 24, notify_on_flag: true, notify_on_action: true, dm_on_kick: true, dm_message: 'Your account was flagged as a potential alt. If this is a mistake, please contact a moderator.' } },
   }
 
   for (const [moduleId, settings] of Object.entries(defaults)) {
@@ -227,6 +232,8 @@ export async function logSecurityEvent(params: {
       unauthorized_bot: 'Unauthorized Bot',
       bot_added: 'Bot Added',
       verification: 'Member Verified',
+      alt_detected: 'Alt Account Detected',
+      alt_velocity: 'Alt Join Velocity Alert',
     }
 
     await sendSecurityLog({
