@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import {
   Home, LogOut, Menu, X, Loader2, Shield, ChevronDown, Ban, Link2, UserX, Zap, ScrollText,
   Bell, HelpCircle, Search, Settings, Users, ChevronRight, Bomb, Bot, ShieldCheck, UserMinus,
-  Gavel, AlertOctagon, FileText
+  Gavel, AlertOctagon, FileText, UserPlus
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ToastProvider } from '@/components/dashboard/ui/toast'
@@ -50,6 +50,10 @@ const moderationSubNav = [
   { title: 'Mod Logs', href: '/dashboard/moderation/logs', icon: FileText },
 ]
 
+const automationSubNav = [
+  { title: 'Welcome & Goodbye', href: '/dashboard/welcome', icon: UserPlus },
+]
+
 // ─── Page Title Helper ───────────────────────────────────────────────────────
 
 function getPageTitle(pathname: string): string {
@@ -66,6 +70,7 @@ function getPageTitle(pathname: string): string {
   if (pathname === '/dashboard/security/logs') return 'Security / Logs'
   if (pathname === '/dashboard/moderation/warns') return 'Moderation / Warnings'
   if (pathname === '/dashboard/moderation/logs') return 'Moderation / Mod Logs'
+  if (pathname === '/dashboard/welcome') return 'Automations / Welcome & Goodbye'
   return 'Dashboard'
 }
 
@@ -79,6 +84,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const [securityOpen, setSecurityOpen] = useState(pathname.includes('/security'))
   const [moderationOpen, setModerationOpen] = useState(pathname.includes('/moderation'))
+  const [automationOpen, setAutomationOpen] = useState(pathname.includes('/welcome') || pathname.includes('/automations'))
 
   // ─── Auth Logic (PRESERVED EXACTLY) ──────────────────────────────────
   useEffect(() => {
@@ -98,6 +104,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   useEffect(() => { setSidebarOpen(false) }, [pathname])
   useEffect(() => { if (pathname.includes('/security')) setSecurityOpen(true) }, [pathname])
   useEffect(() => { if (pathname.includes('/moderation')) setModerationOpen(true) }, [pathname])
+  useEffect(() => { if (pathname.includes('/welcome') || pathname.includes('/automations')) setAutomationOpen(true) }, [pathname])
 
   // ─── Loading State ───────────────────────────────────────────────────
   if (auth.loading) {
@@ -133,6 +140,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
   const isSecurityPage = pathname.includes('/security')
   const isModerationPage = pathname.includes('/moderation')
+  const isAutomationPage = pathname.includes('/welcome') || pathname.includes('/automations')
   const selectedServer = auth.guilds.find(g => g.id === selectedGuild) || auth.guilds[0] || null
 
   return (
@@ -297,6 +305,42 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                   ))}
                 </div>
               </div>
+
+              {/* AUTOMATION */}
+              <p className="text-[10px] font-semibold text-white/20 uppercase tracking-[0.08em] px-3 mb-2 mt-6">Automation</p>
+              <button
+                onClick={() => setAutomationOpen(!automationOpen)}
+                className={cn(
+                  'w-full flex items-center justify-between rounded-lg px-3 py-2.5 text-[13px] transition-all duration-200 mb-0.5',
+                  isAutomationPage ? 'text-white/80 bg-white/[0.02]' : 'text-white/45 hover:text-white/75 hover:bg-white/[0.03]'
+                )}
+              >
+                <span className="flex items-center gap-3">
+                  <Zap className={cn('h-4 w-4', isAutomationPage && 'text-[#FFD600]')} />
+                  Automations
+                </span>
+                <ChevronDown className={cn('h-3.5 w-3.5 text-white/20 transition-transform duration-200', automationOpen && 'rotate-180')} />
+              </button>
+
+              <div className={cn('overflow-hidden transition-all duration-300', automationOpen ? 'max-h-[300px] opacity-100' : 'max-h-0 opacity-0')}>
+                <div className="ml-3 pl-3 border-l border-white/[0.04] space-y-0.5 py-1">
+                  {automationSubNav.map(item => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={cn(
+                        'flex items-center gap-2.5 rounded-md px-3 py-[7px] text-[12px] transition-all duration-200',
+                        pathname === item.href
+                          ? 'text-[#FFD600] bg-[#FFD600]/[0.06] font-medium'
+                          : 'text-white/30 hover:text-white/60 hover:bg-white/[0.03]'
+                      )}
+                    >
+                      <item.icon className={cn('h-3.5 w-3.5', pathname === item.href && 'text-[#FFD600]')} />
+                      {item.title}
+                    </Link>
+                  ))}
+                </div>
+              </div>
             </nav>
 
             {/* User Section */}
@@ -368,6 +412,13 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                   ))}
                   <p className="text-[10px] font-semibold text-white/20 uppercase tracking-[0.08em] px-3 mb-2 mt-5">Moderation</p>
                   {moderationSubNav.map(item => (
+                    <Link key={item.href} href={item.href} onClick={() => setSidebarOpen(false)}
+                      className={cn('flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] mb-0.5', pathname === item.href ? 'text-[#FFD600] bg-[#FFD600]/[0.08] font-medium' : 'text-white/45')}>
+                      <item.icon className="h-4 w-4" /> {item.title}
+                    </Link>
+                  ))}
+                  <p className="text-[10px] font-semibold text-white/20 uppercase tracking-[0.08em] px-3 mb-2 mt-5">Automation</p>
+                  {automationSubNav.map(item => (
                     <Link key={item.href} href={item.href} onClick={() => setSidebarOpen(false)}
                       className={cn('flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] mb-0.5', pathname === item.href ? 'text-[#FFD600] bg-[#FFD600]/[0.08] font-medium' : 'text-white/45')}>
                       <item.icon className="h-4 w-4" /> {item.title}
