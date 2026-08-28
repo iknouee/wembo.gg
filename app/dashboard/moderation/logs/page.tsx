@@ -154,9 +154,10 @@ export default function ModLogsPage() {
         iconColor="bg-blue-500/[0.06] text-blue-400"
         title="Mod Log Channel"
         description="Where moderation actions are logged as Discord embeds"
+        className="overflow-visible"
       >
         <div className="flex items-center gap-3">
-          <div className="relative flex-1">
+          <div className="relative flex-1" style={{ zIndex: channelDropdownOpen ? 50 : 1 }}>
             <button
               onClick={() => { setChannelDropdownOpen(!channelDropdownOpen); setChannelSearch('') }}
               className="dash-input w-full flex items-center justify-between gap-2 cursor-pointer"
@@ -171,7 +172,7 @@ export default function ModLogsPage() {
             {channelDropdownOpen && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setChannelDropdownOpen(false)} />
-                <div className="absolute top-full left-0 right-0 mt-1 z-50 rounded-xl bg-[#111214] border border-white/[0.06] shadow-2xl shadow-black/60 overflow-hidden">
+                <div className="absolute bottom-full left-0 right-0 mb-1 z-50 rounded-xl bg-[#111214] border border-white/[0.06] shadow-2xl shadow-black/60 overflow-hidden">
                   <div className="p-2.5 border-b border-white/[0.04]">
                     <input
                       value={channelSearch}

@@ -12,8 +12,9 @@ interface SettingCardProps {
 }
 
 export function SettingCard({ icon: Icon, iconColor, title, description, children, className = '' }: SettingCardProps) {
+  const hasOverflowOverride = className.includes('overflow-')
   return (
-    <div className={`dash-card overflow-hidden ${className}`}>
+    <div className={`dash-card ${hasOverflowOverride ? '' : 'overflow-hidden'} ${className}`}>
       <div className="px-6 py-4 border-b border-white/[0.04] flex items-center gap-3">
         {Icon && (
           <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${iconColor || 'bg-white/[0.04] text-white/50'}`}>
