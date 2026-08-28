@@ -37,6 +37,19 @@ export const dashboardTopItems: NavTopItem[] = [
 
 export const dashboardSections: NavSection[] = [
   {
+    label: 'AUTOMATION',
+    groups: [
+      {
+        title: 'Automations',
+        icon: Zap,
+        href: '/dashboard/automations',
+        children: [
+          { title: 'Welcome & Goodbye', href: '/dashboard/welcome' },
+        ],
+      },
+    ],
+  },
+  {
     label: 'SECURITY',
     groups: [
       {
@@ -68,19 +81,6 @@ export const dashboardSections: NavSection[] = [
         children: [
           { title: 'Warnings', href: '/dashboard/moderation/warnings' },
           { title: 'Mod Logs', href: '/dashboard/moderation/mod-logs' },
-        ],
-      },
-    ],
-  },
-  {
-    label: 'AUTOMATION',
-    groups: [
-      {
-        title: 'Automations',
-        icon: Zap,
-        href: '/dashboard/automations',
-        children: [
-          { title: 'Welcome & Goodbye', href: '/dashboard/welcome' },
         ],
       },
     ],
