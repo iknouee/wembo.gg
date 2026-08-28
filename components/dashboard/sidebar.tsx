@@ -4,10 +4,134 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { dashboardNav } from '@/config/dashboard'
+import { dashboardNav, type NavItem } from '@/config/dashboard'
 import { ServerSelector } from '@/components/dashboard/server-selector'
 import { UserProfile } from '@/components/dashboard/user-profile'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, ChevronDown } from 'lucide-react'
+
+function NavItemLink({
+  item,
+  pathname,
+  onClick,
+}: {
+  item: NavItem
+  pathname: string
+  onClick?: () => void
+}) {
+  const [expanded, setExpanded] = useState(() => {
+    // Auto-expand if a child is active
+    if (item.children) {
+      return item.children.some(
+        (child) =>
+          pathname === child.href ||
+          (child.href !== '/dashboard' && pathname.startsWith(child.href))
+      )
+    }
+    return false
+  })
+
+  const hasChildren = item.children && item.children.length > 0
+
+  const isActive =
+    pathname === item.href ||
+    (item.href !== '/dashboard' && pathname.startsWith(item.href))
+
+  const isChildActive = hasChildren
+    ? item.children!.some(
+        (child) =>
+          pathname === child.href ||
+          (child.href !== '/dashboard' && pathname.startsWith(child.href))
+      )
+    : false
+
+  if (hasChildren) {
+    return (
+      <li>
+        {/* Parent item with dropdown toggle */}
+        <div className="space-y-0.5">
+          <div className="flex items-center">
+            <Link
+              href={item.href}
+              onClick={onClick}
+              className={cn(
+                'flex-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-200',
+                isActive && !isChildActive
+                  ? 'bg-primary/10 text-primary font-medium'
+                  : isChildActive
+                  ? 'text-foreground font-medium'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+              )}
+            >
+              <item.icon className="h-4 w-4" />
+              {item.title}
+            </Link>
+            <button
+              onClick={() => setExpanded(!expanded)}
+              className={cn(
+                'p-2 rounded-lg transition-all duration-200 hover:bg-accent',
+                expanded ? 'text-foreground' : 'text-muted-foreground'
+              )}
+              aria-label={expanded ? 'Collapse' : 'Expand'}
+            >
+              <ChevronDown
+                className={cn(
+                  'h-3.5 w-3.5 transition-transform duration-200',
+                  expanded && 'rotate-180'
+                )}
+              />
+            </button>
+          </div>
+
+          {/* Children */}
+          {expanded && (
+            <ul className="ml-4 pl-3 border-l border-border/50 space-y-0.5">
+              {item.children!.map((child) => {
+                const childActive =
+                  pathname === child.href ||
+                  (child.href !== '/dashboard' && pathname.startsWith(child.href))
+                return (
+                  <li key={child.href}>
+                    <Link
+                      href={child.href}
+                      onClick={onClick}
+                      className={cn(
+                        'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-200',
+                        childActive
+                          ? 'bg-primary/10 text-primary font-medium'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                      )}
+                    >
+                      <child.icon className="h-3.5 w-3.5" />
+                      {child.title}
+                    </Link>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+        </div>
+      </li>
+    )
+  }
+
+  return (
+    <li>
+      <Link
+        href={item.href}
+        onClick={onClick}
+        className={cn(
+          'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-200',
+          isActive
+            ? 'bg-primary/10 text-primary font-medium'
+            : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+        )}
+      >
+        <item.icon className="h-4 w-4" />
+        {item.title}
+      </Link>
+    </li>
+  )
+}
 
 export function Sidebar() {
   const pathname = usePathname()
@@ -27,27 +151,9 @@ export function Sidebar() {
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto py-4 px-3">
         <ul className="space-y-1">
-          {dashboardNav.map((item) => {
-            const isActive =
-              pathname === item.href ||
-              (item.href !== '/dashboard' && pathname.startsWith(item.href))
-            return (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className={cn(
-                    'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-200',
-                    isActive
-                      ? 'bg-primary/10 text-primary font-medium'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-accent'
-                  )}
-                >
-                  <item.icon className="h-4 w-4" />
-                  {item.title}
-                </Link>
-              </li>
-            )
-          })}
+          {dashboardNav.map((item) => (
+            <NavItemLink key={item.href} item={item} pathname={pathname} />
+          ))}
         </ul>
       </nav>
 
@@ -112,28 +218,14 @@ export function MobileSidebar() {
             </div>
             <nav className="flex-1 overflow-y-auto py-4 px-3">
               <ul className="space-y-1">
-                {dashboardNav.map((item) => {
-                  const isActive =
-                    pathname === item.href ||
-                    (item.href !== '/dashboard' && pathname.startsWith(item.href))
-                  return (
-                    <li key={item.href}>
-                      <Link
-                        href={item.href}
-                        onClick={() => setOpen(false)}
-                        className={cn(
-                          'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-200',
-                          isActive
-                            ? 'bg-primary/10 text-primary font-medium'
-                            : 'text-muted-foreground hover:text-foreground hover:bg-accent'
-                        )}
-                      >
-                        <item.icon className="h-4 w-4" />
-                        {item.title}
-                      </Link>
-                    </li>
-                  )
-                })}
+                {dashboardNav.map((item) => (
+                  <NavItemLink
+                    key={item.href}
+                    item={item}
+                    pathname={pathname}
+                    onClick={() => setOpen(false)}
+                  />
+                ))}
               </ul>
             </nav>
             <div className="border-t border-border p-3">

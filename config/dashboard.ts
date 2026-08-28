@@ -15,13 +15,27 @@ import {
   UserPlus,
   Users,
   Zap,
+  type LucideIcon,
 } from 'lucide-react'
 
-export const dashboardNav = [
+export interface NavItem {
+  title: string
+  href: string
+  icon: LucideIcon
+  children?: NavItem[]
+}
+
+export const dashboardNav: NavItem[] = [
   { title: 'Overview', href: '/dashboard', icon: Home },
-  { title: 'Welcome & Goodbye', href: '/dashboard/welcome', icon: UserPlus },
   { title: 'AI', href: '/dashboard/ai', icon: Bot },
-  { title: 'Automations', href: '/dashboard/automations', icon: Zap },
+  {
+    title: 'Automations',
+    href: '/dashboard/automations',
+    icon: Zap,
+    children: [
+      { title: 'Welcome & Goodbye', href: '/dashboard/welcome', icon: UserPlus },
+    ],
+  },
   { title: 'Security', href: '/dashboard/security', icon: Shield },
   { title: 'Members', href: '/dashboard/members', icon: Users },
   { title: 'Forms', href: '/dashboard/forms', icon: FileText },
