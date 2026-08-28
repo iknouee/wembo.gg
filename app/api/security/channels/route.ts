@@ -4,6 +4,8 @@ export const dynamic = 'force-dynamic'
 
 /**
  * Fetch text channels for a guild using the bot token.
+ * Returns ALL text-based channels (text, announcement, forum, voice stage) 
+ * regardless of whether they're in a category or not.
  */
 export async function GET(request: NextRequest) {
   const guildId = request.nextUrl.searchParams.get('guild_id')
@@ -21,10 +23,15 @@ export async function GET(request: NextRequest) {
 
     const allChannels = await res.json()
 
-    // Filter to text channels only (type 0 = text, type 5 = announcement)
+    // Channel types:
+    // 0 = text, 2 = voice, 4 = category, 5 = announcement, 
+    // 13 = stage, 15 = forum, 16 = media
+    // We want all channels a bot can send messages to (text-based)
+    const textBasedTypes = [0, 5, 15]
+
     const textChannels = allChannels
-      .filter((ch: any) => ch.type === 0 || ch.type === 5)
-      .map((ch: any) => ({ id: ch.id, name: ch.name, type: ch.type }))
+      .filter((ch: any) => textBasedTypes.includes(ch.type))
+      .map((ch: any) => ({ id: ch.id, name: ch.name, type: ch.type, parent_id: ch.parent_id || null }))
       .sort((a: any, b: any) => a.name.localeCompare(b.name))
 
     return NextResponse.json({ channels: textChannels })
