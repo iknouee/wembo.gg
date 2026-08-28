@@ -467,7 +467,7 @@ async function handleBan(interaction: ChatInputCommandInteraction, guildId: stri
         user_tag: user.tag,
         expires_at: new Date(Date.now() + duration.ms).toISOString(),
         moderator_id: interaction.user.id,
-      }).catch(() => {})
+      })
     }
 
     const embed = new EmbedBuilder()
@@ -606,7 +606,7 @@ async function handleUnban(interaction: ChatInputCommandInteraction, guildId: st
 
     // Remove from temp_bans if exists
     const supabase = getSupabase()
-    await supabase.from('temp_bans').delete().eq('guild_id', guildId).eq('user_id', userId).catch(() => {})
+    await supabase.from('temp_bans').delete().eq('guild_id', guildId).eq('user_id', userId)
 
     const embed = new EmbedBuilder()
       .setTitle('🔓 User Unbanned')
