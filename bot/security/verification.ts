@@ -47,13 +47,14 @@ export function initVerification(client: Client) {
 
       // Log verification
       if (config.log_verifications) {
+        const userTag = 'tag' in member.user ? member.user.tag : member.user.username
         await logSecurityEvent({
           guildId: guild.id,
           eventType: 'verification',
           severity: 'low',
-          description: `${member.user.tag} verified successfully`,
+          description: `${userTag} verified successfully`,
           userId: member.user.id,
-          userTag: member.user.tag,
+          userTag: userTag,
           actionTaken: 'verified',
         })
       }
