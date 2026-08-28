@@ -8,6 +8,7 @@ import { initLockdownMonitor, isInLockdown } from './lockdown'
 import { initLogger, sendSecurityLog } from './logger'
 import { initAntiNuke } from './antinuke'
 import { initBotGuard } from './botguard'
+import { initVerification } from './verification'
 
 // Cache module settings to avoid spamming DB
 const moduleCache: Map<string, { data: any; expires: number }> = new Map()
@@ -36,6 +37,9 @@ export function initSecurity(client: Client) {
 
   // Initialize Bot Guard monitoring
   initBotGuard(client)
+
+  // Initialize Verification Gate
+  initVerification(client)
 
   // ─── Member Join ─────────────────────────────────────────────────────
   client.on(Events.GuildMemberAdd, async (member) => {
@@ -111,6 +115,7 @@ async function setupGuildDefaults(guildId: string) {
     impersonation: { enabled: false, config: { protected_roles: [], similarity_threshold: 80, action: 'flag', check_avatars: true, check_nicknames: true } },
     antinuke: { enabled: true, config: { max_channel_deletes: 3, max_role_deletes: 3, max_bans: 5, max_kicks: 5, time_window_seconds: 60, action: 'strip_roles', monitor_permission_changes: true, monitor_webhook_creation: true, monitor_channel_deletes: true, monitor_role_deletes: true, monitor_mass_bans: true, monitor_mass_kicks: true, whitelist_owner: true } },
     botguard: { enabled: false, config: { action: 'kick', notify_on_add: true, quarantine_unverified: true, auto_kick_unverified: false, require_verification: true, log_bot_actions: true, whitelisted_bots: [] } },
+    verification: { enabled: false, config: { embed_title: 'Verify to Access the Server', embed_description: 'Click the button below to verify that you are a human and gain access to the server.', embed_color: '#FFD600', embed_image: '', embed_thumbnail: '', embed_footer: 'Wembo Verification', button_label: '✓ Verify', button_style: 'Success', verified_role_id: '', unverified_role_id: '', channel_id: '', remove_unverified_role: true, log_verifications: true, kick_unverified_after: 0 } },
   }
 
   for (const [moduleId, settings] of Object.entries(defaults)) {
@@ -221,6 +226,7 @@ export async function logSecurityEvent(params: {
       nuke: 'Nuke Attempt Detected',
       unauthorized_bot: 'Unauthorized Bot',
       bot_added: 'Bot Added',
+      verification: 'Member Verified',
     }
 
     await sendSecurityLog({

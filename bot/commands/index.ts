@@ -33,6 +33,11 @@ export const commands = [
     .addSubcommand(sub =>
       sub.setName('list').setDescription('View all whitelisted bots')
     ),
+
+  new SlashCommandBuilder()
+    .setName('verify')
+    .setDescription('Deploy the verification embed to the configured channel')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 ]
 
 export async function handleCommand(interaction: ChatInputCommandInteraction) {
@@ -62,6 +67,11 @@ export async function handleCommand(interaction: ChatInputCommandInteraction) {
 
     case 'whitelist': {
       await handleWhitelistCommand(interaction, guildId)
+      break
+    }
+
+    case 'verify': {
+      await handleVerifyCommand(interaction, guildId)
       break
     }
 
@@ -254,5 +264,20 @@ async function handleWhitelistCommand(interaction: ChatInputCommandInteraction, 
     }
   } catch (err) {
     await interaction.editReply({ content: '❌ Failed to manage whitelist.' })
+  }
+}
+
+
+// ─── /verify ─────────────────────────────────────────────────────────────────
+
+async function handleVerifyCommand(interaction: ChatInputCommandInteraction, guildId: string) {
+  await interaction.deferReply({ ephemeral: true })
+
+  try {
+    const { deployVerificationEmbed } = await import('../security/verification')
+    await deployVerificationEmbed(interaction.client, guildId)
+    await interaction.editReply({ content: '✅ Verification embed deployed to the configured channel.' })
+  } catch (err) {
+    await interaction.editReply({ content: '❌ Failed to deploy verification embed. Make sure a channel is configured in the dashboard.' })
   }
 }
