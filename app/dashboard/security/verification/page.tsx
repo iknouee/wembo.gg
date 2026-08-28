@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { ShieldCheck, Loader2, Hash, Eye, Palette } from 'lucide-react'
+import { ShieldCheck, Loader2, Hash, Eye, Palette, RefreshCw, ChevronDown, Check } from 'lucide-react'
 import { useAuth } from '@/components/dashboard/dashboard-shell'
 import { PageHeader, SettingCard, SettingRow, Toggle, SegmentedControl, SaveBar, useToast } from '@/components/dashboard/ui'
 
@@ -44,19 +44,36 @@ export default function VerificationPage() {
   const [saving, setSaving] = useState(false)
   const [hasChanges, setHasChanges] = useState(false)
   const [channels, setChannels] = useState<{ id: string; name: string }[]>([])
+  const [channelDropdownOpen, setChannelDropdownOpen] = useState(false)
+  const [refreshingChannels, setRefreshingChannels] = useState(false)
   const initialState = useRef<{ enabled: boolean; config: typeof DEFAULT_CONFIG } | null>(null)
 
   // ─── Data Fetching ───────────────────────────────────────────────────
+  const fetchChannels = async () => {
+    if (!guildId) return
+    try {
+      const res = await fetch(`/api/security/channels?guild_id=${guildId}`)
+      const data = await res.json()
+      setChannels(data.channels || [])
+    } catch {}
+  }
+
+  const refreshChannels = async () => {
+    setRefreshingChannels(true)
+    await fetchChannels()
+    setRefreshingChannels(false)
+    toast('Channel list refreshed', 'success')
+  }
+
   useEffect(() => {
     if (!guildId) { setLoading(false); return }
 
     Promise.all([
       fetch(`/api/security/modules?guild_id=${guildId}`).then(r => r.json()),
-      fetch(`/api/security/channels?guild_id=${guildId}`).then(r => r.json()),
-    ]).then(([moduleData, channelData]) => {
+      fetchChannels(),
+    ]).then(([moduleData]) => {
       const mod = (moduleData.modules || []).find((m: any) => m.module_id === 'verification')
       if (mod) { setEnabled(mod.enabled); setConfig(c => ({ ...c, ...mod.config })) }
-      setChannels(channelData.channels || [])
       setLoading(false)
       setTimeout(() => {
         initialState.current = { enabled: mod?.enabled ?? false, config: { ...DEFAULT_CONFIG, ...(mod?.config || {}) } }
@@ -238,16 +255,53 @@ export default function VerificationPage() {
             description="How verification works"
           >
             <SettingRow label="Verification Channel" description="Where the verification embed is posted.">
-              <select
-                value={config.channel_id}
-                onChange={e => setConfig({ ...config, channel_id: e.target.value })}
-                className="dash-input w-48"
-              >
-                <option value="">Select channel</option>
-                {channels.map(ch => (
-                  <option key={ch.id} value={ch.id}>#{ch.name}</option>
-                ))}
-              </select>
+              <div className="flex items-center gap-2">
+                <div className="relative">
+                  <button
+                    onClick={() => setChannelDropdownOpen(!channelDropdownOpen)}
+                    className="dash-input w-48 flex items-center justify-between gap-2 cursor-pointer"
+                  >
+                    <span className="truncate text-left">
+                      {config.channel_id ? `# ${channels.find(c => c.id === config.channel_id)?.name || config.channel_id}` : 'Select channel'}
+                    </span>
+                    <ChevronDown className={`h-3.5 w-3.5 text-white/20 transition-transform ${channelDropdownOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  {channelDropdownOpen && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={() => setChannelDropdownOpen(false)} />
+                      <div className="absolute top-full left-0 right-0 mt-1 z-50 rounded-xl bg-[#111214] border border-white/[0.06] shadow-xl shadow-black/40 overflow-hidden max-h-[240px] overflow-y-auto">
+                        <button
+                          onClick={() => { setConfig({ ...config, channel_id: '' }); setChannelDropdownOpen(false) }}
+                          className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-left text-body-sm transition-colors ${!config.channel_id ? 'bg-[#FFD600]/[0.04] text-white/70' : 'text-white/40 hover:bg-white/[0.03]'}`}
+                        >
+                          <span className="text-white/20">—</span>
+                          <span>None</span>
+                          {!config.channel_id && <Check className="h-3 w-3 text-[#FFD600] ml-auto" />}
+                        </button>
+                        {channels.map(ch => (
+                          <button
+                            key={ch.id}
+                            onClick={() => { setConfig({ ...config, channel_id: ch.id }); setChannelDropdownOpen(false) }}
+                            className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-left text-body-sm transition-colors ${config.channel_id === ch.id ? 'bg-[#FFD600]/[0.04] text-white/70' : 'text-white/40 hover:bg-white/[0.03]'}`}
+                          >
+                            <Hash className="h-3.5 w-3.5 text-white/20 flex-shrink-0" />
+                            <span className="truncate">{ch.name}</span>
+                            {config.channel_id === ch.id && <Check className="h-3 w-3 text-[#FFD600] ml-auto flex-shrink-0" />}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+                <button
+                  onClick={refreshChannels}
+                  disabled={refreshingChannels}
+                  className="h-[42px] w-[42px] flex items-center justify-center rounded-lg bg-white/[0.03] border border-white/[0.06] text-white/30 hover:text-white/60 hover:border-white/[0.1] transition-all disabled:opacity-50"
+                  title="Refresh channels"
+                >
+                  <RefreshCw className={`h-3.5 w-3.5 ${refreshingChannels ? 'animate-spin' : ''}`} />
+                </button>
+              </div>
             </SettingRow>
             <SettingRow label="Verified Role ID" description="Role to give after verification. Paste the role ID.">
               <input
