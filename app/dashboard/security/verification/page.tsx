@@ -422,12 +422,8 @@ export default function VerificationPage() {
 // Strip emoji and separator characters from channel names
 function stripEmoji(name: string): string {
   return name
-    .replace(/[\u{1F600}-\u{1F9FF}]/gu, '') // emoticons
-    .replace(/[\u{2600}-\u{26FF}]/gu, '')   // misc symbols
-    .replace(/[\u{2700}-\u{27BF}]/gu, '')   // dingbats
-    .replace(/[\u{FE00}-\u{FE0F}]/gu, '')   // variation selectors
-    .replace(/[\u{1F000}-\u{1FFFF}]/gu, '') // extended
-    .replace(/[·•|]/g, '')                   // separators
-    .replace(/\s{2,}/g, ' ')                 // collapse spaces
+    .replace(/[^\w\s-]/g, '')  // remove non-word chars (emojis, symbols)
+    .replace(/[·•|]/g, '')     // separators
+    .replace(/\s{2,}/g, ' ')   // collapse spaces
     .trim()
 }
