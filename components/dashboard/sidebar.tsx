@@ -27,7 +27,7 @@ function SidebarGroup({
     (child) => pathname === child.href || pathname.startsWith(child.href + '/')
   )
 
-  const [expanded, setExpanded] = useState(true)
+  const [expanded, setExpanded] = useState(isChildActive || pathname.startsWith(group.href))
 
   return (
     <div>
