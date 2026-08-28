@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Shield, Lock, Loader2, Zap, Ban, Link2, UserX, AlertTriangle, Bomb, Bot } from 'lucide-react'
+import { Shield, Lock, Loader2, Zap, Ban, Link2, UserX, AlertTriangle, Bomb, Bot, ShieldCheck } from 'lucide-react'
 import { useAuth } from '@/components/dashboard/dashboard-shell'
 import { PageHeader, StatCard, ModuleCard, SecurityScore, ConfirmModal, EmptyState } from '@/components/dashboard/ui'
 
@@ -216,6 +216,15 @@ export default function SecurityOverview() {
             description="Detect unauthorized bots and manage bot access."
             active={true}
             statLabel="All bots verified"
+          />
+          <ModuleCard
+            href="/dashboard/security/verification"
+            icon={ShieldCheck}
+            iconColor="bg-cyan-500/[0.06] text-cyan-400"
+            name="Verification Gate"
+            description="Require new members to verify before accessing the server."
+            active={true}
+            statLabel="Custom embed + button"
           />
         </div>
       </div>
