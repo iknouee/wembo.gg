@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { FileText, Loader2, Search, Shield, AlertOctagon, Ban, UserX, Clock, Volume2 } from 'lucide-react'
+import { FileText, Loader2, Search, Shield, AlertOctagon, Ban, UserX, Clock, Volume2, Hash, ChevronDown, Check, RefreshCw, Send } from 'lucide-react'
 import { useAuth } from '@/components/dashboard/dashboard-shell'
-import { PageHeader, StatCard } from '@/components/dashboard/ui'
+import { PageHeader, StatCard, SettingCard, useToast } from '@/components/dashboard/ui'
 
 interface ModLog {
   id: string
@@ -30,22 +30,52 @@ const ACTION_CONFIG: Record<string, { icon: any; color: string; label: string }>
 export default function ModLogsPage() {
   const { guilds, selectedGuild } = useAuth()
   const guildId = selectedGuild || guilds[0]?.id || null
+  const { toast } = useToast()
 
   const [logs, setLogs] = useState<ModLog[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState<string>('all')
+  const [channels, setChannels] = useState<{ id: string; name: string }[]>([])
+  const [modLogChannelId, setModLogChannelId] = useState('')
+  const [savingChannel, setSavingChannel] = useState(false)
 
-  // ─── Fetch Logs ──────────────────────────────────────────────────────
+  // ─── Fetch Logs + Settings ───────────────────────────────────────────
   useEffect(() => {
     if (!guildId) { setLoading(false); return }
     const params = new URLSearchParams({ guild_id: guildId, limit: '100' })
     if (filter !== 'all') params.set('filter', filter)
-    fetch(`/api/moderation/logs?${params}`)
-      .then(r => r.json())
-      .then(data => { setLogs(data.logs || []); setLoading(false) })
-      .catch(() => setLoading(false))
+
+    Promise.all([
+      fetch(`/api/moderation/logs?${params}`).then(r => r.json()),
+      fetch(`/api/security/channels?guild_id=${guildId}`).then(r => r.json()),
+      fetch(`/api/security/settings?guild_id=${guildId}`).then(r => r.json()),
+    ]).then(([logData, channelData, settingsData]) => {
+      setLogs(logData.logs || [])
+      setChannels(channelData.channels || [])
+      if (settingsData?.settings?.mod_log_channel_id) {
+        setModLogChannelId(settingsData.settings.mod_log_channel_id)
+      }
+      setLoading(false)
+    }).catch(() => setLoading(false))
   }, [guildId, filter])
+
+  // ─── Save Mod Log Channel ────────────────────────────────────────────
+  const saveModLogChannel = async () => {
+    if (!guildId) return
+    setSavingChannel(true)
+    try {
+      await fetch('/api/security/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ guild_id: guildId, mod_log_channel_id: modLogChannelId || null }),
+      })
+      toast('Mod log channel saved', 'success')
+    } catch {
+      toast('Failed to save channel', 'error')
+    }
+    setSavingChannel(false)
+  }
 
   // ─── Filter by search ────────────────────────────────────────────────
   const filtered = logs.filter(log =>
@@ -105,6 +135,38 @@ export default function ModLogsPage() {
           sub="total"
         />
       </div>
+
+      {/* Mod Log Channel Config */}
+      <SettingCard
+        icon={Hash}
+        iconColor="bg-blue-500/[0.06] text-blue-400"
+        title="Mod Log Channel"
+        description="Where moderation actions are logged as Discord embeds"
+      >
+        <div className="flex items-center gap-3">
+          <select
+            value={modLogChannelId}
+            onChange={e => setModLogChannelId(e.target.value)}
+            className="dash-input flex-1"
+          >
+            <option value="">Disabled — no logging</option>
+            {channels.map(ch => (
+              <option key={ch.id} value={ch.id}>#{ch.name}</option>
+            ))}
+          </select>
+          <button
+            onClick={saveModLogChannel}
+            disabled={savingChannel}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#FFD600] text-black text-caption font-semibold hover:bg-[#FFD600]/90 transition-colors disabled:opacity-50"
+          >
+            {savingChannel ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+            Save
+          </button>
+        </div>
+        <p className="text-micro text-white/20 mt-2">
+          When set, all /warn, /mute, /kick, /ban actions will be sent as embeds to this channel.
+        </p>
+      </SettingCard>
 
       {/* Search + Filters */}
       <div className="flex items-center gap-3 flex-wrap">
