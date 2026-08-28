@@ -39,6 +39,8 @@ export default function ModLogsPage() {
   const [channels, setChannels] = useState<{ id: string; name: string }[]>([])
   const [modLogChannelId, setModLogChannelId] = useState('')
   const [savingChannel, setSavingChannel] = useState(false)
+  const [channelDropdownOpen, setChannelDropdownOpen] = useState(false)
+  const [channelSearch, setChannelSearch] = useState('')
 
   // ─── Fetch Logs + Settings ───────────────────────────────────────────
   useEffect(() => {
@@ -144,20 +146,76 @@ export default function ModLogsPage() {
         description="Where moderation actions are logged as Discord embeds"
       >
         <div className="flex items-center gap-3">
-          <select
-            value={modLogChannelId}
-            onChange={e => setModLogChannelId(e.target.value)}
-            className="dash-input flex-1"
-          >
-            <option value="">Disabled — no logging</option>
-            {channels.map(ch => (
-              <option key={ch.id} value={ch.id}>#{ch.name}</option>
-            ))}
-          </select>
+          <div className="relative flex-1">
+            <button
+              onClick={() => { setChannelDropdownOpen(!channelDropdownOpen); setChannelSearch('') }}
+              className="dash-input w-full flex items-center justify-between gap-2 cursor-pointer"
+            >
+              <span className="truncate text-left">
+                {modLogChannelId
+                  ? `# ${stripEmoji(channels.find(c => c.id === modLogChannelId)?.name || modLogChannelId)}`
+                  : 'Disabled — no logging'}
+              </span>
+              <ChevronDown className={`h-3.5 w-3.5 text-white/20 flex-shrink-0 transition-transform ${channelDropdownOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {channelDropdownOpen && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setChannelDropdownOpen(false)} />
+                <div className="absolute top-full left-0 right-0 mt-1 z-50 rounded-xl bg-[#111214] border border-white/[0.06] shadow-2xl shadow-black/60 overflow-hidden">
+                  <div className="p-2.5 border-b border-white/[0.04]">
+                    <input
+                      value={channelSearch}
+                      onChange={e => setChannelSearch(e.target.value)}
+                      placeholder="Search or paste channel ID..."
+                      className="w-full h-9 rounded-lg bg-white/[0.04] border border-white/[0.06] px-3 text-[13px] text-white/80 placeholder:text-white/25 focus:outline-none focus:border-[#FFD600]/30"
+                      autoFocus
+                    />
+                  </div>
+                  <div className="max-h-[220px] overflow-y-auto p-1">
+                    {channelSearch && /^\d{17,20}$/.test(channelSearch.trim()) && (
+                      <button
+                        onClick={() => { setModLogChannelId(channelSearch.trim()); setChannelDropdownOpen(false); setChannelSearch('') }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-left text-body-sm text-[#FFD600]/80 hover:bg-[#FFD600]/[0.04] transition-colors"
+                      >
+                        <Hash className="h-3.5 w-3.5 flex-shrink-0" />
+                        <span>Use ID: {channelSearch.trim()}</span>
+                      </button>
+                    )}
+                    {!channelSearch && (
+                      <button
+                        onClick={() => { setModLogChannelId(''); setChannelDropdownOpen(false) }}
+                        className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-left text-body-sm transition-colors ${!modLogChannelId ? 'bg-[#FFD600]/[0.04] text-white/70' : 'text-white/40 hover:bg-white/[0.03]'}`}
+                      >
+                        <span className="text-white/20 w-3.5 text-center">—</span>
+                        <span>Disabled — no logging</span>
+                        {!modLogChannelId && <Check className="h-3 w-3 text-[#FFD600] ml-auto" />}
+                      </button>
+                    )}
+                    {channels
+                      .filter(ch => !channelSearch || stripEmoji(ch.name).toLowerCase().includes(channelSearch.toLowerCase()) || ch.name.toLowerCase().includes(channelSearch.toLowerCase()))
+                      .map(ch => (
+                        <button
+                          key={ch.id}
+                          onClick={() => { setModLogChannelId(ch.id); setChannelDropdownOpen(false); setChannelSearch('') }}
+                          className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-left text-body-sm transition-colors ${modLogChannelId === ch.id ? 'bg-[#FFD600]/[0.04] text-white/70' : 'text-white/40 hover:bg-white/[0.03]'}`}
+                        >
+                          <Hash className="h-3.5 w-3.5 text-white/20 flex-shrink-0" />
+                          <span className="truncate">{stripEmoji(ch.name)}</span>
+                          {modLogChannelId === ch.id && <Check className="h-3 w-3 text-[#FFD600] ml-auto flex-shrink-0" />}
+                        </button>
+                      ))}
+                    {channels.filter(ch => !channelSearch || stripEmoji(ch.name).toLowerCase().includes(channelSearch.toLowerCase()) || ch.name.toLowerCase().includes(channelSearch.toLowerCase())).length === 0 && channelSearch && !/^\d{17,20}$/.test(channelSearch.trim()) && (
+                      <p className="px-3 py-4 text-[12px] text-white/20 text-center">No channels found. Paste a channel ID instead.</p>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
           <button
             onClick={saveModLogChannel}
             disabled={savingChannel}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#FFD600] text-black text-caption font-semibold hover:bg-[#FFD600]/90 transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-4 h-[42px] rounded-lg bg-[#FFD600] text-black text-caption font-semibold hover:bg-[#FFD600]/90 transition-colors disabled:opacity-50"
           >
             {savingChannel ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
             Save
@@ -262,4 +320,9 @@ function getTimeAgo(d: string): string {
   if (s < 3600) return `${Math.floor(s / 60)}m ago`
   if (s < 86400) return `${Math.floor(s / 3600)}h ago`
   return `${Math.floor(s / 86400)}d ago`
+}
+
+
+function stripEmoji(name: string): string {
+  return name.replace(/[^\w\s-]/g, '').replace(/[·•|]/g, '').replace(/\s{2,}/g, ' ').trim()
 }
