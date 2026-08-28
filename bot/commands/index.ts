@@ -24,11 +24,11 @@ export const commands = [
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addSubcommand(sub =>
       sub.setName('add').setDescription('Add a bot to the whitelist')
-        .addUserOption(opt => opt.setName('bot').setDescription('The bot to whitelist').setRequired(true))
+        .addStringOption(opt => opt.setName('bot_id').setDescription('The bot user ID to whitelist').setRequired(true))
     )
     .addSubcommand(sub =>
       sub.setName('remove').setDescription('Remove a bot from the whitelist')
-        .addUserOption(opt => opt.setName('bot').setDescription('The bot to remove').setRequired(true))
+        .addStringOption(opt => opt.setName('bot_id').setDescription('The bot user ID to remove').setRequired(true))
     )
     .addSubcommand(sub =>
       sub.setName('list').setDescription('View all whitelisted bots')
@@ -209,36 +209,36 @@ async function handleWhitelistCommand(interaction: ChatInputCommandInteraction, 
     const whitelist: string[] = config.whitelisted_bots || []
 
     if (sub === 'add') {
-      const bot = interaction.options.getUser('bot', true)
-      if (!bot.bot) {
-        await interaction.editReply({ content: '❌ That user is not a bot.' })
+      const botId = interaction.options.getString('bot_id', true).trim()
+      if (!/^\d{17,20}$/.test(botId)) {
+        await interaction.editReply({ content: '❌ Invalid ID. Provide a valid Discord user ID (17-20 digits).' })
         return
       }
-      if (whitelist.includes(bot.id)) {
-        await interaction.editReply({ content: `✅ \`${bot.tag}\` is already whitelisted.` })
+      if (whitelist.includes(botId)) {
+        await interaction.editReply({ content: `✅ \`${botId}\` is already whitelisted.` })
         return
       }
-      whitelist.push(bot.id)
+      whitelist.push(botId)
       await supabase.from('security_modules').upsert({
         guild_id: guildId, module_id: 'botguard', enabled: true,
         config: { ...config, whitelisted_bots: whitelist },
         updated_at: new Date().toISOString(),
       }, { onConflict: 'guild_id,module_id' })
-      await interaction.editReply({ content: `✅ \`${bot.tag}\` has been whitelisted.` })
+      await interaction.editReply({ content: `✅ <@${botId}> (\`${botId}\`) has been whitelisted.` })
 
     } else if (sub === 'remove') {
-      const bot = interaction.options.getUser('bot', true)
-      if (!whitelist.includes(bot.id)) {
-        await interaction.editReply({ content: `❌ \`${bot.tag}\` is not on the whitelist.` })
+      const botId = interaction.options.getString('bot_id', true).trim()
+      if (!whitelist.includes(botId)) {
+        await interaction.editReply({ content: `❌ \`${botId}\` is not on the whitelist.` })
         return
       }
-      const updated = whitelist.filter(id => id !== bot.id)
+      const updated = whitelist.filter(id => id !== botId)
       await supabase.from('security_modules').upsert({
         guild_id: guildId, module_id: 'botguard', enabled: true,
         config: { ...config, whitelisted_bots: updated },
         updated_at: new Date().toISOString(),
       }, { onConflict: 'guild_id,module_id' })
-      await interaction.editReply({ content: `✅ \`${bot.tag}\` removed from whitelist.` })
+      await interaction.editReply({ content: `✅ \`${botId}\` removed from whitelist.` })
 
     } else if (sub === 'list') {
       if (whitelist.length === 0) {
