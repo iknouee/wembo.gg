@@ -1,6 +1,7 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, PermissionFlagsBits, TextChannel, EmbedBuilder } from 'discord.js'
 import { BRAND } from '../config'
 import { getSupabase } from '../lib/supabase'
+import { moderationCommands, handleModerationCommand } from '../moderation'
 
 export const commands = [
   new SlashCommandBuilder()
@@ -38,6 +39,8 @@ export const commands = [
     .setName('verify')
     .setDescription('Deploy the verification embed to the configured channel')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+
+  ...moderationCommands,
 ]
 
 export async function handleCommand(interaction: ChatInputCommandInteraction) {
@@ -72,6 +75,14 @@ export async function handleCommand(interaction: ChatInputCommandInteraction) {
 
     case 'verify': {
       await handleVerifyCommand(interaction, guildId)
+      break
+    }
+
+    case 'warn':
+    case 'warns':
+    case 'clearwarn':
+    case 'clearwarns': {
+      await handleModerationCommand(interaction)
       break
     }
 
