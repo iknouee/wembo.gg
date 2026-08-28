@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { ShieldCheck, Loader2, Hash, Eye, Palette, RefreshCw, ChevronDown, Check } from 'lucide-react'
+import { ShieldCheck, Loader2, Hash, Eye, Palette, RefreshCw, ChevronDown, Check, Send } from 'lucide-react'
 import { useAuth } from '@/components/dashboard/dashboard-shell'
 import { PageHeader, SettingCard, SettingRow, Toggle, SegmentedControl, SaveBar, useToast } from '@/components/dashboard/ui'
 
@@ -42,6 +42,7 @@ export default function VerificationPage() {
   const [config, setConfig] = useState(DEFAULT_CONFIG)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [deploying, setDeploying] = useState(false)
   const [hasChanges, setHasChanges] = useState(false)
   const [channels, setChannels] = useState<{ id: string; name: string }[]>([])
   const [channelDropdownOpen, setChannelDropdownOpen] = useState(false)
@@ -107,6 +108,28 @@ export default function VerificationPage() {
     setConfig({ ...initialState.current.config })
   }
 
+  // ─── Deploy Embed ────────────────────────────────────────────────────
+  const deployPanel = async () => {
+    if (!guildId) return
+    setDeploying(true)
+    try {
+      const res = await fetch('/api/security/deploy-verification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ guild_id: guildId }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        toast('Verification panel sent to channel', 'success')
+      } else {
+        toast(data.error || 'Failed to send panel', 'error')
+      }
+    } catch {
+      toast('Failed to send panel', 'error')
+    }
+    setDeploying(false)
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -139,7 +162,19 @@ export default function VerificationPage() {
             <span className="status-inactive">Disabled</span>
           )
         }
-        actions={<Toggle checked={enabled} onChange={setEnabled} />}
+        actions={
+          <div className="flex items-center gap-3">
+            <button
+              onClick={deployPanel}
+              disabled={deploying || !enabled || !config.channel_id}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-[12px] font-semibold bg-[#FFD600] text-black hover:bg-[#FFD600]/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {deploying ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+              Send Panel
+            </button>
+            <Toggle checked={enabled} onChange={setEnabled} />
+          </div>
+        }
       />
 
       <div className="grid lg:grid-cols-5 gap-6">
