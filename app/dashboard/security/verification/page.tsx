@@ -264,31 +264,31 @@ export default function VerificationPage() {
                   >
                     <span className="truncate text-left">
                       {config.channel_id
-                        ? `# ${channels.find(c => c.id === config.channel_id)?.name || config.channel_id}`
+                        ? `# ${stripEmoji(channels.find(c => c.id === config.channel_id)?.name || config.channel_id)}`
                         : 'Select or type ID'}
                     </span>
-                    <ChevronDown className={`h-3.5 w-3.5 text-white/20 transition-transform ${channelDropdownOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`h-3.5 w-3.5 text-white/20 transition-transform flex-shrink-0 ${channelDropdownOpen ? 'rotate-180' : ''}`} />
                   </button>
                   {channelDropdownOpen && (
                     <>
                       <div className="fixed inset-0 z-40" onClick={() => setChannelDropdownOpen(false)} />
-                      <div className="absolute top-full left-0 mt-1 z-50 w-64 rounded-xl bg-[#111214] border border-white/[0.06] shadow-xl shadow-black/40 overflow-hidden">
-                        {/* Search / manual ID input */}
-                        <div className="p-2 border-b border-white/[0.04]">
+                      <div className="absolute top-full right-0 mt-1 z-50 w-72 rounded-xl bg-[#111214] border border-white/[0.06] shadow-2xl shadow-black/60 overflow-hidden">
+                        {/* Search input */}
+                        <div className="p-2.5 border-b border-white/[0.04]">
                           <input
                             value={channelSearch}
                             onChange={e => setChannelSearch(e.target.value)}
                             placeholder="Search or paste channel ID..."
-                            className="w-full h-8 rounded-lg bg-white/[0.03] border border-white/[0.04] px-3 text-[12px] text-white/70 placeholder:text-white/20 focus:outline-none focus:border-white/[0.1]"
+                            className="w-full h-9 rounded-lg bg-white/[0.04] border border-white/[0.06] px-3 text-[13px] text-white/80 placeholder:text-white/25 focus:outline-none focus:border-[#FFD600]/30"
                             autoFocus
                           />
                         </div>
-                        <div className="max-h-[200px] overflow-y-auto">
-                          {/* If they typed a channel ID directly */}
+                        <div className="max-h-[220px] overflow-y-auto p-1">
+                          {/* Paste ID option */}
                           {channelSearch && /^\d{17,20}$/.test(channelSearch.trim()) && (
                             <button
                               onClick={() => { setConfig({ ...config, channel_id: channelSearch.trim() }); setChannelDropdownOpen(false); setChannelSearch('') }}
-                              className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left text-body-sm text-[#FFD600]/70 hover:bg-white/[0.03] transition-colors"
+                              className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-left text-body-sm text-[#FFD600]/80 hover:bg-[#FFD600]/[0.04] transition-colors"
                             >
                               <Hash className="h-3.5 w-3.5 flex-shrink-0" />
                               <span>Use ID: {channelSearch.trim()}</span>
@@ -298,29 +298,29 @@ export default function VerificationPage() {
                           {!channelSearch && (
                             <button
                               onClick={() => { setConfig({ ...config, channel_id: '' }); setChannelDropdownOpen(false) }}
-                              className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-left text-body-sm transition-colors ${!config.channel_id ? 'bg-[#FFD600]/[0.04] text-white/70' : 'text-white/40 hover:bg-white/[0.03]'}`}
+                              className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-left text-body-sm transition-colors ${!config.channel_id ? 'bg-[#FFD600]/[0.04] text-white/70' : 'text-white/40 hover:bg-white/[0.03]'}`}
                             >
-                              <span className="text-white/20">—</span>
+                              <span className="text-white/20 w-3.5 text-center">—</span>
                               <span>None</span>
                               {!config.channel_id && <Check className="h-3 w-3 text-[#FFD600] ml-auto" />}
                             </button>
                           )}
-                          {/* Channel list (filtered) */}
+                          {/* Channel list */}
                           {channels
-                            .filter(ch => !channelSearch || ch.name.toLowerCase().includes(channelSearch.toLowerCase()))
+                            .filter(ch => !channelSearch || stripEmoji(ch.name).toLowerCase().includes(channelSearch.toLowerCase()) || ch.name.toLowerCase().includes(channelSearch.toLowerCase()))
                             .map(ch => (
                               <button
                                 key={ch.id}
                                 onClick={() => { setConfig({ ...config, channel_id: ch.id }); setChannelDropdownOpen(false); setChannelSearch('') }}
-                                className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-left text-body-sm transition-colors ${config.channel_id === ch.id ? 'bg-[#FFD600]/[0.04] text-white/70' : 'text-white/40 hover:bg-white/[0.03]'}`}
+                                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-left text-body-sm transition-colors ${config.channel_id === ch.id ? 'bg-[#FFD600]/[0.04] text-white/70' : 'text-white/40 hover:bg-white/[0.03]'}`}
                               >
                                 <Hash className="h-3.5 w-3.5 text-white/20 flex-shrink-0" />
-                                <span className="truncate">{ch.name}</span>
+                                <span className="truncate">{stripEmoji(ch.name)}</span>
                                 {config.channel_id === ch.id && <Check className="h-3 w-3 text-[#FFD600] ml-auto flex-shrink-0" />}
                               </button>
                             ))}
-                          {channels.filter(ch => !channelSearch || ch.name.toLowerCase().includes(channelSearch.toLowerCase())).length === 0 && channelSearch && !/^\d{17,20}$/.test(channelSearch.trim()) && (
-                            <p className="px-3 py-3 text-[11px] text-white/20 text-center">No channels found. Paste a channel ID instead.</p>
+                          {channels.filter(ch => !channelSearch || stripEmoji(ch.name).toLowerCase().includes(channelSearch.toLowerCase()) || ch.name.toLowerCase().includes(channelSearch.toLowerCase())).length === 0 && channelSearch && !/^\d{17,20}$/.test(channelSearch.trim()) && (
+                            <p className="px-3 py-4 text-[12px] text-white/20 text-center">No channels found. Paste a channel ID instead.</p>
                           )}
                         </div>
                       </div>
@@ -416,4 +416,18 @@ export default function VerificationPage() {
       <SaveBar show={hasChanges} saving={saving} onSave={save} onReset={reset} />
     </div>
   )
+}
+
+
+// Strip emoji and separator characters from channel names
+function stripEmoji(name: string): string {
+  return name
+    .replace(/[\u{1F600}-\u{1F9FF}]/gu, '') // emoticons
+    .replace(/[\u{2600}-\u{26FF}]/gu, '')   // misc symbols
+    .replace(/[\u{2700}-\u{27BF}]/gu, '')   // dingbats
+    .replace(/[\u{FE00}-\u{FE0F}]/gu, '')   // variation selectors
+    .replace(/[\u{1F000}-\u{1FFFF}]/gu, '') // extended
+    .replace(/[·•|]/g, '')                   // separators
+    .replace(/\s{2,}/g, ' ')                 // collapse spaces
+    .trim()
 }
