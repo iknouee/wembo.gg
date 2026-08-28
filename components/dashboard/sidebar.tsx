@@ -4,10 +4,77 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { dashboardNav } from '@/config/dashboard'
+import { dashboardNav, type NavSection } from '@/config/dashboard'
 import { ServerSelector } from '@/components/dashboard/server-selector'
 import { UserProfile } from '@/components/dashboard/user-profile'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, ChevronDown } from 'lucide-react'
+
+function SidebarSection({
+  section,
+  pathname,
+  onClick,
+}: {
+  section: NavSection
+  pathname: string
+  onClick?: () => void
+}) {
+  // Auto-expand if any item in the section is active
+  const hasActiveChild = section.items.some(
+    (item) =>
+      pathname === item.href ||
+      (item.href !== '/dashboard' && pathname.startsWith(item.href))
+  )
+
+  const [expanded, setExpanded] = useState(hasActiveChild)
+
+  return (
+    <div className="space-y-1">
+      {/* Section header with dropdown toggle */}
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="w-full flex items-center justify-between px-3 py-2 group"
+      >
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/70 group-hover:text-muted-foreground transition-colors">
+          {section.label}
+        </span>
+        <ChevronDown
+          className={cn(
+            'h-3 w-3 text-muted-foreground/50 group-hover:text-muted-foreground transition-all duration-200',
+            expanded && 'rotate-180'
+          )}
+        />
+      </button>
+
+      {/* Section items */}
+      {expanded && (
+        <ul className="space-y-0.5">
+          {section.items.map((item) => {
+            const isActive =
+              pathname === item.href ||
+              (item.href !== '/dashboard' && pathname.startsWith(item.href))
+            return (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  onClick={onClick}
+                  className={cn(
+                    'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-200',
+                    isActive
+                      ? 'bg-primary/10 text-primary font-medium'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                  )}
+                >
+                  <item.icon className="h-4 w-4" />
+                  {item.title}
+                </Link>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </div>
+  )
+}
 
 export function Sidebar() {
   const pathname = usePathname()
@@ -24,37 +91,21 @@ export function Sidebar() {
         </Link>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto py-4 px-3">
-        <ul className="space-y-1">
-          {dashboardNav.map((item) => {
-            const isActive =
-              pathname === item.href ||
-              (item.href !== '/dashboard' && pathname.startsWith(item.href))
-            return (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className={cn(
-                    'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-200',
-                    isActive
-                      ? 'bg-primary/10 text-primary font-medium'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-accent'
-                  )}
-                >
-                  <item.icon className="h-4 w-4" />
-                  {item.title}
-                </Link>
-              </li>
-            )
-          })}
-        </ul>
-      </nav>
-
       {/* Server Selector */}
-      <div className="border-t border-border p-3">
+      <div className="border-b border-border p-3">
         <ServerSelector />
       </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-4">
+        {dashboardNav.map((section) => (
+          <SidebarSection
+            key={section.label}
+            section={section}
+            pathname={pathname}
+          />
+        ))}
+      </nav>
 
       {/* User Profile at bottom */}
       <div className="border-t border-border p-3">
@@ -110,35 +161,23 @@ export function MobileSidebar() {
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <nav className="flex-1 overflow-y-auto py-4 px-3">
-              <ul className="space-y-1">
-                {dashboardNav.map((item) => {
-                  const isActive =
-                    pathname === item.href ||
-                    (item.href !== '/dashboard' && pathname.startsWith(item.href))
-                  return (
-                    <li key={item.href}>
-                      <Link
-                        href={item.href}
-                        onClick={() => setOpen(false)}
-                        className={cn(
-                          'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-200',
-                          isActive
-                            ? 'bg-primary/10 text-primary font-medium'
-                            : 'text-muted-foreground hover:text-foreground hover:bg-accent'
-                        )}
-                      >
-                        <item.icon className="h-4 w-4" />
-                        {item.title}
-                      </Link>
-                    </li>
-                  )
-                })}
-              </ul>
-            </nav>
-            <div className="border-t border-border p-3">
+
+            {/* Server Selector */}
+            <div className="border-b border-border p-3">
               <ServerSelector />
             </div>
+
+            <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-4">
+              {dashboardNav.map((section) => (
+                <SidebarSection
+                  key={section.label}
+                  section={section}
+                  pathname={pathname}
+                  onClick={() => setOpen(false)}
+                />
+              ))}
+            </nav>
+
             <div className="border-t border-border p-3">
               <UserProfile />
             </div>
