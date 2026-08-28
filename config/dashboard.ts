@@ -1,38 +1,90 @@
 import {
-  BarChart3,
-  Bell,
-  Bot,
-  FileText,
-  Heart,
+  Gavel,
   Home,
-  Lightbulb,
-  Lock,
-  Puzzle,
-  Settings,
   Shield,
-  Ticket,
-  Trophy,
   UserPlus,
-  Users,
   Zap,
+  type LucideIcon,
 } from 'lucide-react'
 
-export const dashboardNav = [
+export interface NavSubItem {
+  title: string
+  href: string
+}
+
+export interface NavGroup {
+  title: string
+  icon: LucideIcon
+  href: string
+  children: NavSubItem[]
+}
+
+export interface NavSection {
+  label: string
+  groups: NavGroup[]
+}
+
+// Standalone top-level items (no section header, no expand)
+export interface NavTopItem {
+  title: string
+  href: string
+  icon: LucideIcon
+}
+
+export const dashboardTopItems: NavTopItem[] = [
   { title: 'Overview', href: '/dashboard', icon: Home },
-  { title: 'Welcome & Goodbye', href: '/dashboard/welcome', icon: UserPlus },
-  { title: 'AI', href: '/dashboard/ai', icon: Bot },
-  { title: 'Automations', href: '/dashboard/automations', icon: Zap },
-  { title: 'Security', href: '/dashboard/security', icon: Shield },
-  { title: 'Members', href: '/dashboard/members', icon: Users },
-  { title: 'Forms', href: '/dashboard/forms', icon: FileText },
-  { title: 'Knowledge', href: '/dashboard/knowledge', icon: Lightbulb },
-  { title: 'Suggestions', href: '/dashboard/suggestions', icon: Heart },
-  { title: 'Tickets', href: '/dashboard/tickets', icon: Ticket },
-  { title: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
-  { title: 'Engagement', href: '/dashboard/engagement', icon: Trophy },
-  { title: 'Notifications', href: '/dashboard/notifications', icon: Bell },
-  { title: 'Integrations', href: '/dashboard/integrations', icon: Puzzle },
-  { title: 'Settings', href: '/dashboard/settings', icon: Settings },
+]
+
+export const dashboardSections: NavSection[] = [
+  {
+    label: 'SECURITY',
+    groups: [
+      {
+        title: 'Security',
+        icon: Shield,
+        href: '/dashboard/security',
+        children: [
+          { title: 'Overview', href: '/dashboard/security' },
+          { title: 'Anti-Raid', href: '/dashboard/security/anti-raid' },
+          { title: 'Anti-Spam', href: '/dashboard/security/anti-spam' },
+          { title: 'Anti-Nuke', href: '/dashboard/security/anti-nuke' },
+          { title: 'Link Blocker', href: '/dashboard/security/link-blocker' },
+          { title: 'Impersonation', href: '/dashboard/security/impersonation' },
+          { title: 'Bot Guard', href: '/dashboard/security/bot-guard' },
+          { title: 'Verification', href: '/dashboard/security/verification' },
+          { title: 'Alt Detection', href: '/dashboard/security/alt-detection' },
+          { title: 'Security Logs', href: '/dashboard/security/logs' },
+        ],
+      },
+    ],
+  },
+  {
+    label: 'MODERATION',
+    groups: [
+      {
+        title: 'Moderation',
+        icon: Gavel,
+        href: '/dashboard/moderation',
+        children: [
+          { title: 'Warnings', href: '/dashboard/moderation/warnings' },
+          { title: 'Mod Logs', href: '/dashboard/moderation/mod-logs' },
+        ],
+      },
+    ],
+  },
+  {
+    label: 'AUTOMATION',
+    groups: [
+      {
+        title: 'Automations',
+        icon: Zap,
+        href: '/dashboard/automations',
+        children: [
+          { title: 'Welcome & Goodbye', href: '/dashboard/welcome' },
+        ],
+      },
+    ],
+  },
 ]
 
 export interface MockServer {
