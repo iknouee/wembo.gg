@@ -293,7 +293,7 @@ export default function WelcomePage() {
         </div>
       </div>
 
-      {dirty && <SaveBar onSave={() => setDirty(false)} onDiscard={() => setDirty(false)} />}
+      {dirty && <SaveBar show={dirty} onSave={() => setDirty(false)} onReset={() => setDirty(false)} />}
     </div>
   )
 }
