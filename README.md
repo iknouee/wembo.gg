@@ -194,3 +194,4 @@ No database is required for the frontend. When ready:
 ## License
 
 All rights reserved. © Wembo 2024.
+
